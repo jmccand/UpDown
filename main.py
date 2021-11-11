@@ -29,7 +29,32 @@ class MyHandler(SimpleHTTPRequestHandler):
     def get_email(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<html><body><form method='GET' action='/check_email'><input type='email' name='email'/><input type='submit'/></form><body><html>'''.encode('utf8'))
+        self.wfile.write('''<html>
+<body>
+<form method='GET' action='/check_email'>
+<input id='email_box' type='email' name='email'/>
+<input id='submit' type='submit' disabled='true'/>
+</form>
+
+<script>
+setTimeout(checkEmail, 1000);
+function checkEmail() {
+    current_email = document.getElementById('email_box').value;
+    console.log('email: ' + current_email);
+    if (current_email.endsWith('@lexingtonma.org')) {
+        console.log('PROPER EMAIL');
+        document.getElementById('submit').disabled = false;
+    }
+    else {
+        console.log('IMPROPER EMAIL');
+        document.getElementById('submit').disabled = true;
+    }
+    setTimeout(checkEmail, 1000);
+}
+</script>
+
+</body>
+</html>'''.encode('utf8'))
 
     def check_email(self):
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
