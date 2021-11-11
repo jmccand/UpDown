@@ -14,9 +14,10 @@ import db
 class MyHandler(SimpleHTTPRequestHandler):
     
     def do_GET(self):
-        print('path: ' + self.path)
         my_cookies = SimpleCookie(self.headers.get('Cookie'))
-        print(f'{my_cookies=}')
+        if not self.path == '/favicon.ico':
+            print('\npath: ' + self.path)
+            print(f'{my_cookies=}')
         if ('code' not in my_cookies) and (not self.path.startswith('/check_email')):
             self.get_email()
         else:
