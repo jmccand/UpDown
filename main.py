@@ -99,7 +99,15 @@ class User:
 
 def main():
     print('Student Change Web App... running...')
-    
+
+    print(f'\n{db.user_cookies=}')
+    for cookie, user in db.user_cookies.items():
+        print(f'  {cookie} : User({user.email}, {user.sessions}, {user.votes}, {user.opinions}, {user.confirmed_email})')
+
+    print(f'\n{db.opinions_database=}')
+    for ID, opinion in db.opinions_database.items():
+        print(f'  {ID} : Opinion()')
+        
     httpd = ReuseHTTPServer(('0.0.0.0', 8888), MyHandler)
     httpd.serve_forever()
     
