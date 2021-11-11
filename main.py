@@ -18,11 +18,27 @@ class MyHandler(SimpleHTTPRequestHandler):
         if not self.path == '/favicon.ico':
             print('\npath: ' + self.path)
             print(f'{my_cookies=}')
-        if ('code' not in my_cookies) and (not self.path.startswith('/check_email')):
+
+        invalid_cookie = True
+        if 'code' in my_cookies:
+            if str(my_cookies['code']) in db.user_cookies:
+                invalid_cookie = False
+            else:
+                if not self.path == '/favicon.ico':
+                    print(f'INVALID COOKIE FOUND: {self.path=} and {my_cookies=}\n')
+        else:
+            if not self.path == '/favicon.ico':
+                print(f'INVALID COOKIE FOUND: {self.path =}\n')
+
+        
+        if invalid_cookie and not self.path.startswith('/check_email'):
             self.get_email()
         else:
             if self.path == '/':
-                self.send_opinions()
+                self.opinions_page()
+            elif self.path == '/favicon.ico':
+                self.send_response(404)
+                self.end_headers()
             elif self.path.startswith('/check_email'):
                 self.check_email()
             
@@ -72,7 +88,7 @@ function checkEmail() {
             self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
             self.end_headers()
 
-    def send_opinions(self):
+    def opinions_page(self):
         self.send_response(200)
         self.end_headers()
         local_opinions = ('Joel is the best name', 'School sucks', 'This app is rad')
@@ -89,13 +105,22 @@ class ReuseHTTPServer(HTTPServer):
     
 class User:
 
-    def __init__(self, email, sessions=[], votes={}, opinions=[], confirmed_email=False):
+    def __init__(self, email, activity=[], votes={}, opinions=[], confirmed_email=False):
                  
         self.email = email
-        self.sessions = sessions
+        self.activity = activity
         self.votes = votes
         self.opinions = opinions
         self.confirmed_email = confirmed_email
+
+class Opinion:
+
+    def __init__(self, ID, text, activity):
+
+        self.ID = ID
+        self.text = text
+        self.activity = activity
+    
 
 def main():
     print('Student Change Web App... running...')
