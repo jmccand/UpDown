@@ -41,7 +41,13 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
             elif self.path.startswith('/check_email'):
                 self.check_email()
-            
+            elif self.path == '/about_the_senate':
+                self.about_the_senate_page()
+            elif self.path == '/current_issues':
+                self.current_issues_page()
+            elif self.path == '/meet_the_senators':
+                self.meet_the_senators_page()
+                
 
     def get_email(self):
         self.send_response(200)
@@ -98,7 +104,33 @@ function checkEmail() {
         self.wfile.write('<html><body>'.encode('utf8'))
         for index, opinion in enumerate(local_opinions):
             self.wfile.write(f'''<div id='{local_opinions_start + index}'>{opinion}</div>'''.encode('utf8'))
+        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
+
+    def about_the_senate_page(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('''<html><body>'''.encode('utf8'))
+        self.wfile.write('''You have reached the about the senate page.'''.encode('utf8'))
+        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        self.wfile.write('''</body></html>'''.encode('utf8'))
+
+    def current_issues_page(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('''<html><body>'''.encode('utf8'))
+        self.wfile.write('''You have reached the current issues page.'''.encode('utf8'))
+        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        self.wfile.write('''</body></html>'''.encode('utf8'))
+
+    def meet_the_senators_page(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('''<html><body>'''.encode('utf8'))
+        self.wfile.write('''You have reached the meet the senators page.'''.encode('utf8'))
+        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        self.wfile.write('''</body></html>'''.encode('utf8'))
+
         
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
