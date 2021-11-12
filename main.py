@@ -111,8 +111,11 @@ function checkEmail() {
         self.send_response(200)
         self.end_headers()
         self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write('''You have reached the about the senate page.'''.encode('utf8'))
-        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        self.wfile.write('''<h2>About the Senate</h2>
+Welcome to the Lexington High School Student-Faculty Senate! The Senate convenes at 3:15pm on Wednesdays in the Library Media Center.
+We implement school-wide policies on a number of issues, from things as mundane as placing extra benches around the school to changes as significant as eliminating the community service requirement for open campus, allowing students to eat in the Quad, or determining what information will be printed on transcripts.<br />
+All meetings are open to the public! If you want to change something about the school, we would love to hear and discuss your ideas.'''.encode('utf8'))
+        self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
     def current_issues_page(self):
@@ -120,15 +123,34 @@ function checkEmail() {
         self.end_headers()
         self.wfile.write('''<html><body>'''.encode('utf8'))
         self.wfile.write('''You have reached the current issues page.'''.encode('utf8'))
-        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
     def meet_the_senators_page(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write('''You have reached the meet the senators page.'''.encode('utf8'))
-        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        self.wfile.write('''<h2>Meet the Senators</h2>
+Executive<br />
+&emsp; Moderator: Zeke Moroze<br />
+&emsp; Secretary: Sara Mei<br />
+&emsp; Faculty Moderator: Mr. Doucette<br /><br />
+
+Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
+head: Sara Mei, members: Andrea Mariadoss, Michael Gordon, Frances Adiwijaya, Zeke Moroze, Aditi Swamy, Krissh Kamath, Anuka Manghwani, Sree Dharmaraj, Elias Tamer, Lia Erisson, Ria Vasishtha (2), Ambilu Sivabalan, Francis Liu, Sam Chung, Maisha Afia<br /><br />
+
+Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
+heads: Aria Maher, Olivia Hoover, members: Kunal Botla, Gavin Ohler, Sophia Zhang, Maya Gervits, Anuka Manghwani, Ria Vasishtha (3), Valentina Guerra<br /><br />
+
+The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
+heads: Grace Ou, Ireh Hong, members: Ananya Katyal, Lia Erisson, Shalin Sinha, Erin Kim, Grace Ou, Ria Vasishtha, Ireh Hong, Aidan McPhee, Uma Sanker, Elias Tamer, Kelly Heo, Ambilu Sivabalan, Shalin Sinha<br /><br />
+
+The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
+heads: Sarah Jensen, Defne Olgun, members: Sara Mei (2), Anuka Manghwani, Sophia Zhang, Valentina Guerra, Sree Dharmaraj, Carrie Luo, Tasbia Uddin<br /><br />
+
+The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
+heads: Grace Wang, Tiffany Liu, members: Anika Basu, Grace Wang, Tiffany Liu, Maya Gervits, Julien Song, Aria Maher (2)'''.encode('utf8'))
+        self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         
