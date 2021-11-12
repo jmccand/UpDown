@@ -21,11 +21,11 @@ class MyHandler(SimpleHTTPRequestHandler):
 
         invalid_cookie = True
         if 'code' in my_cookies:
-            if str(my_cookies['code']) in db.user_cookies:
+            if my_cookies['code'].value in db.user_cookies:
                 invalid_cookie = False
             else:
                 if not self.path == '/favicon.ico':
-                    print(f'INVALID COOKIE FOUND: {self.path=} and {my_cookies=}\n')
+                    print(f'INVALID COOKIE FOUND: {self.path=} and {my_cookies["code"].value=}\n')
         else:
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path =}\n')
@@ -76,17 +76,19 @@ function checkEmail() {
     def check_email(self):
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         if 'email' in url_arguments:
-            #send confirmation email
-            #record email + create account
-            my_uuid = uuid.uuid1().hex
-            while my_uuid in db.user_cookies:
+            if url_arguments['email'][0].endswith('@lexingtonma.org'):
+                #send confirmation email
+                #record email + create account
                 my_uuid = uuid.uuid1().hex
-            db.user_cookies[my_uuid] = User(url_arguments['email'][0])
-            db.user_cookies.sync()
-            self.send_response(302)
-            self.send_header('Location', '/')
-            self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
-            self.end_headers()
+                email_address = url_arguments['email'][0]
+                while my_uuid in db.user_cookies:
+                    my_uuid = uuid.uuid1().hex
+                db.user_cookies[my_uuid] = User(url_arguments['email'][0])
+                db.user_cookies.sync()
+                self.send_response(302)
+                self.send_header('Location', '/')
+                self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
+                self.end_headers()
 
     def opinions_page(self):
         self.send_response(200)
@@ -127,7 +129,7 @@ def main():
 
     print(f'\n{db.user_cookies=}')
     for cookie, user in db.user_cookies.items():
-        print(f'  {cookie} : User({user.email}, {user.sessions}, {user.votes}, {user.opinions}, {user.confirmed_email})')
+        print(f'  {cookie} : User({user.email}, {user.activity}, {user.votes}, {user.opinions}, {user.confirmed_email})')
 
     print(f'\n{db.opinions_database=}')
     for ID, opinion in db.opinions_database.items():
