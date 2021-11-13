@@ -5,10 +5,11 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from datetime import datetime
 import re
 import json
-
 import uuid
-
 import db
+import local
+import threading
+from datetime import datetime
 
 
 class MyHandler(SimpleHTTPRequestHandler):
@@ -30,24 +31,39 @@ class MyHandler(SimpleHTTPRequestHandler):
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path =}\n')
 
-        
         if invalid_cookie and not self.path.startswith('/check_email'):
             self.get_email()
         else:
-            if self.path == '/':
-                self.opinions_page()
-            elif self.path == '/favicon.ico':
-                self.send_response(404)
-                self.end_headers()
-            elif self.path.startswith('/check_email'):
-                self.check_email()
-            elif self.path == '/about_the_senate':
-                self.about_the_senate_page()
-            elif self.path == '/current_issues':
-                self.current_issues_page()
-            elif self.path == '/meet_the_senators':
-                self.meet_the_senators_page()
+            try:
+                if self.path == '/':
+                    self.opinions_page()
+                elif self.path == '/favicon.ico':
+                    self.send_response(404)
+                    self.end_headers()
+                elif self.path.startswith('/check_email'):
+                    self.check_email()
+                elif self.path == '/about_the_senate':
+                    self.about_the_senate_page()
+                elif self.path == '/current_issues':
+                    self.current_issues_page()
+                elif self.path == '/meet_the_senators':
+                    self.meet_the_senators_page()
+                elif self.path.startswith('/submit_opinion'):
+                    self.submit_opinion()
+            except invalidCookie as error:
+                print(str(error))
                 
+
+    def identify_user(self):
+        my_cookies = SimpleCookie(self.headers.get('Cookie'))
+        if 'code' in my_cookies:
+            my_code = my_cookies['code'].value
+            if my_code in db.user_cookies:
+                return db.user_cookies[my_code]
+            else:
+                raise ValueError(f'CODE NOT IN USER_COOKIES DATABASE FOUND! {my_code=}')
+        else:
+            return
 
     def get_email(self):
         self.send_response(200)
@@ -89,7 +105,7 @@ function checkEmail() {
                 email_address = url_arguments['email'][0]
                 while my_uuid in db.user_cookies:
                     my_uuid = uuid.uuid1().hex
-                db.user_cookies[my_uuid] = User(url_arguments['email'][0])
+                db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
                 db.user_cookies.sync()
                 self.send_response(302)
                 self.send_header('Location', '/')
@@ -99,11 +115,21 @@ function checkEmail() {
     def opinions_page(self):
         self.send_response(200)
         self.end_headers()
-        local_opinions = ('Joel is the best name', 'School sucks', 'This app is rad')
-        local_opinions_start = 1
         self.wfile.write('<html><body>'.encode('utf8'))
-        for index, opinion in enumerate(local_opinions):
-            self.wfile.write(f'''<div id='{local_opinions_start + index}'>{opinion}</div>'''.encode('utf8'))
+        for index, opinion in db.opinions_database.items():
+            self.wfile.write(f'''<div id='{index}'>{opinion.text}</div>'''.encode('utf8'))
+        self.wfile.write('''<br />
+<input id='opinion_text' type='text'/>
+<button onclick='submit_opinion()'>SUBMIT</button>
+<script>
+function submit_opinion() {
+    var xhttp = new XMLHttpRequest();
+    var opinion_text = document.getElementById('opinion_text').value;
+    xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
+    xhttp.send();
+}
+</script>
+<br />'''.encode('utf8'))
         self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
 
@@ -130,28 +156,44 @@ All meetings are open to the public! If you want to change something about the s
         self.send_response(200)
         self.end_headers()
         self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write('''<h2>Meet the Senators</h2>
+        self.wfile.write(f'''<h2>Meet the Senators</h2>
 Executive<br />
-&emsp; Moderator: Zeke Moroze<br />
-&emsp; Secretary: Sara Mei<br />
-&emsp; Faculty Moderator: Mr. Doucette<br /><br />
+{local.EXECUTIVE}
 
 Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
-head: Sara Mei, members: Andrea Mariadoss, Michael Gordon, Frances Adiwijaya, Zeke Moroze, Aditi Swamy, Krissh Kamath, Anuka Manghwani, Sree Dharmaraj, Elias Tamer, Lia Erisson, Ria Vasishtha (2), Ambilu Sivabalan, Francis Liu, Sam Chung, Maisha Afia<br /><br />
+{local.COMMUNICATIONS}
 
 Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
-heads: Aria Maher, Olivia Hoover, members: Kunal Botla, Gavin Ohler, Sophia Zhang, Maya Gervits, Anuka Manghwani, Ria Vasishtha (3), Valentina Guerra<br /><br />
+{local.OVERSIGHT}
 
 The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
-heads: Grace Ou, Ireh Hong, members: Ananya Katyal, Lia Erisson, Shalin Sinha, Erin Kim, Grace Ou, Ria Vasishtha, Ireh Hong, Aidan McPhee, Uma Sanker, Elias Tamer, Kelly Heo, Ambilu Sivabalan, Shalin Sinha<br /><br />
+{local.POLICY}
 
 The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
-heads: Sarah Jensen, Defne Olgun, members: Sara Mei (2), Anuka Manghwani, Sophia Zhang, Valentina Guerra, Sree Dharmaraj, Carrie Luo, Tasbia Uddin<br /><br />
+{local.SOCIAL_ACTION}
 
 The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
-heads: Grace Wang, Tiffany Liu, members: Anika Basu, Grace Wang, Tiffany Liu, Maya Gervits, Julien Song, Aria Maher (2)'''.encode('utf8'))
+{local.CLIMATE}'''.encode('utf8'))
+
         self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
+
+    def submit_opinion(self):
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        my_account = self.identify_user()
+        if 'opinion_text' in url_arguments and not my_account == False:
+            opinion_text = url_arguments['opinion_text'][0]
+            opinion_lock = threading.Lock()
+            opinion_lock.acquire()
+            try:
+                opinion_ID = len(db.opinions_database)
+                assert str(opinion_ID) not in db.opinions_database
+                db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.now())])
+                db.opinions_database.sync()
+            finally:
+                opinion_lock.release()
+            self.send_response(200)
+            self.end_headers()
 
         
 class ReuseHTTPServer(HTTPServer):    
@@ -161,12 +203,12 @@ class ReuseHTTPServer(HTTPServer):
     
 class User:
 
-    def __init__(self, email, activity=[], votes={}, opinions=[], confirmed_email=False):
+    def __init__(self, email, cookie_code, activity=[], votes={}, confirmed_email=False):
                  
         self.email = email
+        self.cookie_code = cookie_code
         self.activity = activity
         self.votes = votes
-        self.opinions = opinions
         self.confirmed_email = confirmed_email
 
 class Opinion:
@@ -176,6 +218,10 @@ class Opinion:
         self.ID = ID
         self.text = text
         self.activity = activity
+
+class invalidCookie(ValueError):
+    def __init__(self, message):
+        super().__init__(message)
     
 
 def main():
@@ -183,11 +229,11 @@ def main():
 
     print(f'\n{db.user_cookies=}')
     for cookie, user in db.user_cookies.items():
-        print(f'  {cookie} : User({user.email}, {user.activity}, {user.votes}, {user.opinions}, {user.confirmed_email})')
+        print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.confirmed_email})')
 
     print(f'\n{db.opinions_database=}')
     for ID, opinion in db.opinions_database.items():
-        print(f'  {ID} : Opinion()')
+        print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity})')
         
     httpd = ReuseHTTPServer(('0.0.0.0', 8888), MyHandler)
     httpd.serve_forever()
