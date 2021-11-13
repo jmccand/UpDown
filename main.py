@@ -8,7 +8,6 @@ import json
 import uuid
 import db
 import local
-import threading
 from datetime import datetime
 
 
@@ -104,14 +103,18 @@ function checkEmail() {
                 #record email + create account
                 my_uuid = uuid.uuid1().hex
                 email_address = url_arguments['email'][0]
-                while my_uuid in db.user_cookies:
-                    my_uuid = uuid.uuid1().hex
-                db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
-                db.user_cookies.sync()
-                self.send_response(302)
-                self.send_header('Location', '/')
-                self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
-                self.end_headers()
+                db.user_cookies_lock.acquire()
+                try:
+                    while my_uuid in db.user_cookies:
+                        my_uuid = uuid.uuid1().hex
+                    db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
+                    db.user_cookies.sync()
+                    self.send_response(302)
+                    self.send_header('Location', '/')
+                    self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
+                    self.end_headers()
+                finally:
+                    db.user_cookies_lock.release()
 
     def opinions_page(self):
         self.send_response(200)
@@ -186,15 +189,14 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
         my_account = self.identify_user()
         if 'opinion_text' in url_arguments and not my_account == False:
             opinion_text = url_arguments['opinion_text'][0]
-            opinion_lock = threading.Lock()
-            opinion_lock.acquire()
+            db.opinions_database_lock.acquire()
             try:
                 opinion_ID = len(db.opinions_database)
                 assert str(opinion_ID) not in db.opinions_database
                 db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.now())])
                 db.opinions_database.sync()
             finally:
-                opinion_lock.release()
+                db.opinions_database_lock.release()
             self.send_response(200)
             self.end_headers()
 
