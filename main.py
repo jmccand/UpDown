@@ -71,6 +71,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         self.wfile.write('''<html>
 <body>
 <form method='GET' action='/check_email'>
+Enter your school email (must end in @lexingtonma.org):
 <input id='email_box' type='email' name='email'/>
 <input id='submit' type='submit' disabled='true'/>
 </form>
@@ -127,6 +128,8 @@ function submit_opinion() {
     var opinion_text = document.getElementById('opinion_text').value;
     xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
     xhttp.send();
+    document.getElementById('opinion_text').value = '';
+    alert('Your opinion was submitted. Thank you!');
 }
 </script>
 <br />'''.encode('utf8'))
