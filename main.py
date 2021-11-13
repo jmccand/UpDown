@@ -49,6 +49,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.meet_the_senators_page()
                 elif self.path.startswith('/submit_opinion'):
                     self.submit_opinion()
+                elif self.path.startswith('/vote'):
+                    self.vote()
             except invalidCookie as error:
                 print(str(error))
                 
@@ -120,8 +122,10 @@ function checkEmail() {
         self.send_response(200)
         self.end_headers()
         self.wfile.write('<html><body>'.encode('utf8'))
-        for index, opinion in db.opinions_database.items():
-            self.wfile.write(f'''<div id='{index}'>{opinion.text}</div>'''.encode('utf8'))
+        self.wfile.write('<table>'.encode('utf8'))
+        for opinion_ID, opinion in db.opinions_database.items():
+            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div onclick='vote(this, "up", {opinion_ID})'>&#9650;</div><div onclick='vote(this, "down", {opinion_ID})'>&#9660;</div></td></tr>'''.encode('utf8'))
+        self.wfile.write('</table>'.encode('utf8'))
         self.wfile.write('''<br />
 <input id='opinion_text' type='text'/>
 <button onclick='submit_opinion()'>SUBMIT</button>
@@ -133,6 +137,12 @@ function submit_opinion() {
     xhttp.send();
     document.getElementById('opinion_text').value = '';
     alert('Your opinion was submitted. Thank you!');
+}
+function vote(arrow, my_vote, opinion_ID) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    xhttp.send();
+    arrow.style = 'color : red';
 }
 </script>
 <br />'''.encode('utf8'))
@@ -197,6 +207,26 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                 db.opinions_database.sync()
             finally:
                 db.opinions_database_lock.release()
+            self.send_response(200)
+            self.end_headers()
+
+    def vote(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
+            opinion_ID = url_arguments['opinion_ID'][0]
+            my_vote = url_arguments['my_vote'][0]
+            if opinion_ID in my_account.votes:
+                my_account.votes[opinion_ID].append((my_vote, datetime.now()))
+            else:
+                my_account.votes[opinion_ID] = [(my_vote, datetime.now())]
+            db.user_cookies_lock.acquire()
+            try:
+                db.user_cookies[my_account.cookie_code] = my_account
+                db.user_cookies.sync()
+            finally:
+                db.user_cookies_lock.release()
+                
             self.send_response(200)
             self.end_headers()
 
