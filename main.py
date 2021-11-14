@@ -121,7 +121,18 @@ function checkEmail() {
     def opinions_page(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('<html><body>'.encode('utf8'))
+        self.wfile.write('''<html>
+<head>
+<style>
+div.unselected {
+    color : black;
+}
+div.selected {
+    color : red;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
         self.wfile.write('<table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
             self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
@@ -145,8 +156,21 @@ function vote(element_ID) {
     const my_vote = split_ID[1];
     xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
+    
     let arrow = document.getElementById(element_ID);
     arrow.style = 'color : red';
+
+    if (my_vote == 'up') {
+        let other_arrow = document.getElementById(opinion_ID + ' down');
+        other_arrow.style = 'color : black';
+    }
+    else if (my_vote == 'down') {
+        let other_arrow = document.getElementById(opinion_ID + ' up');
+        other_arrow.style = 'color : black';
+    }
+    else {
+        arrow.style = 'color : black';
+    }
 }
 </script>
 <br />'''.encode('utf8'))
