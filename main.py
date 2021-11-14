@@ -124,7 +124,7 @@ function checkEmail() {
         self.wfile.write('<html><body>'.encode('utf8'))
         self.wfile.write('<table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
-            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div onclick='vote(this, "up", {opinion_ID})'>&#9650;</div><div onclick='vote(this, "down", {opinion_ID})'>&#9660;</div></td></tr>'''.encode('utf8'))
+            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
         self.wfile.write('</table>'.encode('utf8'))
         self.wfile.write('''<br />
 <input id='opinion_text' type='text'/>
@@ -132,16 +132,20 @@ function checkEmail() {
 <script>
 function submit_opinion() {
     var xhttp = new XMLHttpRequest();
-    var opinion_text = document.getElementById('opinion_text').value;
+    const opinion_text = document.getElementById('opinion_text').value;
     xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
     xhttp.send();
     document.getElementById('opinion_text').value = '';
     alert('Your opinion was submitted. Thank you!');
 }
-function vote(arrow, my_vote, opinion_ID) {
+function vote(element_ID) {
     var xhttp = new XMLHttpRequest();
+    var split_ID = element_ID.split(' ');
+    const opinion_ID = split_ID[0];
+    const my_vote = split_ID[1];
     xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
+    let arrow = document.getElementById(element_ID);
     arrow.style = 'color : red';
 }
 </script>
