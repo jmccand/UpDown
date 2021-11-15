@@ -51,20 +51,23 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.submit_opinion()
                 elif self.path.startswith('/vote'):
                     self.vote()
-            except invalidCookie as error:
+            except ValueError as error:
                 print(str(error))
                 
 
-    def identify_user(self):
+    def identify_user(self, nocookie=False):
         my_cookies = SimpleCookie(self.headers.get('Cookie'))
         if 'code' in my_cookies:
             my_code = my_cookies['code'].value
             if my_code in db.user_cookies:
                 return db.user_cookies[my_code]
             else:
-                raise ValueError(f'CODE NOT IN USER_COOKIES DATABASE FOUND! {my_code=}')
+                raise ValueError(f'ip {self.client_address[0]} -- identify user function got code {my_code}')
         else:
-            return
+            if nocookie:
+                return
+            else:
+                raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
 
     def get_email(self):
         self.send_response(200)
@@ -117,6 +120,10 @@ function checkEmail() {
                     self.end_headers()
                 finally:
                     db.user_cookies_lock.release()
+            else:
+                raise ValueError(f"ip {self.client_address[0]} -- check email function got email {url_arguments['email'][0]}")
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
     def opinions_page(self):
         my_account = self.identify_user()
@@ -148,10 +155,11 @@ div.selected {
             else:
                 self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
         self.wfile.write('</table>'.encode('utf8'))
-        self.wfile.write('''<br />
+        self.wfile.write(str('''<br />
 <input id='opinion_text' type='text'/>
 <button onclick='submit_opinion()'>SUBMIT</button>
 <script>
+const page_IDs = %s;
 function submit_opinion() {
     var xhttp = new XMLHttpRequest();
     const opinion_text = document.getElementById('opinion_text').value;
@@ -166,7 +174,6 @@ function vote(element_ID) {
     const opinion_ID = split_ID[0];
 
     let old_vote = '';
-    console.log(document.getElementById(opinion_ID + ' up').className + ' is the class');
     if (document.getElementById(opinion_ID + ' up').className == 'selected') {
         old_vote = 'up';
     }
@@ -186,29 +193,54 @@ function vote(element_ID) {
     else {
         my_vote = 'abstain';
     }
-
-    xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
-    xhttp.send();
-
-    console.log('old vote: ' + old_vote + '      new vote: ' + my_vote);
-
-    if (my_vote == old_vote) {
-        document.getElementById(element_ID).className = 'unselected';
-    }
-    else {
-        if (old_vote != 'abstain') {
-            let other_arrow = document.getElementById(opinion_ID + ' ' + old_vote);
-            console.log('other arrow class: ' + other_arrow.className);
-            other_arrow.className = 'unselected';
-        }
-        if (my_vote != 'abstain') {
-            document.getElementById(element_ID).className = 'selected';
-        }
-    }
     
+    if (checkVoteValidity(my_vote)) {
+
+        xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+        xhttp.send();
+
+        if (my_vote == old_vote) {
+            document.getElementById(element_ID).className = 'unselected';
+        }
+        else {
+            if (old_vote != 'abstain') {
+                let other_arrow = document.getElementById(opinion_ID + ' ' + old_vote);
+                other_arrow.className = 'unselected';
+            }
+            if (my_vote != 'abstain') {
+                document.getElementById(element_ID).className = 'selected';
+            }
+        }
+    }
+}
+function checkVoteValidity(new_vote) {
+    let up_count = 0;
+    let down_count = 0;
+    for (let index = 0; index < page_IDs.length; index++) {
+        if (document.getElementById(page_IDs[index] + ' up').className == 'selected') {
+            up_count++;
+        }
+        else if (document.getElementById(page_IDs[index] + ' down').className == 'selected') {
+            down_count++;
+        }
+    }
+    let valid = true;
+    if (up_count == 5 && new_vote == 'up') {
+        alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        valid = false;
+    }
+    else if (down_count == 5 && new_vote == 'down') {
+        alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        valid = false;
+    }
+    if (up_count + down_count == 8 && new_vote != 'abstain') {
+        alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        valid = false;
+    }
+    return valid;
 }
 </script>
-<br />'''.encode('utf8'))
+<br />''' % (list(db.opinions_database.keys()))).encode('utf8'))
         self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
 
@@ -272,6 +304,8 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                 db.opinions_database_lock.release()
             self.send_response(200)
             self.end_headers()
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- submit opinion function got url arguments {url_arguments}')
 
     def vote(self):
         my_account = self.identify_user()
@@ -279,19 +313,25 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
         if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
             opinion_ID = url_arguments['opinion_ID'][0]
             my_vote = url_arguments['my_vote'][0]
-            if opinion_ID in my_account.votes:
-                my_account.votes[opinion_ID].append((my_vote, datetime.now()))
+            if opinion_ID in db.opinions_database and my_vote in ('up', 'down', 'abstain'):
+                if opinion_ID in my_account.votes:
+                    my_account.votes[opinion_ID].append((my_vote, datetime.now()))
+                else:
+                    my_account.votes[opinion_ID] = [(my_vote, datetime.now())]
+                db.user_cookies_lock.acquire()
+                try:
+                    db.user_cookies[my_account.cookie_code] = my_account
+                    db.user_cookies.sync()
+                finally:
+                    db.user_cookies_lock.release()
+
+                self.send_response(200)
+                self.end_headers()
             else:
-                my_account.votes[opinion_ID] = [(my_vote, datetime.now())]
-            db.user_cookies_lock.acquire()
-            try:
-                db.user_cookies[my_account.cookie_code] = my_account
-                db.user_cookies.sync()
-            finally:
-                db.user_cookies_lock.release()
+                raise ValueError(f'ip {self.client_address[0]} -- vote function got opinion ID {opinion_ID} and vote {my_vote}')
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- vote function got url arguments {url_arguments}')
                 
-            self.send_response(200)
-            self.end_headers()
 
         
 class ReuseHTTPServer(HTTPServer):    
@@ -320,7 +360,7 @@ class Opinion:
 class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
-    
+
 
 def main():
     print('Student Change Web App... running...')
