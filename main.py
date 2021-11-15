@@ -119,6 +119,7 @@ function checkEmail() {
                     db.user_cookies_lock.release()
 
     def opinions_page(self):
+        my_account = self.identify_user()
         self.send_response(200)
         self.end_headers()
         self.wfile.write('''<html>
@@ -135,7 +136,17 @@ div.selected {
 <body>'''.encode('utf8'))
         self.wfile.write('<table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
-            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+            if opinion_ID in my_account.votes:
+                print(f'{opinion_ID} in my account votes')
+                my_vote = my_account.votes[opinion_ID]
+                if my_vote[-1][0] == 'up':
+                    self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                elif my_vote[-1][0] == 'down':
+                    self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                else:
+                    self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+            else:
+                self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
         self.wfile.write('</table>'.encode('utf8'))
         self.wfile.write('''<br />
 <input id='opinion_text' type='text'/>
@@ -153,24 +164,48 @@ function vote(element_ID) {
     var xhttp = new XMLHttpRequest();
     var split_ID = element_ID.split(' ');
     const opinion_ID = split_ID[0];
-    const my_vote = split_ID[1];
-    xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
-    xhttp.send();
-    
-    let arrow = document.getElementById(element_ID);
-    arrow.style = 'color : red';
 
-    if (my_vote == 'up') {
-        let other_arrow = document.getElementById(opinion_ID + ' down');
-        other_arrow.style = 'color : black';
+    let old_vote = '';
+    console.log(document.getElementById(opinion_ID + ' up').className + ' is the class');
+    if (document.getElementById(opinion_ID + ' up').className == 'selected') {
+        old_vote = 'up';
     }
-    else if (my_vote == 'down') {
-        let other_arrow = document.getElementById(opinion_ID + ' up');
-        other_arrow.style = 'color : black';
+    else if (document.getElementById(opinion_ID + ' down').className == 'selected') {
+        old_vote = 'down';
     }
     else {
-        arrow.style = 'color : black';
+        old_vote = 'abstain';
     }
+
+    const my_click = split_ID[1];
+
+    let my_vote = '';
+    if (my_click != old_vote) {
+        my_vote = my_click;
+    }
+    else {
+        my_vote = 'abstain';
+    }
+
+    xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    xhttp.send();
+
+    console.log('old vote: ' + old_vote + '      new vote: ' + my_vote);
+
+    if (my_vote == old_vote) {
+        document.getElementById(element_ID).className = 'unselected';
+    }
+    else {
+        if (old_vote != 'abstain') {
+            let other_arrow = document.getElementById(opinion_ID + ' ' + old_vote);
+            console.log('other arrow class: ' + other_arrow.className);
+            other_arrow.className = 'unselected';
+        }
+        if (my_vote != 'abstain') {
+            document.getElementById(element_ID).className = 'selected';
+        }
+    }
+    
 }
 </script>
 <br />'''.encode('utf8'))
