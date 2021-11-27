@@ -194,7 +194,7 @@ function vote(element_ID) {
         my_vote = 'abstain';
     }
     
-    if (checkVoteValidity(my_vote)) {
+    if (checkVoteValidity(my_vote, old_vote)) {
 
         xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
         xhttp.send();
@@ -213,7 +213,7 @@ function vote(element_ID) {
         }
     }
 }
-function checkVoteValidity(new_vote) {
+function checkVoteValidity(new_vote, old_vote) {
     let up_count = 0;
     let down_count = 0;
     for (let index = 0; index < page_IDs.length; index++) {
@@ -233,9 +233,11 @@ function checkVoteValidity(new_vote) {
         alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
     }
-    if (up_count + down_count == 8 && new_vote != 'abstain') {
-        alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
-        valid = false;
+    if (old_vote == 'abstain') {
+        if (up_count + down_count == 8 && new_vote != 'abstain') {
+            alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+            valid = false;
+        }
     }
     return valid;
 }
