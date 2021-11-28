@@ -169,12 +169,21 @@ function checkEmail() {
             if db.verification_links[link_uuid] == my_account.cookie_code:
                 my_account.verified_email = True
 
-                db.user_cookies_lock.aqcuire()
+                db.user_cookies_lock.acquire()
                 try:
                     db.user_cookies[my_account.cookie_code] = my_account
                     db.user_cookies.sync()
                 except:
                     db.user_cookies_lock.release()
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write('''<html>
+<body>
+Thank you for verifying. Your votes are now counted.<br />
+<a href='/'>Return to homepage</a>
+</body>
+</html>'''.encode('utf8'))
                     
                 print(f'{my_account.email} just verified their email!')
             else:
@@ -426,7 +435,7 @@ def main():
 
     print(f'\n{db.user_cookies=}')
     for cookie, user in db.user_cookies.items():
-        print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.confirmed_email})')
+        print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.verified_email})')
 
     print(f'\n{db.opinions_database=}')
     for ID, opinion in db.opinions_database.items():
