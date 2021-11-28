@@ -9,7 +9,7 @@ import uuid
 import db
 import local
 from datetime import datetime
-
+import smtplib
 
 class MyHandler(SimpleHTTPRequestHandler):
     
@@ -51,6 +51,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.submit_opinion()
                 elif self.path.startswith('/vote'):
                     self.vote()
+                elif self.path.startswith('/verify_email'):
+                    self.verify_email()
             except ValueError as error:
                 print(str(error))
                 
@@ -104,27 +106,82 @@ function checkEmail() {
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         if 'email' in url_arguments:
             if url_arguments['email'][0].endswith('@lexingtonma.org'):
-                #send confirmation email
-                #record email + create account
+                #set up uuids so that they are unique
                 my_uuid = uuid.uuid1().hex
+                while my_uuid in db.user_cookies or my_uuid in db.verification_links:
+                    my_uuid = uuid.uuid1().hex
+                
+                link_uuid = uuid.uuid1().hex
+                while link_uuid in db.user_cookies or link_uuid in db.verification_links or link_uuid == my_uuid:
+                    link_uuid = uuid.uuid1().hex
+                print(f'{my_uuid=} {link_uuid=}')
+
+                # send email
+                assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
                 email_address = url_arguments['email'][0]
+                gmail_user = local.EMAIL
+                gmail_password = local.PASSWORD
+                sent_from = gmail_user
+                to = email_address
+                subject = 'Add your votes to the count?'
+                body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
+                email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
+                try:
+                    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+                    server.ehlo()
+                    server.login(gmail_user, gmail_password)
+                    server.sendmail(sent_from, to, email_text)
+                    server.close()
+                    print(f'New user with email {email_address}!')
+                except:
+                    raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
+
+                # change the databases
+                assert(my_uuid not in db.user_cookies and my_uuid not in db.verification_links)
+                db.verification_links_lock.acquire()
+                try:
+                    db.verification_links[link_uuid] = my_uuid
+                    db.verification_links.sync()
+                finally:
+                    db.verification_links_lock.release()
                 db.user_cookies_lock.acquire()
                 try:
-                    while my_uuid in db.user_cookies:
-                        my_uuid = uuid.uuid1().hex
                     db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
                     db.user_cookies.sync()
-                    self.send_response(302)
-                    self.send_header('Location', '/')
-                    self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
-                    self.end_headers()
                 finally:
                     db.user_cookies_lock.release()
+
+                #redirect to homepage so they can vote
+                self.send_response(302)
+                self.send_header('Location', '/')
+                self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
+                self.end_headers()
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {url_arguments['email'][0]}")
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
+    def verify_email(self):
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        my_account = self.identify_user()
+        if 'verification_id' in url_arguments:
+            link_uuid = url_arguments['verification_id'][0]
+            if db.verification_links[link_uuid] == my_account.cookie_code:
+                my_account.verified_email = True
+
+                db.user_cookies_lock.aqcuire()
+                try:
+                    db.user_cookies[my_account.cookie_code] = my_account
+                    db.user_cookies.sync()
+                except:
+                    db.user_cookies_lock.release()
+                    
+                print(f'{my_account.email} just verified their email!')
+            else:
+                raise ValueError(f'ip {self.client_address[0]} -- Insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]]}, their link ({link_uuid}) was opened by {my_account.email}')
+        else:
+            raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
+            
     def opinions_page(self):
         my_account = self.identify_user()
         self.send_response(200)
@@ -343,13 +400,13 @@ class ReuseHTTPServer(HTTPServer):
     
 class User:
 
-    def __init__(self, email, cookie_code, activity=[], votes={}, confirmed_email=False):
+    def __init__(self, email, cookie_code, activity=[], votes={}, verified_email=False):
                  
         self.email = email
         self.cookie_code = cookie_code
         self.activity = activity
         self.votes = votes
-        self.confirmed_email = confirmed_email
+        self.verified_email = verified_email
 
 class Opinion:
 
@@ -374,6 +431,10 @@ def main():
     print(f'\n{db.opinions_database=}')
     for ID, opinion in db.opinions_database.items():
         print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity})')
+
+    print(f'\n{db.verification_links=}')
+    for link, ID in db.verification_links.items():
+        print(f'  {link} : {ID}')
         
     httpd = ReuseHTTPServer(('0.0.0.0', 8888), MyHandler)
     httpd.serve_forever()
