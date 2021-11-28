@@ -167,8 +167,10 @@ function checkEmail() {
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
             if db.verification_links[link_uuid] == my_account.cookie_code:
+                # change the account locally
                 my_account.verified_email = True
 
+                # update the database
                 db.user_cookies_lock.acquire()
                 try:
                     db.user_cookies[my_account.cookie_code] = my_account
@@ -176,6 +178,7 @@ function checkEmail() {
                 except:
                     db.user_cookies_lock.release()
 
+                # send success page
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write('''<html>
@@ -187,7 +190,7 @@ Thank you for verifying. Your votes are now counted.<br />
                     
                 print(f'{my_account.email} just verified their email!')
             else:
-                raise ValueError(f'ip {self.client_address[0]} -- Insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]]}, their link ({link_uuid}) was opened by {my_account.email}')
+                raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]]}, their link ({link_uuid}) was opened by {my_account.email}')
         else:
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
             
