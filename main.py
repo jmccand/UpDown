@@ -107,13 +107,13 @@ function checkEmail() {
         if 'email' in url_arguments:
             if url_arguments['email'][0].endswith('@lexingtonma.org'):
                 #set up uuids so that they are unique
-                my_uuid = uuid.uuid1().hex
+                my_uuid = uuid.uuid4().hex
                 while my_uuid in db.user_cookies or my_uuid in db.verification_links:
-                    my_uuid = uuid.uuid1().hex
+                    my_uuid = uuid.uuid4().hex
                 
-                link_uuid = uuid.uuid1().hex
+                link_uuid = uuid.uuid4().hex
                 while link_uuid in db.user_cookies or link_uuid in db.verification_links or link_uuid == my_uuid:
-                    link_uuid = uuid.uuid1().hex
+                    link_uuid = uuid.uuid4().hex
                 print(f'{my_uuid=} {link_uuid=}')
 
                 # send email
