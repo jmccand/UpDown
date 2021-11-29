@@ -55,6 +55,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.verify_email()
                 elif self.path == '/approve_opinions':
                     self.approve_opinions_page()
+                elif self.path.startswith('/approve'):
+                    self.approve()
             except ValueError as error:
                 print(str(error))
                 
@@ -192,7 +194,7 @@ Thank you for verifying. Your votes are now counted.<br />
                     
                 print(f'{my_account.email} just verified their email!')
             else:
-                raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]]}, their link ({link_uuid}) was opened by {my_account.email}')
+                raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
         else:
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
             
@@ -221,13 +223,13 @@ div.selected {
                         print(f'{opinion_ID} in my account votes')
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                         elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                         else:
-                            self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                     else:
-                        self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                        self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                 else:
                     if opinion_ID in my_account.votes:
                         print(f'{opinion_ID} in my account votes')
@@ -368,7 +370,7 @@ function vote(element_ID) {
     xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
 
-    document.getElementById(opinion_ID).display = none;
+    document.getElementById(opinion_ID).style = 'display : none;';
 }
 </script>'''.encode('utf8'))
             self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
@@ -428,7 +430,7 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
             try:
                 opinion_ID = len(db.opinions_database)
                 assert str(opinion_ID) not in db.opinions_database
-                db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.now())])
+                db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, {'created' : (my_account.cookie_code, datetime.now())})
                 db.opinions_database.sync()
             finally:
                 db.opinions_database_lock.release()
@@ -461,7 +463,42 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                 raise ValueError(f'ip {self.client_address[0]} -- vote function got opinion ID {opinion_ID} and vote {my_vote}')
         else:
             raise ValueError(f'ip {self.client_address[0]} -- vote function got url arguments {url_arguments}')
-                
+
+    def approve(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
+            opinion_ID = url_arguments['opinion_ID'][0]
+            my_vote = url_arguments['my_vote'][0]
+            if opinion_ID in db.opinions_database and my_vote in ('yes', 'no'):
+                # update databases
+                opinion = db.opinions_database[opinion_ID]
+                opinion.activity['approved'] = (my_account.email, my_vote, datetime.now())
+                if my_vote == 'yes':
+                    opinion.approved = True
+                else:
+                    opinion.approved = False
+                db.opinions_database_lock.acquire()
+                try:
+                    db.opinions_database[opinion_ID] = opinion
+                    db.opinions_database.sync()
+                finally:
+                    db.opinions_database_lock.release()
+
+                my_account.activity.append((opinion_ID, my_vote, datetime.now()))
+                db.user_cookies_lock.acquire()
+                try:
+                    db.user_cookies[my_account.cookie_code] = my_account
+                    db.user_cookies.sync()
+                finally:
+                    db.user_cookies_lock.release()
+
+                self.send_response(200)
+                self.end_headers()
+            else:
+                raise ValueError(f'ip {self.client_address[0]} -- approval function got opinion ID {opinion_ID} and vote {my_vote}')
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- approval function got url arguments {url_arguments}')        
 
         
 class ReuseHTTPServer(HTTPServer):    
