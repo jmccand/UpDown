@@ -212,31 +212,32 @@ div.selected {
 <body>'''.encode('utf8'))
         self.wfile.write('<table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
-            if my_account.email in local.ADMINS and my_account.verified_email:
-                up_votes, down_votes = opinion.count_votes()
-                if opinion_ID in my_account.votes:
-                    print(f'{opinion_ID} in my account votes')
-                    my_vote = my_account.votes[opinion_ID]
-                    if my_vote[-1][0] == 'up':
-                        self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
-                    elif my_vote[-1][0] == 'down':
-                        self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+            if opinion.approved:
+                if my_account.email in local.ADMINS and my_account.verified_email:
+                    up_votes, down_votes = opinion.count_votes()
+                    if opinion_ID in my_account.votes:
+                        print(f'{opinion_ID} in my account votes')
+                        my_vote = my_account.votes[opinion_ID]
+                        if my_vote[-1][0] == 'up':
+                            self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                        elif my_vote[-1][0] == 'down':
+                            self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                        else:
+                            self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                     else:
                         self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                 else:
-                    self.wfile.write(f'''<tr><td>{opinion.text}&emsp;&emsp;{up_votes+down_votes}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
-            else:
-                if opinion_ID in my_account.votes:
-                    print(f'{opinion_ID} in my account votes')
-                    my_vote = my_account.votes[opinion_ID]
-                    if my_vote[-1][0] == 'up':
-                        self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-                    elif my_vote[-1][0] == 'down':
-                        self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                    if opinion_ID in my_account.votes:
+                        print(f'{opinion_ID} in my account votes')
+                        my_vote = my_account.votes[opinion_ID]
+                        if my_vote[-1][0] == 'up':
+                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                        elif my_vote[-1][0] == 'down':
+                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                        else:
+                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
                     else:
                         self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-                else:
-                    self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
         self.wfile.write('</table>'.encode('utf8'))
         self.wfile.write(str('''<br />
 <input id='opinion_text' type='text'/>
@@ -326,7 +327,10 @@ function checkVoteValidity(new_vote, old_vote) {
 }
 </script>
 <br />''' % (list(db.opinions_database.keys()))).encode('utf8'))
-        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+        else:
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
 
     def about_the_senate_page(self):
@@ -427,7 +431,7 @@ class ReuseHTTPServer(HTTPServer):
 class User:
 
     def __init__(self, email, cookie_code, activity=[], votes={}, verified_email=False):
-                 
+
         self.email = email
         self.cookie_code = cookie_code
         self.activity = activity
@@ -436,7 +440,7 @@ class User:
 
 class Opinion:
 
-    def __init__(self, ID, text, activity, approved):
+    def __init__(self, ID, text, activity, approved=False):
 
         self.ID = ID
         self.text = text
