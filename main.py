@@ -53,6 +53,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.vote()
                 elif self.path.startswith('/verify_email'):
                     self.verify_email()
+                elif self.path == '/approve_opinions':
+                    self.approve_opinions_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -212,7 +214,7 @@ div.selected {
 <body>'''.encode('utf8'))
         self.wfile.write('<table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
-            if opinion.approved:
+            if opinion.approved == True:
                 if my_account.email in local.ADMINS and my_account.verified_email:
                     up_votes, down_votes = opinion.count_votes()
                     if opinion_ID in my_account.votes:
@@ -333,6 +335,45 @@ function checkVoteValidity(new_vote, old_vote) {
             self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
 
+    def approve_opinions_page(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write('''<html>
+<head>
+<style>
+div.unselected {
+    color : black;
+}
+div.selected {
+    color : red;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+            self.wfile.write('<table>'.encode('utf8'))
+            for opinion_ID, opinion in db.opinions_database.items():
+                if opinion.approved == None:
+                    self.wfile.write(f'''<tr id={opinion_ID}><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} yes' onclick='vote(this.id)'>&#10003;</div><div class='unselected' id='{opinion_ID} no' onclick='vote(this.id)'>&#10005;</div></td></tr>'''.encode('utf8'))
+            self.wfile.write('</table>'.encode('utf8'))
+            self.wfile.write('''<script>
+function vote(element_ID) {
+    var xhttp = new XMLHttpRequest();
+    var split_ID = element_ID.split(' ');
+    const opinion_ID = split_ID[0];
+
+    const my_vote = split_ID[1];
+
+    xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    xhttp.send();
+
+    document.getElementById(opinion_ID).display = none;
+}
+</script>'''.encode('utf8'))
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            self.wfile.write('</body></html>'.encode('utf8'))            
+
     def about_the_senate_page(self):
         self.send_response(200)
         self.end_headers()
@@ -440,7 +481,7 @@ class User:
 
 class Opinion:
 
-    def __init__(self, ID, text, activity, approved=False):
+    def __init__(self, ID, text, activity, approved=None):
 
         self.ID = ID
         self.text = text
