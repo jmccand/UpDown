@@ -436,11 +436,12 @@ class User:
 
 class Opinion:
 
-    def __init__(self, ID, text, activity):
+    def __init__(self, ID, text, activity, approved):
 
         self.ID = ID
         self.text = text
         self.activity = activity
+        self.approved = approved
 
     def count_votes(self):
         up_votes = 0
@@ -469,7 +470,7 @@ def main():
 
     print(f'\n{db.opinions_database=}')
     for ID, opinion in db.opinions_database.items():
-        print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity})')
+        print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity}, {opinion.approved})')
 
     print(f'\n{db.verification_links=}')
     for link, ID in db.verification_links.items():
