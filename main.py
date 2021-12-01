@@ -57,6 +57,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.approve_opinions_page()
                 elif self.path.startswith('/approve'):
                     self.approve()
+                elif self.path == '/senate':
+                    self.senate_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -209,7 +211,7 @@ Thank you for verifying. Your votes are now counted.<br />
 There is no voting on weekends.<br />
 Enjoy your weekend and see you on Monday!<br />'''.encode('utf8'))
         elif str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
-                        self.wfile.write('''<html>
+            self.wfile.write('''<html>
 <body>
 Sorry, today's off.<br />
 See you soon!<br />'''.encode('utf8'))
@@ -346,9 +348,10 @@ function submit_opinion() {
 }
 </script>'''.encode('utf8'))
         if my_account.email in local.MODERATORS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            #self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
         else:
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
 
     def approve_opinions_page(self):
@@ -387,9 +390,56 @@ function vote(element_ID) {
     document.getElementById(opinion_ID).style = 'display : none;';
 }
 </script>'''.encode('utf8'))
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
             self.wfile.write('</body></html>'.encode('utf8'))            
 
+    def senate_page(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('''<html><body>'''.encode('utf8'))
+        self.wfile.write('''<h2 id='about'>About the Senate</h2>
+Welcome to the Lexington High School Student-Faculty Senate! The Senate convenes at 3:15pm on Wednesdays in the Library Media Center.
+We implement school-wide policies on a number of issues, from things as mundane as placing extra benches around the school to changes as significant as eliminating the community service requirement for open campus, allowing students to eat in the Quad, or determining what information will be printed on transcripts.<br />
+All meetings are open to the public! If you want to change something about the school, we would love to hear and discuss your ideas.'''.encode('utf8'))
+        self.wfile.write(f'''<h2 id='meet'>Meet the Senators</h2>
+Executive<br />
+{local.EXECUTIVE}
+
+Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
+{local.COMMUNICATIONS}
+
+Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
+{local.OVERSIGHT}
+
+The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
+{local.POLICY}
+
+The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
+{local.SOCIAL_ACTION}
+
+The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
+{local.CLIMATE}'''.encode('utf8'))
+        self.wfile.write(f'''<a name='meet2'><h2>Meet the Senators</h2></a>
+Executive<br />
+{local.EXECUTIVE}
+
+Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
+{local.COMMUNICATIONS}
+
+Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
+{local.OVERSIGHT}
+
+The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
+{local.POLICY}
+
+The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
+{local.SOCIAL_ACTION}
+
+The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
+{local.CLIMATE}'''.encode('utf8'))
+        self.wfile.write('</body></html>'.encode('utf8'))
+
+        
     def about_the_senate_page(self):
         self.send_response(200)
         self.end_headers()
