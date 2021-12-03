@@ -229,8 +229,9 @@ div.selected {
 </head>
 <body>'''.encode('utf8'))
             self.wfile.write('<table>'.encode('utf8'))
-            for opinion_ID, opinion in db.opinions_calendar.items():
+            for opinion in db.opinions_calendar[datetime.date.today()]:
                 assert opinion.approved == True
+                opinion_ID = opinion.ID
                 if my_account.email in local.ADMINS and my_account.verified_email:
                     up_votes, down_votes = opinion.count_votes()
                     if opinion_ID in my_account.votes:
@@ -333,7 +334,7 @@ function checkVoteValidity(new_vote, old_vote) {
     return valid;
 }
 </script>
-<br />''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
+<br />''' % (list(db.opinions_calendar[datetime.date.today()]))).encode('utf8'))
         self.wfile.write('''<br />
 <input id='opinion_text' type='text'/>
 <button onclick='submit_opinion()'>SUBMIT</button>
@@ -394,6 +395,7 @@ function vote(element_ID) {
             self.wfile.write('</body></html>'.encode('utf8'))            
 
     def senate_page(self):
+        my_account = self.identify_user()
         self.send_response(200)
         self.end_headers()
         self.wfile.write('''<html><body>'''.encode('utf8'))
@@ -419,24 +421,11 @@ The Social Action Committee is concerned primarily with student activism and rel
 
 The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
 {local.CLIMATE}'''.encode('utf8'))
-        self.wfile.write(f'''<a name='meet2'><h2>Meet the Senators</h2></a>
-Executive<br />
-{local.EXECUTIVE}
-
-Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
-{local.COMMUNICATIONS}
-
-Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
-{local.OVERSIGHT}
-
-The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
-{local.POLICY}
-
-The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
-{local.SOCIAL_ACTION}
-
-The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
-{local.CLIMATE}'''.encode('utf8'))
+        if my_account.email in local.MODERATORS and my_account.verified_email:
+            #self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+        else:
+            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
 
         
