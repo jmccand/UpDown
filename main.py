@@ -59,6 +59,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.approve()
                 elif self.path == '/senate':
                     self.senate_page()
+                elif self.path == '/schedule_opinions':
+                    self.schedule_opinions_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -519,39 +521,42 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
 
     def approve(self):
         my_account = self.identify_user()
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-        if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
-            opinion_ID = url_arguments['opinion_ID'][0]
-            my_vote = url_arguments['my_vote'][0]
-            if opinion_ID in db.opinions_database and my_vote in ('yes', 'no'):
-                # update databases
-                opinion = db.opinions_database[opinion_ID]
-                opinion.activity['approved'] = (my_account.email, my_vote, datetime.datetime.now())
-                if my_vote == 'yes':
-                    opinion.approved = True
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
+                opinion_ID = url_arguments['opinion_ID'][0]
+                my_vote = url_arguments['my_vote'][0]
+                if opinion_ID in db.opinions_database and my_vote in ('yes', 'no'):
+                    # update databases
+                    opinion = db.opinions_database[opinion_ID]
+                    opinion.activity['approved'] = (my_account.email, my_vote, datetime.datetime.now())
+                    if my_vote == 'yes':
+                        opinion.approved = True
+                    else:
+                        opinion.approved = False
+                    db.opinions_database_lock.acquire()
+                    try:
+                        db.opinions_database[opinion_ID] = opinion
+                        db.opinions_database.sync()
+                    finally:
+                        db.opinions_database_lock.release()
+
+                    my_account.activity.append((opinion_ID, my_vote, datetime.datetime.now()))
+                    db.user_cookies_lock.acquire()
+                    try:
+                        db.user_cookies[my_account.cookie_code] = my_account
+                        db.user_cookies.sync()
+                    finally:
+                        db.user_cookies_lock.release()
+
+                    self.send_response(200)
+                    self.end_headers()
                 else:
-                    opinion.approved = False
-                db.opinions_database_lock.acquire()
-                try:
-                    db.opinions_database[opinion_ID] = opinion
-                    db.opinions_database.sync()
-                finally:
-                    db.opinions_database_lock.release()
-
-                my_account.activity.append((opinion_ID, my_vote, datetime.datetime.now()))
-                db.user_cookies_lock.acquire()
-                try:
-                    db.user_cookies[my_account.cookie_code] = my_account
-                    db.user_cookies.sync()
-                finally:
-                    db.user_cookies_lock.release()
-
-                self.send_response(200)
-                self.end_headers()
+                    raise ValueError(f'ip {self.client_address[0]} -- approval function got opinion ID {opinion_ID} and vote {my_vote}')
             else:
-                raise ValueError(f'ip {self.client_address[0]} -- approval function got opinion ID {opinion_ID} and vote {my_vote}')
-        else:
-            raise ValueError(f'ip {self.client_address[0]} -- approval function got url arguments {url_arguments}')        
+                raise ValueError(f'ip {self.client_address[0]} -- approval function got url arguments {url_arguments}')
+
+        
 
         
 class ReuseHTTPServer(HTTPServer):    
