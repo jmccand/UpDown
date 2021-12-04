@@ -10,6 +10,7 @@ import db
 import local
 import datetime
 import smtplib
+import calendar
 
 class MyHandler(SimpleHTTPRequestHandler):
     
@@ -78,6 +79,15 @@ class MyHandler(SimpleHTTPRequestHandler):
                 return
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
+
+    def send_links(self):
+        my_account = self.identify_user()
+        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+        if my_account.email in local.MODERATORS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
+        
 
     def get_email(self):
         self.send_response(200)
@@ -350,11 +360,7 @@ function submit_opinion() {
     alert('Your opinion was submitted. Thank you!');
 }
 </script>'''.encode('utf8'))
-        if my_account.email in local.MODERATORS and my_account.verified_email:
-            #self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-        else:
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+        self.send_links()
         self.wfile.write('</body></html>'.encode('utf8'))
 
     def approve_opinions_page(self):
@@ -393,7 +399,7 @@ function vote(element_ID) {
     document.getElementById(opinion_ID).style = 'display : none;';
 }
 </script>'''.encode('utf8'))
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            self.send_links()
             self.wfile.write('</body></html>'.encode('utf8'))            
 
     def senate_page(self):
@@ -423,11 +429,7 @@ The Social Action Committee is concerned primarily with student activism and rel
 
 The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
 {local.CLIMATE}'''.encode('utf8'))
-        if my_account.email in local.MODERATORS and my_account.verified_email:
-            #self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a><br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-        else:
-            self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+        self.send_links()
         self.wfile.write('</body></html>'.encode('utf8'))
 
         
@@ -555,10 +557,37 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                     raise ValueError(f'ip {self.client_address[0]} -- approval function got opinion ID {opinion_ID} and vote {my_vote}')
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- approval function got url arguments {url_arguments}')
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- approval function got user {user.email}, who is not a moderator.')
 
-        
-
-        
+    def schedule_opinions_page(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write('<html><body><table><tr>'.encode('utf8'))
+            today_date = datetime.date.today()
+            for day_of_week in range(7):
+                self.wfile.write(f'<td>{calendar.day_name[(day_of_week + 6) % 7]}</td>'.encode('utf8'))
+            self.wfile.write('</tr><tr>'.encode('utf8'))
+            for day in range((calendar.monthrange(today_date.year, today_date.month)[0] + 6) % 7):
+                self.wfile.write('<td></td>'.encode('utf8'))
+            for day_number in range(1, calendar.monthrange(today_date.year, today_date.month)[1] + 1):
+                this_date = datetime.date(today_date.year, today_date.month, day_number)
+                already_selected = 0
+                if str(this_date) in db.opinions_calendar:
+                    already_selected = len(db.opinions_calendar[str(this_date)])
+                if this_date.weekday() == 6 and not day_number == 1:
+                    self.wfile.write('<tr>'.encode('utf8'))
+                self.wfile.write(f'''<td>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))
+                if this_date.weekday() == 0 and not day_number == 1:
+                    self.wfile.write('</tr>'.encode('utf8'))
+            self.wfile.write('</table>'.encode('utf8'))
+            self.send_links()
+            self.wfile.write('</body></html>'.encode('utf8'))
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- approval function got user {user.email}, who is not an admin.')
+            
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
