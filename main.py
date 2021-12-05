@@ -62,8 +62,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.senate_page()
                 elif self.path == '/schedule_opinions':
                     self.schedule_opinions_page()
-                elif self.path.startswith('/schedule'):
-                    self.schedule()
+                elif self.path.startswith('/schedule_date'):
+                    self.schedule_date_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -851,7 +851,7 @@ CALENDAR:
                     self.wfile.write('</tr>'.encode('utf8'))
                     if not day_number == calendar.monthrange(today_date.year, today_date.month)[1]:
                         self.wfile.write('<tr>'.encode('utf8'))
-                self.wfile.write(f'''<td onclick='document.location.href="/schedule?date={this_date}"'>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))
+                self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"'>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))
             for day in range(35 - (calendar.monthrange(today_date.year, today_date.month)[1]) - calendar.monthrange(today_date.year, today_date.month)[0]):
                 self.wfile.write('<td></td>'.encode('utf8'))
             self.wfile.write('</tr>'.encode('utf8'))
@@ -861,7 +861,7 @@ CALENDAR:
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule_opinions function got user {user.email}, who is not an admin.')
 
-    def schedule(self):
+    def schedule_date_page(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
             url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
