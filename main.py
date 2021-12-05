@@ -896,15 +896,20 @@ td {
 </td>
 </tr>'''.encode('utf8'))
                 self.wfile.write('</table></td><td>'.encode('utf8'))
+                self.wfile.write('<table>'.encode('utf8'))
                 if str(datetime.date.today()) in db.opinions_calendar:
-                    self.wfile.write('<table>'.encode('utf8'))
                     for opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
                         self.wfile.write(f'''<tr>
 <td>
 {opinion.text}
 </td>
 </tr>'''.encode('utf8'))
-                    self.wfile.write('</table>'.encode('utf8'))
+                    for blank in range(10 - len(db.opinions_calendar[str(datetime.date.today())])):
+                        self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
+                else:
+                    for blank in range(10):
+                        self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
+                self.wfile.write('</table>'.encode('utf8'))
                 self.wfile.write('</td></tr></table>'.encode('utf8'))
                 self.send_links()
                 self.wfile.write('</body></html>'.encode('utf8'))
