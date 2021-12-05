@@ -822,6 +822,11 @@ CALENDAR:
         if my_account.email in local.ADMINS and my_account.verified_email:
             url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             if 'date' in url_arguments:
+                this_date = url_arguments["date"][0]
+                try:
+                    datetime.datetime.strptime(this_date, '%Y-%m-%d')
+                except ValueError:
+                    raise ValueError(e + f'ip {self.client_address[0]} -- schedule date function got date {url_arguments["date"][0]}')
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write('''<html>
@@ -847,32 +852,40 @@ td {
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.approved == True and not opinion.scheduled:
                         self.wfile.write(f'''<tr>
-<td>
+<td id='{opinion_ID}' onclick='schedule(this);'>
 {opinion.text}
 </td>
 </tr>'''.encode('utf8'))
                 self.wfile.write('</table></td><td>'.encode('utf8'))
                 self.wfile.write('<table>'.encode('utf8'))
-                if str(datetime.date.today()) in db.opinions_calendar:
-                    for opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
+                if this_date in db.opinions_calendar:
+                    for opinion_ID in db.opinions_calendar[this_date]:
                         self.wfile.write(f'''<tr>
 <td>
 {opinion.text}
 </td>
 </tr>'''.encode('utf8'))
-                    for blank in range(10 - len(db.opinions_calendar[str(datetime.date.today())])):
+                    for blank in range(10 - len(db.opinions_calendar[this_date])):
                         self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
                 else:
                     for blank in range(10):
                         self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
                 self.wfile.write('</table>'.encode('utf8'))
                 self.wfile.write('</td></tr></table>'.encode('utf8'))
+                self.wfile.write(f'''<script>
+const this_date = '{this_date}';
+function schedule(element) {{
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/schedule?date=' + this_date + '&opinion_ID=' + element.id, true);
+    xhttp.send();
+}}
+</script>'''.encode('utf8'))
                 self.send_links()
                 self.wfile.write('</body></html>'.encode('utf8'))
             else:
-                raise ValueError(f'ip {self.client_address[0]} -- schedule function got url arguments {url_arguments}')
+                raise ValueError(f'ip {self.client_address[0]} -- schedule date function got url arguments {url_arguments}')
         else:
-            raise ValueError(f'ip {self.client_address[0]} -- schedule function got user {user.email}, who is not an admin.')
+            raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
             
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
