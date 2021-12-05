@@ -62,6 +62,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.senate_page()
                 elif self.path == '/schedule_opinions':
                     self.schedule_opinions_page()
+                elif self.path.startswith('/schedule'):
+                    self.schedule()
             except ValueError as error:
                 print(str(error))
                 
@@ -849,7 +851,7 @@ CALENDAR:
                     self.wfile.write('</tr>'.encode('utf8'))
                     if not day_number == calendar.monthrange(today_date.year, today_date.month)[1]:
                         self.wfile.write('<tr>'.encode('utf8'))
-                self.wfile.write(f'''<td>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))
+                self.wfile.write(f'''<td onclick='document.location.href="/schedule?date={this_date}"'>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))
             for day in range(35 - (calendar.monthrange(today_date.year, today_date.month)[1]) - calendar.monthrange(today_date.year, today_date.month)[0]):
                 self.wfile.write('<td></td>'.encode('utf8'))
             self.wfile.write('</tr>'.encode('utf8'))
@@ -857,7 +859,59 @@ CALENDAR:
             self.send_links()
             self.wfile.write('</body></html>'.encode('utf8'))
         else:
-            raise ValueError(f'ip {self.client_address[0]} -- approval function got user {user.email}, who is not an admin.')
+            raise ValueError(f'ip {self.client_address[0]} -- schedule_opinions function got user {user.email}, who is not an admin.')
+
+    def schedule(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if 'date' in url_arguments:
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write('''<html>
+<head>
+<style>
+table {
+  border-collapse : collapse;
+}
+td {
+  border-style : solid;
+  border-width : 2px;
+  border-color : black;
+  width : 300px;
+  padding : 3px;
+}
+</style>
+</head>
+<body>
+<table>
+<tr>
+<td>
+<table>'''.encode('utf8'))
+                for opinion_ID, opinion in db.opinions_database.items():
+                    if opinion.approved == True and not opinion.scheduled:
+                        self.wfile.write(f'''<tr>
+<td>
+{opinion.text}
+</td>
+</tr>'''.encode('utf8'))
+                self.wfile.write('</table></td><td>'.encode('utf8'))
+                if str(datetime.date.today()) in db.opinions_calendar:
+                    self.wfile.write('<table>'.encode('utf8'))
+                    for opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
+                        self.wfile.write(f'''<tr>
+<td>
+{opinion.text}
+</td>
+</tr>'''.encode('utf8'))
+                    self.wfile.write('</table>'.encode('utf8'))
+                self.wfile.write('</td></tr></table>'.encode('utf8'))
+                self.send_links()
+                self.wfile.write('</body></html>'.encode('utf8'))
+            else:
+                raise ValueError(f'ip {self.client_address[0]} -- schedule function got url arguments {url_arguments}')
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- schedule function got user {user.email}, who is not an admin.')
             
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
@@ -876,12 +930,13 @@ class User:
 
 class Opinion:
 
-    def __init__(self, ID, text, activity, approved=None):
+    def __init__(self, ID, text, activity, approved=None, scheduled=False):
 
         self.ID = ID
         self.text = text
         self.activity = activity
         self.approved = approved
+        self.scheduled = scheduled
 
     def count_votes(self):
         up_votes = 0
