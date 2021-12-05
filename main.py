@@ -416,6 +416,7 @@ We implement school-wide policies on a number of issues, from things as mundane 
 All meetings are open to the public! If you want to change something about the school, we would love to hear and discuss your ideas.<br />'''.encode('utf8'))
         self.wfile.write('''<h2><a name='about'>About the Senate</a></h2>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='constitution'>Constitution</a></h2>
+<div style='width:90%; height:200px; overflow:scroll; border:2px solid black; padding:5px;'>
 Article I: Philosophy<br />
 <br />
 All members of the school community should have a meaningful voice in determining the policies of the school, in promoting a positive school climate, and in shaping the future of the school. It is essential that each member be kept informed through effective communications and have the power to influence decisions made at Lexington High School. For this purpose the Lexington High School Senate is established.<br />
@@ -647,7 +648,7 @@ C. During this Senate meeting period, school shall have been terminated for the 
 <br />
 D. This arrangement shall not decrease the amount of classroom time currently scheduled.<br />
 <br />
-E. No student or faculty member participating in Senate deliberations shall be penalized in any way for not participating in athletic, dramatic, debate, or club activities during the time designated for Senate meetings.<br />'''.encode('utf8'))
+E. No student or faculty member participating in Senate deliberations shall be penalized in any way for not participating in athletic, dramatic, debate, or club activities during the time designated for Senate meetings.<br /></div>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='FAQ'>Frequently Asked Questions</a></h2>
 When and where does the Senate meet?<br />
 The Senate meets every Wednesday afternoon after school in the Library Media Center.<br />
@@ -685,51 +686,6 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
         self.wfile.write('</body></html>'.encode('utf8'))
 
         
-    def about_the_senate_page(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write('''<h2>About the Senate</h2>
-Welcome to the Lexington High School Student-Faculty Senate! The Senate convenes at 3:15pm on Wednesdays in the Library Media Center.
-We implement school-wide policies on a number of issues, from things as mundane as placing extra benches around the school to changes as significant as eliminating the community service requirement for open campus, allowing students to eat in the Quad, or determining what information will be printed on transcripts.<br />
-All meetings are open to the public! If you want to change something about the school, we would love to hear and discuss your ideas.'''.encode('utf8'))
-        self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
-        self.wfile.write('''</body></html>'''.encode('utf8'))
-
-    def current_issues_page(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write('''You have reached the current issues page.'''.encode('utf8'))
-        self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
-        self.wfile.write('''</body></html>'''.encode('utf8'))
-
-    def meet_the_senators_page(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write(f'''<h2>Meet the Senators</h2>
-Executive<br />
-{local.EXECUTIVE}
-
-Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
-{local.COMMUNICATIONS}
-
-Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
-{local.OVERSIGHT}
-
-The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
-{local.POLICY}
-
-The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
-{local.SOCIAL_ACTION}
-
-The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
-{local.CLIMATE}'''.encode('utf8'))
-
-        self.wfile.write('''<br /><br /><a href='/'>Voice Your Opinions</a><br /><a href='/about_the_senate'>About the Student Faculty Senate</a><br /><a href='/current_issues'>View Current Issues</a><br /><a href='/meet_the_senators'>Meet the Senators</a>'''.encode('utf8'))
-        self.wfile.write('''</body></html>'''.encode('utf8'))
-
     def submit_opinion(self):
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         my_account = self.identify_user()
