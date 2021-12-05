@@ -64,6 +64,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.schedule_opinions_page()
                 elif self.path.startswith('/schedule_date'):
                     self.schedule_date_page()
+                elif self.path.startswith('/schedule'):
+                    self.schedule()
             except ValueError as error:
                 print(str(error))
                 
@@ -219,12 +221,7 @@ Thank you for verifying. Your votes are now counted.<br />
         self.send_response(200)
         self.end_headers()
         day_of_the_week = datetime.date.today().weekday()
-        if day_of_the_week in (5, 6):
-            self.wfile.write('''<html>
-<body>
-There is no voting on weekends.<br />
-Enjoy your weekend and see you on Monday!<br />'''.encode('utf8'))
-        elif str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
+        if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
             self.wfile.write('''<html>
 <body>
 Sorry, today's off.<br />
@@ -243,7 +240,9 @@ div.selected {
 </head>
 <body>'''.encode('utf8'))
             self.wfile.write('<table>'.encode('utf8'))
-            for opinion in db.opinions_calendar[datetime.date.today()]:
+            for opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
+                assert opinion_ID in db.opinions_database
+                opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
                 opinion_ID = opinion.ID
                 if my_account.email in local.ADMINS and my_account.verified_email:
@@ -348,7 +347,7 @@ function checkVoteValidity(new_vote, old_vote) {
     return valid;
 }
 </script>
-<br />''' % (list(db.opinions_calendar[datetime.date.today()]))).encode('utf8'))
+<br />''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
         self.wfile.write('''<br />
 <input id='opinion_text' type='text'/>
 <button onclick='submit_opinion()'>SUBMIT</button>
@@ -886,6 +885,47 @@ function schedule(element) {{
                 raise ValueError(f'ip {self.client_address[0]} -- schedule date function got url arguments {url_arguments}')
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
+
+    def schedule(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if 'date' in url_arguments and 'opinion_ID' in url_arguments:
+                this_date = url_arguments["date"][0]
+                opinion_ID = url_arguments['opinion_ID'][0]
+                try:
+                    datetime.datetime.strptime(this_date, '%Y-%m-%d')
+                except ValueError:
+                    raise ValueError(f'ip {self.client_address[0]} -- schedule function got date {url_arguments["date"][0]}')
+                if opinion_ID in db.opinions_database:
+                    opinion = db.opinions_database[opinion_ID]
+                    opinion.scheduled = True
+                    db.opinions_database_lock.acquire()
+                    try:
+                        db.opinions_database[opinion_ID] = opinion
+                        db.opinions_database.sync()
+                    finally:
+                        db.opinions_database_lock.release()
+                    selected = set()
+                    if this_date in db.opinions_calendar:
+                        selected = db.opinions_calendar[this_date]
+                    selected.add(opinion_ID)
+                    db.opinions_calendar_lock.acquire()
+                    try:
+                        db.opinions_calendar[this_date] = selected
+                        db.opinions_calendar.sync()
+                    finally:
+                        db.opinions_calendar_lock.release()
+                    self.send_response(200)
+                    self.end_headers()
+                else:
+                    raise ValueError(f'ip {self.client_address[0]} -- schedule function got opinion ID {opinion_ID}, not in the database')
+            else:
+                raise ValueError(f'ip {self.client_address[0]} -- schedule function got url arguments {url_arguments}')
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
+        
+        
             
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
