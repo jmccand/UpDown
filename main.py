@@ -723,6 +723,7 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
 
                 self.send_response(200)
                 self.end_headers()
+                #print(f'{my_account.email=} has voted {my_vote=}')
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- vote function got opinion ID {opinion_ID} and vote {my_vote}')
         else:
@@ -859,6 +860,8 @@ td {
                 self.wfile.write('<table>'.encode('utf8'))
                 if this_date in db.opinions_calendar:
                     for opinion_ID in db.opinions_calendar[this_date]:
+                        assert opinion_ID in db.opinions_database
+                        opinion = db.opinions_database[opinion_ID]
                         self.wfile.write(f'''<tr>
 <td>
 {opinion.text}
@@ -908,8 +911,10 @@ function schedule(element) {{
                         db.opinions_database_lock.release()
                     selected = set()
                     if this_date in db.opinions_calendar:
-                        selected = db.opinions_calendar[this_date]
+                        selected = db.opinions_calendar[this_date] 
+                    print(f'selected originally: {selected}')
                     selected.add(opinion_ID)
+                    print(f'selected after: {selected}')
                     db.opinions_calendar_lock.acquire()
                     try:
                         db.opinions_calendar[this_date] = selected
@@ -958,7 +963,7 @@ class Opinion:
         for user in db.user_cookies.values():
             if str(self.ID) in user.votes:
                 this_vote = user.votes[str(self.ID)][-1][0]
-                #print(f'{this_vote=}')
+                #print(f'{user.email=} has voted {this_vote=}')
                 if this_vote == 'up':
                     up_votes += 1
                 elif this_vote == 'down':
