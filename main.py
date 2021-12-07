@@ -246,7 +246,7 @@ div.selected {
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
-                opinion_ID = opinion.ID
+                opinion_ID = str(opinion.ID)
                 if my_account.email in local.ADMINS and my_account.verified_email:
                     up_votes, down_votes = opinion.count_votes()
                     if opinion_ID in my_account.votes:
