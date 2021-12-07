@@ -66,6 +66,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.schedule_date_page()
                 elif self.path.startswith('/schedule'):
                     self.schedule()
+                elif self.path == '/track_opinions':
+                    self.track_opinions_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -86,7 +88,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 
     def send_links(self):
         my_account = self.identify_user()
-        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/track_opinions'>Track an Opinion</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
         if my_account.email in local.MODERATORS and my_account.verified_email:
             self.wfile.write('''<br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
         if my_account.email in local.ADMINS and my_account.verified_email:
@@ -694,7 +696,7 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
             try:
                 opinion_ID = len(db.opinions_database)
                 assert str(opinion_ID) not in db.opinions_database
-                db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, {'created' : (my_account.cookie_code, datetime.datetime.now())})
+                db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
                 db.opinions_database.sync()
             finally:
                 db.opinions_database_lock.release()
@@ -739,7 +741,8 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                 if opinion_ID in db.opinions_database and my_vote in ('yes', 'no'):
                     # update databases
                     opinion = db.opinions_database[opinion_ID]
-                    opinion.activity['approved'] = (my_account.email, my_vote, datetime.datetime.now())
+                    assert len(opinion.activity) == 1
+                    opinion.activity.append((my_account.email, my_vote, datetime.datetime.now()))
                     if my_vote == 'yes':
                         opinion.approved = True
                     else:
@@ -929,9 +932,32 @@ function schedule(element) {{
                 raise ValueError(f'ip {self.client_address[0]} -- schedule function got url arguments {url_arguments}')
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
-        
-        
-            
+
+    def track_opinions_page(self):
+        my_account = self.identify_user()
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('''<html>
+<body>
+<table>'''.encode('utf8'))
+        for opinion_ID, opinion in db.opinions_database.items():
+            # timeline: creation, approval, scheduled, vote, successful (passed to senate), expected bill draft date, date of senate hearing
+            # timeline: creation, approval, scheduled, vote, unsuccessful (failed)
+            messages_dict = {1: 'waiting for approval', 2: 'waiting to be scheduled', 3: 'scheduled', 4: 'waiting for admin forwarding'}
+            #5: f'{opinion.activity[4][0]}', 6: f'bill expected for {opinion.activity[5][0]}', 7: f'senate will hear on {opinion.activity[6][0]}'}
+            self.wfile.write(f'''<tr>
+<td>
+{opinion.text}
+</td>
+<td>
+{messages_dict[len(opinion.activity)]}
+</td>
+</tr>'''.encode('utf8'))
+        self.wfile.write('</table>'.encode('utf8'))
+        self.send_links()
+        self.wfile.write('''</body></html>'''.encode('utf8'))
+                
+
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
