@@ -770,7 +770,7 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                     finally:
                         db.opinions_database_lock.release()
 
-                    my_account.activity.append((opinion_ID, my_vote, datetime.datetime.now()))
+                    my_account.activity.append((my_account.email, my_vote, opinion_ID, datetime.datetime.now()))
                     db.user_cookies_lock.acquire()
                     try:
                         db.user_cookies[my_account.cookie_code] = my_account
@@ -963,14 +963,40 @@ function schedule(element) {{
         for opinion_ID, opinion in db.opinions_database.items():
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-            messages_dict = {1: 'waiting for approval', 2: 'waiting to be scheduled', 3: 'scheduled', 4: 'waiting for admin forwarding'}
-            #5: f'{opinion.activity[4][0]}', 6: f'bill expected for {opinion.activity[5][0]}', 7: f'senate will hear on {opinion.activity[6][0]}'}
+            message = None
+            if len(opinion.activity) == 1:
+                message = 'Waiting for approval.'
+            elif len(opinion.activity) == 2:
+                assert opinion.activity[1][1] in ('yes', 'no')
+                assert len(opinion.activity[1]) == 3
+                if opinion.activity[1][1] == 'yes':
+                    message = 'Approved on {opinion.activity[1][3]}. Waiting to be scheduled.'
+                else:
+                    message = 'Rejected on {opinion.activity[1][3]}.'
+            elif len(opinion.activity) == 3:
+                assert len(opinion.activity[2]) == 3
+                if datetime.date.today < opinion.activity[2][1]:
+                    message = 'Approved and scheduled.'
+                elif datetime.date.today > opinion.activity[2][1]:
+                    message = 'Waiting for submission into Senate.'
+                else:
+                    message = 'Currently voting.'
+            elif len(opinion.activity) == 4:
+                assert len(opinion.activity[3]) == 3
+                assert opinion.activity[3][1] in ('yes', 'no')
+                if opinion.activity[3][1] == 'yes':
+                    message = 'Submitted into the Senate.'
+                else:
+                    message = 'Votes were not significant enough to submit to the Senate.'
+            elif len(opinion.activity) == 5:
+                assert len(opinion.activity[4]) == 3
+                message = 'The Senate has viewed the opinion. A first draft of a bill will be completed by the expected date {opinion.activity[4][1]}.'
             self.wfile.write(f'''<tr>
 <td>
 {opinion.text}
 </td>
 <td>
-{messages_dict[len(opinion.activity)]}
+{message}
 </td>
 </tr>'''.encode('utf8'))
         self.wfile.write('</table>'.encode('utf8'))
