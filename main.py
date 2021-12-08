@@ -410,7 +410,16 @@ function vote(element_ID) {
         self.send_response(200)
         self.end_headers()
         self.wfile.write('''<html><body>'''.encode('utf8'))
-        self.wfile.write('''Click <a href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
+        self.wfile.write('''Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
+        self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: gray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
+        self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
+<ul>
+<li><a href='/senate#welcome'>Welcome!</a></li>
+<li><a href='/senate#about'>About the Senate</a></li>
+<li><a href='/senate#constitution'>Constitution</a></li>
+<li><a href='/senate#FAQ'>Frequently Asked Questions!</a></li>
+<li><a href='/senate#meet'>Meet the Senators</a></li>
+</ul>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='welcome'>Welcome!</a></h2>
 Welcome to the Lexington High School Student-Faculty Senate! The Senate convenes at 3:15pm on Wednesdays in the Library Media Center.<br />
 We implement school-wide policies on a number of issues, from things as mundane as placing extra benches around the school to changes as significant as eliminating the community service requirement for open campus, allowing students to eat in the Quad, or determining what information will be printed on transcripts.<br />
