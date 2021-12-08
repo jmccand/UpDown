@@ -924,6 +924,7 @@ function schedule(element) {{
                 if opinion_ID in db.opinions_database:
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = True
+                    opinion.activity.append((my_account.email, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
                     db.opinions_database_lock.acquire()
                     try:
                         db.opinions_database[opinion_ID] = opinion
@@ -960,8 +961,8 @@ function schedule(element) {{
 <body>
 <table>'''.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
-            # timeline: creation, approval, scheduled, vote, successful (passed to senate), expected bill draft date, date of senate hearing
-            # timeline: creation, approval, scheduled, vote, unsuccessful (failed)
+            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
+            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
             messages_dict = {1: 'waiting for approval', 2: 'waiting to be scheduled', 3: 'scheduled', 4: 'waiting for admin forwarding'}
             #5: f'{opinion.activity[4][0]}', 6: f'bill expected for {opinion.activity[5][0]}', 7: f'senate will hear on {opinion.activity[6][0]}'}
             self.wfile.write(f'''<tr>
