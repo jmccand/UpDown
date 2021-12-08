@@ -98,7 +98,8 @@ class MyHandler(SimpleHTTPRequestHandler):
     def get_email(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<html>
+        self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <body>
 <form method='GET' action='/check_email'>
 Enter your school email (must end in @lexingtonma.org):
@@ -205,7 +206,8 @@ function checkEmail() {
                 # send success page
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write('''<html>
+                self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <body>
 Thank you for verifying. Your votes are now counted.<br />
 <a href='/'>Return to homepage</a>
@@ -224,12 +226,14 @@ Thank you for verifying. Your votes are now counted.<br />
         self.end_headers()
         day_of_the_week = datetime.date.today().weekday()
         if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
-            self.wfile.write('''<html>
+            self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <body>
 Sorry, today's off.<br />
 See you soon!<br />'''.encode('utf8'))
         else:
-            self.wfile.write('''<html>
+            self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <head>
 <style>
 div.unselected {
@@ -371,7 +375,8 @@ function submit_opinion() {
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write('''<html>
+            self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <head>
 <style>
 div.unselected {
@@ -409,7 +414,9 @@ function vote(element_ID) {
         my_account = self.identify_user()
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<html><body>'''.encode('utf8'))
+        self.wfile.write('''<!DOCTYPE HTML>
+<html>
+<body>'''.encode('utf8'))
         self.wfile.write('''Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
         self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: gray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
@@ -785,7 +792,8 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write('''<html>
+            self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <head>
 <style>
 table {
@@ -841,7 +849,8 @@ CALENDAR:
                     raise ValueError(e + f'ip {self.client_address[0]} -- schedule date function got date {url_arguments["date"][0]}')
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write('''<html>
+                self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <head>
 <style>
 table {
@@ -946,7 +955,8 @@ function schedule(element) {{
         my_account = self.identify_user()
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<html>
+        self.wfile.write('''<!DOCTYPE HTML>
+<html>
 <body>
 <table>'''.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
