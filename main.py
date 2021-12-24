@@ -11,6 +11,7 @@ import local
 import datetime
 import smtplib
 import calendar
+import random
 
 class MyHandler(SimpleHTTPRequestHandler):
     
@@ -246,7 +247,9 @@ div.selected {
 </head>
 <body>'''.encode('utf8'))
             self.wfile.write('<table>'.encode('utf8'))
-            for opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
+            randomized = list(db.opinions_calendar[str(datetime.date.today())])
+            random.shuffle(randomized)
+            for opinion_ID in randomized:
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
