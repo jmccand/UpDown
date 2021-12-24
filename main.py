@@ -927,7 +927,7 @@ function update_selected(element) {{
     element.style = 'display: none;';
 }}
 function update_unselected(element) {{
-    selected.pop(selected.indexOf(element.id));
+    selected.splice(selected.indexOf(element.id), 1);
     new_tr = document.createElement('tr');
     new_td = document.createElement('td');
     new_tr.appendChild(new_td);
