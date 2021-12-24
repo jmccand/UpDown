@@ -869,38 +869,67 @@ td {
 <table>
 <tr>
 <td>
-<table>'''.encode('utf8'))
+<table id='unselected'>'''.encode('utf8'))
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.approved == True and not opinion.scheduled:
                         self.wfile.write(f'''<tr>
-<td id='{opinion_ID}' onclick='schedule(this);'>
-{opinion.text}
+<td id='{opinion_ID}' onclick='handleClick(this);'>
+{opinion.text} -- id {opinion_ID}
 </td>
 </tr>'''.encode('utf8'))
                 self.wfile.write('</table></td><td>'.encode('utf8'))
-                self.wfile.write('<table>'.encode('utf8'))
+                self.wfile.write('''<table id='selected'>'''.encode('utf8'))
                 if this_date in db.opinions_calendar:
                     for opinion_ID in db.opinions_calendar[this_date]:
                         assert opinion_ID in db.opinions_database
                         opinion = db.opinions_database[opinion_ID]
-                        self.wfile.write(f'''<tr>
-<td>
-{opinion.text}
+                        self.wfile.write(f'''<tr >
+<td id='{opinion_ID}' onclick='handleClick(this);'>
+{opinion.text} -- id {opinion_ID}
 </td>
 </tr>'''.encode('utf8'))
-                    for blank in range(10 - len(db.opinions_calendar[this_date])):
-                        self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
-                else:
-                    for blank in range(10):
-                        self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
+                    #for blank in range(10 - len(db.opinions_calendar[this_date])):
+                        #self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
+                #else:
+                    #for blank in range(10):
+                        #self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
                 self.wfile.write('</table>'.encode('utf8'))
                 self.wfile.write('</td></tr></table>'.encode('utf8'))
                 self.wfile.write(f'''<script>
 const this_date = '{this_date}';
+let selected = {list(db.opinions_calendar[this_date])};
+function handleClick(element) {{
+    console.log('original selected: ' + selected);
+    if (selected.indexOf(element.id) != -1) {{
+        update_unselected(element);
+    }}
+    else {{
+        schedule(element);
+        update_selected(element);
+    }}
+    console.log('end selected: ' + selected);
+}}
 function schedule(element) {{
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/schedule?date=' + this_date + '&opinion_ID=' + element.id, true);
     xhttp.send();
+}}
+function update_selected(element) {{
+    selected.push(element.id);
+    new_tr = document.createElement('tr');
+    new_td = document.createElement('td');
+    new_tr.appendChild(new_td);
+    new_td.innerHTML = element.innerHTML;
+    document.getElementById('selected').appendChild(new_tr);
+    element.style = 'display: none;';
+}}
+function update_unselected(element) {{
+    selected.pop(selected.indexOf(element.id));
+    new_tr = document.createElement('tr');
+    new_td = document.createElement('td');
+    new_tr.appendChild(new_td);
+    new_td.innerHTML = element.innerHTML;
+    document.getElementById('unselected').appendChild(new_tr);
     element.style = 'display: none;';
 }}
 </script>'''.encode('utf8'))
