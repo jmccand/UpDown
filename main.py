@@ -901,6 +901,7 @@ function schedule(element) {{
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/schedule?date=' + this_date + '&opinion_ID=' + element.id, true);
     xhttp.send();
+    element.style = 'display: none;';
 }}
 </script>'''.encode('utf8'))
                 self.send_links()
