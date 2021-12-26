@@ -67,6 +67,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.schedule_date_page()
                 elif self.path.startswith('/schedule'):
                     self.schedule()
+                elif self.path.startswith('/unschedule'):
+                    self.unschedule()
                 elif self.path == '/track_opinions':
                     self.track_opinions_page()
             except ValueError as error:
@@ -904,6 +906,7 @@ let selected = {list(db.opinions_calendar[this_date])};
 function handleClick(element) {{
     console.log('original selected: ' + selected);
     if (selected.indexOf(element.id) != -1) {{
+        unschedule(element);
         update_unselected(element);
     }}
     else {{
@@ -915,6 +918,11 @@ function handleClick(element) {{
 function schedule(element) {{
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/schedule?date=' + this_date + '&opinion_ID=' + element.id, true);
+    xhttp.send();
+}}
+function unschedule(element) {{
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/unschedule?date=' + this_date + '&opinion_ID=' + element.id, true);
     xhttp.send();
 }}
 function update_selected(element) {{
@@ -957,7 +965,7 @@ function update_unselected(element) {{
                 if opinion_ID in db.opinions_database:
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = True
-                    opinion.activity.append((my_account.email, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
+                    opinion.activity.append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
                     db.opinions_database_lock.acquire()
                     try:
                         db.opinions_database[opinion_ID] = opinion
@@ -984,6 +992,47 @@ function update_unselected(element) {{
                 raise ValueError(f'ip {self.client_address[0]} -- schedule function got url arguments {url_arguments}')
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
+    def unschedule(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if 'date' in url_arguments and 'opinion_ID' in url_arguments:
+                this_date = url_arguments["date"][0]
+                opinion_ID = url_arguments['opinion_ID'][0]
+                try:
+                    datetime.datetime.strptime(this_date, '%Y-%m-%d')
+                except ValueError:
+                    raise ValueError(f'ip {self.client_address[0]} -- schedule function got date {url_arguments["date"][0]}')
+                if opinion_ID in db.opinions_database:
+                    opinion = db.opinions_database[opinion_ID]
+                    opinion.scheduled = False
+                    opinion.activity.append((my_account.email, False, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
+                    db.opinions_database_lock.acquire()
+                    try:
+                        db.opinions_database[opinion_ID] = opinion
+                        db.opinions_database.sync()
+                    finally:
+                        db.opinions_database_lock.release()
+                    selected = set()
+                    if this_date in db.opinions_calendar:
+                        selected = db.opinions_calendar[this_date] 
+                    print(f'selected originally: {selected}')
+                    selected.remove(opinion_ID)
+                    print(f'selected after: {selected}')
+                    db.opinions_calendar_lock.acquire()
+                    try:
+                        db.opinions_calendar[this_date] = selected
+                        db.opinions_calendar.sync()
+                    finally:
+                        db.opinions_calendar_lock.release()
+                    self.send_response(200)
+                    self.end_headers()
+                else:
+                    raise ValueError(f'ip {self.client_address[0]} -- unschedule function got opinion ID {opinion_ID}, not in the database')
+            else:
+                raise ValueError(f'ip {self.client_address[0]} -- unschedule function got url arguments {url_arguments}')
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
 
     def track_opinions_page(self):
         my_account = self.identify_user()
