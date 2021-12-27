@@ -1058,9 +1058,9 @@ function update_unselected(element) {{
                 assert opinion.activity[1][1] in ('yes', 'no')
                 assert len(opinion.activity[1]) == 3
                 if opinion.activity[1][1] == 'yes':
-                    message = f'Approved on {opinion.activity[1][2]}. Waiting to be scheduled.'
+                    message = f'Approved on {opinion.activity[1][2].date()}. Waiting to be scheduled.'
                 else:
-                    message = f'Rejected on {opinion.activity[1][2]}.'
+                    message = f'Rejected on {opinion.activity[1][2].date()}.'
             elif len(opinion.activity) == 3:
                 assert len(opinion.activity[2]) == 4
                 if datetime.date.today() < opinion.activity[2][2]:
