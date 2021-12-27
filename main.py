@@ -971,7 +971,7 @@ function update_unselected(element) {{
                 if opinion_ID in db.opinions_database:
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = True
-                    opinion.activity.append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
+                    opinion.activity.append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now()))
                     db.opinions_database_lock.acquire()
                     try:
                         db.opinions_database[opinion_ID] = opinion
@@ -1063,9 +1063,9 @@ function update_unselected(element) {{
                     message = f'Rejected on {opinion.activity[1][2]}.'
             elif len(opinion.activity) == 3:
                 assert len(opinion.activity[2]) == 4
-                if datetime.date.today < opinion.activity[2][2]:
+                if datetime.date.today() < opinion.activity[2][2]:
                     message = 'Approved and scheduled.'
-                elif datetime.date.today > opinion.activity[2][2]:
+                elif datetime.date.today() > opinion.activity[2][2]:
                     message = 'Waiting for submission into Senate.'
                 else:
                     message = 'Currently voting.'
