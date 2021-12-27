@@ -884,7 +884,9 @@ td {
 </tr>'''.encode('utf8'))
                 self.wfile.write('</table></td><td>'.encode('utf8'))
                 self.wfile.write('''<table id='selected'>'''.encode('utf8'))
+                selected = set()
                 if this_date in db.opinions_calendar:
+                    selected = db.opinions_calendar[str(this_date)]
                     for opinion_ID in db.opinions_calendar[this_date]:
                         assert opinion_ID in db.opinions_database
                         opinion = db.opinions_database[opinion_ID]
@@ -902,7 +904,7 @@ td {
                 self.wfile.write('</td></tr></table>'.encode('utf8'))
                 self.wfile.write(f'''<script>
 const this_date = '{this_date}';
-let selected = {list(db.opinions_calendar[this_date])};
+let selected = {list(selected)};
 function handleClick(element) {{
     console.log('original selected: ' + selected);
     if (selected.indexOf(element.id) != -1) {{
@@ -931,6 +933,8 @@ function update_selected(element) {{
     new_td = document.createElement('td');
     new_tr.appendChild(new_td);
     new_td.innerHTML = element.innerHTML;
+    new_td.onclick = 'handleClick(this);';
+    new_td.id = element.id;
     document.getElementById('selected').appendChild(new_tr);
     element.style = 'display: none;';
 }}
@@ -940,6 +944,8 @@ function update_unselected(element) {{
     new_td = document.createElement('td');
     new_tr.appendChild(new_td);
     new_td.innerHTML = element.innerHTML;
+    new_td.onclick = 'handleClick(this);';
+    new_td.id = element.id;
     document.getElementById('unselected').appendChild(new_tr);
     element.style = 'display: none;';
 }}
