@@ -242,7 +242,10 @@ See you soon!<br />'''.encode('utf8'))
 div.unselected {
     color : black;
 }
-div.selected {
+div.selected_up {
+    color : green;
+}
+div.selected_down {
     color : red;
 }
 </style>
@@ -262,9 +265,9 @@ div.selected {
                         print(f'{opinion_ID} in my account votes')
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                         elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                         else:
                             self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                     else:
@@ -274,9 +277,9 @@ div.selected {
                         print(f'{opinion_ID} in my account votes')
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
                         elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
+                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
                         else:
                             self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
                     else:
@@ -290,10 +293,10 @@ function vote(element_ID) {
     const opinion_ID = split_ID[0];
 
     let old_vote = '';
-    if (document.getElementById(opinion_ID + ' up').className == 'selected') {
+    if (document.getElementById(opinion_ID + ' up').className.startsWith('selected')) {
         old_vote = 'up';
     }
-    else if (document.getElementById(opinion_ID + ' down').className == 'selected') {
+    else if (document.getElementById(opinion_ID + ' down').className.startsWith('selected')) {
         old_vote = 'down';
     }
     else {
@@ -324,7 +327,12 @@ function vote(element_ID) {
                 other_arrow.className = 'unselected';
             }
             if (my_vote != 'abstain') {
-                document.getElementById(element_ID).className = 'selected';
+                if (my_vote == 'up') {
+                    document.getElementById(element_ID).className = 'selected_up';
+                }
+                else {
+                    document.getElementById(element_ID).className = 'selected_down';
+                }
             }
         }
     }
@@ -333,10 +341,10 @@ function checkVoteValidity(new_vote, old_vote) {
     let up_count = 0;
     let down_count = 0;
     for (let index = 0; index < page_IDs.length; index++) {
-        if (document.getElementById(page_IDs[index] + ' up').className == 'selected') {
+        if (document.getElementById(page_IDs[index] + ' up').className.startsWith('selected')) {
             up_count++;
         }
-        else if (document.getElementById(page_IDs[index] + ' down').className == 'selected') {
+        else if (document.getElementById(page_IDs[index] + ' down').className.startsWith('selected')) {
             down_count++;
         }
     }
