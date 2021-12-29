@@ -71,6 +71,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.unschedule()
                 elif self.path == '/track_opinions':
                     self.track_opinions_page()
+                elif self.path == '/forward_opinions':
+                    self.forward_opinions_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -95,8 +97,8 @@ class MyHandler(SimpleHTTPRequestHandler):
         if my_account.email in local.MODERATORS and my_account.verified_email:
             self.wfile.write('''<br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
         if my_account.email in local.ADMINS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
-        
+            self.wfile.write('''<br /><a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<br /><a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
 
     def get_email(self):
         self.send_response(200)
@@ -1098,7 +1100,44 @@ function update_unselected(element) {{
         self.wfile.write('</table>'.encode('utf8'))
         self.send_links()
         self.wfile.write('''</body></html>'''.encode('utf8'))
-                
+
+    def forward_opinions_page(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write('''<html>
+<head>
+<style>
+td.raw {
+  text-color: green;
+}
+td.impressions {
+  text-color: 'light green';
+}
+</style>
+</head>
+<body>
+<table>'''.encode('utf8'))
+            sorted_dates = list(db.opinions_calendar.keys())
+            sorted_dates.sort()
+            for this_date in sorted_dates[::-1]:
+                if datetime.datetime.strptime(this_date, '%Y-%m-%d').date() < datetime.date.today():
+                    opinion_set = db.opinions_calendar[this_date]
+                    self.wfile.write(f'''<tr><td colspan='3'>{this_date}</td></tr>'''.encode('utf8'))
+                    for opinion_ID in opinion_set:
+                        opinion = db.opinions_database[opinion_ID]
+                        up_votes, down_votes = opinion.count_votes()
+                        up_percent = 'N/A'
+                        if up_votes + down_votes != 0:
+                            up_percent = up_votes / (up_votes + down_votes) * 100
+                        self.wfile.write(f'''<tr><td>{opinion.text}</td><td class='raw'>{up_percent}%</td><td class='impressions'>N/A</td></tr>'''.encode('utf8'))
+            self.wfile.write('''</table>'''.encode('utf8'))
+            self.send_links()
+            self.wfile.write('''</body></html>'''.encode('utf8'))
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
+        
 
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
