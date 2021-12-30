@@ -1115,9 +1115,15 @@ td.raw {
 td.impressions {
   text-color: 'light green';
 }
+tr.selected {
+  background-color: 'yellow';
+}
 </style>
 </head>
 <body>
+<table>
+<tr>
+<td>
 <table>'''.encode('utf8'))
             sorted_dates = list(db.opinions_calendar.keys())
             sorted_dates.sort()
@@ -1132,7 +1138,14 @@ td.impressions {
                         if up_votes + down_votes != 0:
                             up_percent = up_votes / (up_votes + down_votes) * 100
                         self.wfile.write(f'''<tr><td>{opinion.text}</td><td class='raw'>{up_percent}%</td><td class='impressions'>N/A</td></tr>'''.encode('utf8'))
-            self.wfile.write('''</table>'''.encode('utf8'))
+            self.wfile.write('''</table></td><td>
+<button>OVERSIGHT</button><br />
+<button>COMMUNICATIONS</button><br />
+<button>POLICY</button><br />
+<button>SOCIAL ACTION</button><br />
+<button>CLIMATE</button><br />
+<button>&#10005;</button>
+</td></tr></table>'''.encode('utf8'))
             self.send_links()
             self.wfile.write('''</body></html>'''.encode('utf8'))
         else:
