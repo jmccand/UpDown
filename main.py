@@ -1110,13 +1110,16 @@ function update_unselected(element) {{
 <head>
 <style>
 td.raw {
-  text-color: green;
+  color: lightGreen;
 }
 td.impressions {
-  text-color: 'light green';
+  color: green;
 }
 tr.selected {
-  background-color: 'yellow';
+  background-color: yellow;
+}
+tr.unselected {
+  background-color: white;
 }
 </style>
 </head>
@@ -1127,17 +1130,19 @@ tr.selected {
 <table>'''.encode('utf8'))
             sorted_dates = list(db.opinions_calendar.keys())
             sorted_dates.sort()
+            opinion_ID_count = 0
             for this_date in sorted_dates[::-1]:
                 if datetime.datetime.strptime(this_date, '%Y-%m-%d').date() < datetime.date.today():
                     opinion_set = db.opinions_calendar[this_date]
                     self.wfile.write(f'''<tr><td colspan='3'>{this_date}</td></tr>'''.encode('utf8'))
-                    for opinion_ID in opinion_set:
+                    for opinion_ID in list(opinion_set):
                         opinion = db.opinions_database[opinion_ID]
                         up_votes, down_votes = opinion.count_votes()
                         up_percent = 'N/A'
                         if up_votes + down_votes != 0:
                             up_percent = up_votes / (up_votes + down_votes) * 100
-                        self.wfile.write(f'''<tr><td>{opinion.text}</td><td class='raw'>{up_percent}%</td><td class='impressions'>N/A</td></tr>'''.encode('utf8'))
+                        self.wfile.write(f'''<tr id='{opinion_ID_count}' onclick='handleClick(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{up_percent}%</td><td class='impressions'>N/A</td></tr>'''.encode('utf8'))
+                        opinion_ID_count += 1
             self.wfile.write('''</table></td><td>
 <button>OVERSIGHT</button><br />
 <button>COMMUNICATIONS</button><br />
@@ -1146,6 +1151,15 @@ tr.selected {
 <button>CLIMATE</button><br />
 <button>&#10005;</button>
 </td></tr></table>'''.encode('utf8'))
+            self.wfile.write(f'''<script>
+let selected = '0';
+document.getElementById('0').className = 'selected';
+function handleClick(element) {{
+    document.getElementById(selected).className = 'unselected';
+    element.className = 'selected';
+    selected = element.id;
+}}
+</script>'''.encode('utf8'))
             self.send_links()
             self.wfile.write('''</body></html>'''.encode('utf8'))
         else:
