@@ -303,7 +303,7 @@ div.selected_down {
                 assert opinion.approved == True
                 opinion_ID = str(opinion.ID)
                 if my_account.email in local.ADMINS and my_account.verified_email:
-                    up_votes, down_votes = opinion.count_votes()
+                    up_votes, down_votes, abstains = opinion.count_votes()
                     if opinion_ID in my_account.votes:
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
@@ -1206,11 +1206,14 @@ tr.unselected {
                     self.wfile.write(f'''<tr><td colspan='3'>{this_date}</td></tr>'''.encode('utf8'))
                     for opinion_ID in list(opinion_set):
                         opinion = db.opinions_database[opinion_ID]
-                        up_votes, down_votes = opinion.count_votes()
-                        up_percent = 'N/A'
+                        up_votes, down_votes, abstains = opinion.count_votes()
+                        raw_up_percent = 'N/A'
                         if up_votes + down_votes != 0:
-                            up_percent = up_votes / (up_votes + down_votes) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID_count}' onclick='handleClick(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{up_percent}%</td><td class='impressions'>N/A</td></tr>'''.encode('utf8'))
+                            raw_up_percent = up_votes / (up_votes + down_votes) * 100
+                        impressions_up_percent = 'N/A'
+                        if up_votes + down_votes + abstains != 0:
+                            impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
+                        self.wfile.write(f'''<tr id='{opinion_ID_count}' onclick='handleClick(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
                         opinion_ID_count += 1
             self.wfile.write('''</table></td><td>
 <button>OVERSIGHT</button><br />
@@ -1265,6 +1268,7 @@ class Opinion:
     def count_votes(self):
         up_votes = 0
         down_votes = 0
+        abstains = 0
         for user in db.user_cookies.values():
             if str(self.ID) in user.votes:
                 this_vote = user.votes[str(self.ID)][-1][0]
@@ -1273,7 +1277,11 @@ class Opinion:
                     up_votes += 1
                 elif this_vote == 'down':
                     down_votes += 1
-        return up_votes, down_votes
+                elif this_vote == 'abstain':
+                    abstains += 1
+                else:
+                    raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
+        return up_votes, down_votes, abstains
 
 class invalidCookie(ValueError):
     def __init__(self, message):
