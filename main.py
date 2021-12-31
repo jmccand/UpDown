@@ -1110,10 +1110,10 @@ function update_unselected(element) {{
 <head>
 <style>
 td.raw {
-  color: lightGreen;
+  color: limegreen;
 }
 td.impressions {
-  color: green;
+  color: darkGreen;
 }
 tr.selected {
   background-color: yellow;
