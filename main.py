@@ -14,12 +14,16 @@ import calendar
 import random
 
 class MyHandler(SimpleHTTPRequestHandler):
+
+    DEBUG = 2
     
     def do_GET(self):
+        print('\n')
         my_cookies = SimpleCookie(self.headers.get('Cookie'))
         if not self.path == '/favicon.ico':
-            print('\npath: ' + self.path)
-            print(f'{my_cookies=}')
+            if MyHandler.DEBUG == 0:
+                print('\npath: ' + self.path)
+                print(f'{my_cookies=}')
 
         invalid_cookie = True
         if 'code' in my_cookies:
@@ -144,7 +148,8 @@ function checkEmail() {
                 link_uuid = uuid.uuid4().hex
                 while link_uuid in db.user_cookies or link_uuid in db.verification_links or link_uuid == my_uuid:
                     link_uuid = uuid.uuid4().hex
-                print(f'{my_uuid=} {link_uuid=}')
+                if MyHandler.DEBUG < 2:
+                    print(f'{my_uuid=} {link_uuid=}')
 
                 # send email
                 assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
@@ -162,7 +167,8 @@ function checkEmail() {
                     server.login(gmail_user, gmail_password)
                     server.sendmail(sent_from, to, email_text)
                     server.close()
-                    print(f'New user with email {email_address}!')
+                    if MyHandler.DEBUG < 2:
+                        print(f'New user with email {email_address}!')
                 except:
                     raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
 
@@ -218,8 +224,8 @@ Thank you for verifying. Your votes are now counted.<br />
 <a href='/'>Return to homepage</a>
 </body>
 </html>'''.encode('utf8'))
-                    
-                print(f'{my_account.email} just verified their email!')
+                if MyHandler.DEBUG < 2:    
+                    print(f'{my_account.email} just verified their email!')
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
         else:
@@ -264,7 +270,6 @@ div.selected_down {
                 if my_account.email in local.ADMINS and my_account.verified_email:
                     up_votes, down_votes = opinion.count_votes()
                     if opinion_ID in my_account.votes:
-                        print(f'{opinion_ID} in my account votes')
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
                             self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
@@ -276,7 +281,6 @@ div.selected_down {
                         self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                 else:
                     if opinion_ID in my_account.votes:
-                        print(f'{opinion_ID} in my account votes')
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
                             self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
@@ -759,7 +763,8 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
 
                 self.send_response(200)
                 self.end_headers()
-                #print(f'{my_account.email=} has voted {my_vote=}')
+                if MyHandler.DEBUG < 2:
+                    print(f'{my_account.email=} has voted {my_vote=}')
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- vote function got opinion ID {opinion_ID} and vote {my_vote}')
         else:
@@ -993,10 +998,12 @@ function update_unselected(element) {{
                         db.opinions_database_lock.release()
                     selected = set()
                     if this_date in db.opinions_calendar:
-                        selected = db.opinions_calendar[this_date] 
-                    print(f'selected originally: {selected}')
+                        selected = db.opinions_calendar[this_date]
+                    if MyHandler.DEBUG < 2:
+                        print(f'selected originally: {selected}')
                     selected.add(opinion_ID)
-                    print(f'selected after: {selected}')
+                    if MyHandler.DEBUG < 2:
+                        print(f'selected after: {selected}')
                     db.opinions_calendar_lock.acquire()
                     try:
                         db.opinions_calendar[this_date] = selected
@@ -1034,10 +1041,12 @@ function update_unselected(element) {{
                         db.opinions_database_lock.release()
                     selected = set()
                     if this_date in db.opinions_calendar:
-                        selected = db.opinions_calendar[this_date] 
-                    print(f'selected originally: {selected}')
+                        selected = db.opinions_calendar[this_date]
+                    if MyHandler.DEBUG < 2:
+                        print(f'selected originally: {selected}')
                     selected.remove(opinion_ID)
-                    print(f'selected after: {selected}')
+                    if MyHandler.DEBUG < 2:
+                        print(f'selected after: {selected}')
                     db.opinions_calendar_lock.acquire()
                     try:
                         db.opinions_calendar[this_date] = selected
@@ -1219,13 +1228,21 @@ def main():
     for cookie, user in db.user_cookies.items():
         print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.verified_email})')
 
+    print(f'\n{db.verification_links=}')
+    for link, ID in db.verification_links.items():
+        print(f'  {link} : {ID}')
+
     print(f'\n{db.opinions_database=}')
     for ID, opinion in db.opinions_database.items():
         print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity}, {opinion.approved})')
 
-    print(f'\n{db.verification_links=}')
-    for link, ID in db.verification_links.items():
-        print(f'  {link} : {ID}')
+    print(f'\n{db.opinions_calendar=}')
+    sorted_calendar = list(db.opinions_calendar.keys())
+    sorted_calendar.sort()
+    for this_date in sorted_calendar:
+        ID_set = db.opinions_calendar[this_date]
+        print(f'  {this_date} : {ID_set}')
+
         
     httpd = ReuseHTTPServer(('0.0.0.0', 8888), MyHandler)
     httpd.serve_forever()
