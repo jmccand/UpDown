@@ -747,6 +747,9 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                     my_account.votes[opinion_ID].append((my_vote, datetime.datetime.now()))
                 else:
                     my_account.votes[opinion_ID] = [(my_vote, datetime.datetime.now())]
+                for other_opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
+                    if other_opinion_ID != opinion_ID and len(my_account.votes[other_opinion_ID]) == 0:
+                        my_account.votes[other_opinion_ID] = [('abstain', datetime.datetime.now())]
                 db.user_cookies_lock.acquire()
                 try:
                     db.user_cookies[my_account.cookie_code] = my_account
