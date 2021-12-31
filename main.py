@@ -833,7 +833,6 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
                     finally:
                         db.opinions_database_lock.release()
 
-                    my_account.activity.append((my_account.email, my_vote, opinion_ID, datetime.datetime.now()))
                     db.user_cookies_lock.acquire()
                     try:
                         db.user_cookies[my_account.cookie_code] = my_account
