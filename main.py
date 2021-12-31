@@ -124,7 +124,7 @@ class MyHandler(SimpleHTTPRequestHandler):
     def log_activity(self, what=[]):
         my_account = self.identify_user()
         activity_unit = [self.path_root] + what + [datetime.datetime.now()]
-        if datetime.date.today in my_account.activity:
+        if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
         else:
             my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
