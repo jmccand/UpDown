@@ -104,6 +104,21 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write('''<br /><a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
             self.wfile.write('''<br /><a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
 
+    def log_activity(self, what):
+        my_account = self.identify_user()
+        activity_unit = what + [datetime.date.now]
+        if datetime.date.today in my_account.activity:
+            my_account.activity[datetime.date.today()].append((activity_unit))
+        else:
+            my_account.activity[datetime.date.today()] = [(activity_unit)]
+        db.user_cookies_lock.acquire()
+        try:
+            db.user_cookies[my_account.cookie_code] = my_account
+            db.user_cookies.sync()
+        except:
+            db.user_cookies_lock.release()
+        print(f'{my_account.email} did {activity_unit}')
+
     def get_email(self):
         self.send_response(200)
         self.end_headers()
@@ -1185,7 +1200,7 @@ class ReuseHTTPServer(HTTPServer):
     
 class User:
 
-    def __init__(self, email, cookie_code, activity=[], votes={}, verified_email=False):
+    def __init__(self, email, cookie_code, activity={}, votes={}, verified_email=False):
 
         self.email = email
         self.cookie_code = cookie_code
