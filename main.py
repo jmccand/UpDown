@@ -120,6 +120,19 @@ class MyHandler(SimpleHTTPRequestHandler):
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.wfile.write('''<br /><a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
             self.wfile.write('''<br /><a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
+        if my_account.email in local.EXECUTIVE_MEMBERS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/executive'>Executive</a>'''.encode('utf8'))
+        if my_account.email in local.COMMUNICATIONS_MEMBERS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/communications'>Communications</a>'''.encode('utf8'))
+        if my_account.email in local.OVERSIGHT_MEMBERS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/oversight'>Oversight</a>'''.encode('utf8'))
+        if my_account.email in local.POLICY_MEMBERS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/policy'>Policy</a>'''.encode('utf8'))
+        if my_account.email in local.SOCIAL_ACTION_MEMBERS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/social_action'>Social Action</a>'''.encode('utf8'))
+        if my_account.email in local.CLIMATE_MEMBERS and my_account.verified_email:
+            self.wfile.write('''<br /><a href='/climate'>Climate</a>'''.encode('utf8'))
+
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
