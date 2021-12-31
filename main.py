@@ -1016,7 +1016,7 @@ function update_unselected(element) {{
                 self.send_links()
                 self.wfile.write('</body></html>'.encode('utf8'))
 
-                self.log_activity()
+                self.log_activity([this_date])
                 
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- schedule date function got url arguments {url_arguments}')
