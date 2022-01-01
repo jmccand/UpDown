@@ -94,6 +94,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/forward_opinions':
                     self.path_root = '/forward_opinions'
                     self.forward_opinions_page()
+                elif self.path.startswith('/forward'):
+                    self.path_root = '/forward'
+                    self.forward()
             except ValueError as error:
                 print(str(error))
                 
@@ -1251,6 +1254,27 @@ function handleClick(element) {{
             self.log_activity()
         else:
             raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
+
+    def forward(self):
+        my_account = self.identify_user()
+        if my_account in local.ADMINS and my_account.verified_email:
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if 'opinion_ID' in url_arguments and 'committee' in url_arguments:
+                opinion_ID = url_arguments['opinion_ID'][0]
+                opinion = db.opinions_database[opinion_ID]
+                committee = url_arguments['committee'][0]
+                self.send_response(200)
+                self.end_headers()
+                self.log_activity([committee, opinion_ID])
+
+                opinion.activity.append((my_account.email, committee, datetime.datetime.now()))
+                db.opinions_database_lock.acquire()
+                try:
+                    db.opinions_database[opinion_ID] = opinion
+                    db.opinions_database.sync()
+                finally:
+                    db.opinions_database_lock.release()
+
         
 
 class ReuseHTTPServer(HTTPServer):    
