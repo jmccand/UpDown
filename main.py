@@ -1263,19 +1263,28 @@ function handleClick(element) {{
                 opinion_ID = url_arguments['opinion_ID'][0]
                 opinion = db.opinions_database[opinion_ID]
                 committee = url_arguments['committee'][0]
-                self.send_response(200)
-                self.end_headers()
-                self.log_activity([committee, opinion_ID])
+                if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
 
-                opinion.activity.append((my_account.email, committee, datetime.datetime.now()))
-                db.opinions_database_lock.acquire()
-                try:
-                    db.opinions_database[opinion_ID] = opinion
-                    db.opinions_database.sync()
-                finally:
-                    db.opinions_database_lock.release()
+                    db.user_cookies_lock.acquire()
+                    try:
+                        db.user_cookies[my_account.cookie_code] = my_account
+                        db.user_cookies.sync()
+                    finally:
+                        db.user_cookies_lock.release()
 
-        
+                    opinion.activity.append((my_account.email, committee, datetime.datetime.now()))
+                    opinion.committee_jurisdiction = committee
+                    db.opinions_database_lock.acquire()
+                    try:
+                        db.opinions_database[opinion_ID] = opinion
+                        db.opinions_database.sync()
+                    finally:
+                        db.opinions_database_lock.release()
+
+                    self.send_response(200)
+                    self.end_headers()
+                    self.log_activity([committee, opinion_ID])
+
 
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
@@ -1294,13 +1303,14 @@ class User:
 
 class Opinion:
 
-    def __init__(self, ID, text, activity, approved=None, scheduled=False):
+    def __init__(self, ID, text, activity, approved=None, scheduled=False, committee_jurisdiction=None):
 
         self.ID = ID
         self.text = text
         self.activity = activity
         self.approved = approved
         self.scheduled = scheduled
+        self.committee_jurisdiction = committee_jurisdiction
 
     def count_votes(self):
         up_votes = 0
