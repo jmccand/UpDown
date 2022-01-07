@@ -1285,7 +1285,20 @@ function handleClick(element) {{
                     self.end_headers()
                     self.log_activity([committee, opinion_ID])
 
+    def committee_page(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        committee = url_arguments['committee'][0]
+        if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
+            if my_account in local.COMMITTEE_MEMBERS[committee]:
+                self.wfile.write(f'''<html><body>Committee page: {committee}'''.encode('utf8'))
+                for opinion_ID, opinion in db.opinions_database.items():
+                    if opinion.committee_jurisdiction == committee:
+                        self.wfile.write(f'''<br />{opinion.text}'''.encode('utf8'))
+                self.wfile.write('''</body></html>'''.encode('utf8'))
+        
 
+        
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
