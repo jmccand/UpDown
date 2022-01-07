@@ -1222,24 +1222,30 @@ tr.unselected {
                         impressions_up_percent = 'N/A'
                         if up_votes + down_votes + abstains != 0:
                             impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID_count}' onclick='handleClick(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
+                        self.wfile.write(f'''<tr id='{opinion_ID_count}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
                         opinion_ID_count += 1
             self.wfile.write('''</table></td><td>
-<button>OVERSIGHT</button><br />
-<button>COMMUNICATIONS</button><br />
-<button>POLICY</button><br />
-<button>SOCIAL ACTION</button><br />
-<button>CLIMATE</button><br />
-<button>&#10005;</button>
+<button id='executive' onclick='forward(this);'>EXECUTIVE</button><br />
+<button id='oversight' onclick='forward(this);'>OVERSIGHT</button><br />
+<button id='communications' onclick='forward(this);'>COMMUNICATIONS</button><br />
+<button id='policy' onclick='forward(this);'>POLICY</button><br />
+<button id='social_action' onclick='forward(this);'>SOCIAL ACTION</button><br />
+<button id='climate' onclick='forward(this);'>CLIMATE</button><br />
 </td></tr></table>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 let selected = '0';
 document.getElementById('0').className = 'selected';
-function handleClick(element) {{
+function select(element) {{
     document.getElementById(selected).className = 'unselected';
     element.className = 'selected';
     selected = element.id;
 }}
+function forward(element) {{
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/forward?committtee=' + element.id, true);
+    xhttp.send();
+}}
+
 </script>'''.encode('utf8'))
             self.send_links()
             self.wfile.write('''</body></html>'''.encode('utf8'))
@@ -1257,13 +1263,8 @@ function handleClick(element) {{
                 opinion = db.opinions_database[opinion_ID]
                 committee = url_arguments['committee'][0]
                 if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
-
-                    db.user_cookies_lock.acquire()
-                    try:
-                        db.user_cookies[my_account.cookie_code] = my_account
-                        db.user_cookies.sync()
-                    finally:
-                        db.user_cookies_lock.release()
+                    
+                    self.log_activity([committee, opinion_ID])
 
                     opinion.activity.append((my_account.email, committee, datetime.datetime.now()))
                     opinion.committee_jurisdiction = committee
@@ -1276,7 +1277,6 @@ function handleClick(element) {{
 
                     self.send_response(200)
                     self.end_headers()
-                    self.log_activity([committee, opinion_ID])
 
     def view_committee_page(self):
         my_account = self.identify_user()
