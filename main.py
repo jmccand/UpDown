@@ -97,9 +97,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/forward'):
                     self.path_root = '/forward'
                     self.forward()
-                elif self.path.startswith('/committee'):
-                    self.path_root = '/committee'
-                    self.committee_page()
+                elif self.path.startswith('/view_committee'):
+                    self.path_root = '/view_committee'
+                    self.view_committee_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -128,7 +128,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.wfile.write('''<br /><a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
         for committee, members in local.COMMITTEE_MEMBERS.items():
             if my_account.email in members and my_account.verified_email:
-                self.wfile.write(f'''<br /><a href='/committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+                self.wfile.write(f'''<br /><a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
@@ -1278,16 +1278,19 @@ function handleClick(element) {{
                     self.end_headers()
                     self.log_activity([committee, opinion_ID])
 
-    def committee_page(self):
+    def view_committee_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         committee = url_arguments['committee'][0]
         if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
-            if my_account.email in local.COMMITTEE_MEMBERS[committee]:
-                self.wfile.write(f'''<html><body>Committee page: {committee}'''.encode('utf8'))
+            if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_email:
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(f'''<html><body><div>Committee page: {committee}<br /></div>'''.encode('utf8'))
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
                         self.wfile.write(f'''<br />{opinion.text}'''.encode('utf8'))
+                self.send_links()
                 self.wfile.write('''</body></html>'''.encode('utf8'))
         
 
