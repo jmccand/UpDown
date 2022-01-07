@@ -1208,7 +1208,7 @@ tr.unselected {
 <table>'''.encode('utf8'))
             sorted_dates = list(db.opinions_calendar.keys())
             sorted_dates.sort()
-            opinion_ID_count = 0
+            opinion_ID_list = []
             for this_date in sorted_dates[::-1]:
                 if datetime.datetime.strptime(this_date, '%Y-%m-%d').date() < datetime.date.today():
                     opinion_set = db.opinions_calendar[this_date]
@@ -1222,8 +1222,8 @@ tr.unselected {
                         impressions_up_percent = 'N/A'
                         if up_votes + down_votes + abstains != 0:
                             impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID_count}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
-                        opinion_ID_count += 1
+                        self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
+                        opinion_ID_list.append(opinion_ID)
             self.wfile.write('''</table></td><td>
 <button id='executive' onclick='forward(this);'>EXECUTIVE</button><br />
 <button id='oversight' onclick='forward(this);'>OVERSIGHT</button><br />
@@ -1233,8 +1233,9 @@ tr.unselected {
 <button id='climate' onclick='forward(this);'>CLIMATE</button><br />
 </td></tr></table>'''.encode('utf8'))
             self.wfile.write(f'''<script>
-let selected = '0';
-document.getElementById('0').className = 'selected';
+opinionList = {opinion_ID_list};
+let selected = opinionList[0];
+document.getElementById(selected).className = 'selected';
 function select(element) {{
     document.getElementById(selected).className = 'unselected';
     element.className = 'selected';
@@ -1242,7 +1243,7 @@ function select(element) {{
 }}
 function forward(element) {{
     var xhttp = new XMLHttpRequest();
-    xhttp.open('GET', '/forward?committtee=' + element.id, true);
+    xhttp.open('GET', '/forward?committee=' + element.id + '&opinion_ID=' + selected, true);
     xhttp.send();
 }}
 
@@ -1263,7 +1264,7 @@ function forward(element) {{
                 opinion = db.opinions_database[opinion_ID]
                 committee = url_arguments['committee'][0]
                 if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
-                    
+    
                     self.log_activity([committee, opinion_ID])
 
                     opinion.activity.append((my_account.email, committee, datetime.datetime.now()))
