@@ -97,6 +97,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/forward'):
                     self.path_root = '/forward'
                     self.forward()
+                elif self.path.startswith('/committee'):
+                    self.path_root = '/committee'
+                    self.committee_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -123,19 +126,9 @@ class MyHandler(SimpleHTTPRequestHandler):
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.wfile.write('''<br /><a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
             self.wfile.write('''<br /><a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
-        if my_account.email in local.EXECUTIVE_MEMBERS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/executive'>Executive</a>'''.encode('utf8'))
-        if my_account.email in local.COMMUNICATIONS_MEMBERS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/communications'>Communications</a>'''.encode('utf8'))
-        if my_account.email in local.OVERSIGHT_MEMBERS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/oversight'>Oversight</a>'''.encode('utf8'))
-        if my_account.email in local.POLICY_MEMBERS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/policy'>Policy</a>'''.encode('utf8'))
-        if my_account.email in local.SOCIAL_ACTION_MEMBERS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/social_action'>Social Action</a>'''.encode('utf8'))
-        if my_account.email in local.CLIMATE_MEMBERS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/climate'>Climate</a>'''.encode('utf8'))
-
+        for committee, members in local.COMMITTEE_MEMBERS.items():
+            if my_account.email in members and my_account.verified_email:
+                self.wfile.write(f'''<br /><a href='/committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
@@ -1257,7 +1250,7 @@ function handleClick(element) {{
 
     def forward(self):
         my_account = self.identify_user()
-        if my_account in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_email:
             url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             if 'opinion_ID' in url_arguments and 'committee' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -1290,7 +1283,7 @@ function handleClick(element) {{
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         committee = url_arguments['committee'][0]
         if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
-            if my_account in local.COMMITTEE_MEMBERS[committee]:
+            if my_account.email in local.COMMITTEE_MEMBERS[committee]:
                 self.wfile.write(f'''<html><body>Committee page: {committee}'''.encode('utf8'))
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
