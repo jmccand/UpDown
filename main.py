@@ -316,6 +316,10 @@ div.selected_down {
                     if opinion_ID in my_account.votes:
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
+                            #arrow up = &#9650
+                            #arrow down = &#9660
+                            #thumbs up = &#128077;
+                            #thumbs down = &#128078;
                             self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
                         elif my_vote[-1][0] == 'down':
                             self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
