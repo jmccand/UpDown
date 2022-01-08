@@ -1155,7 +1155,7 @@ function update_unselected(element) {{
                 else:
                     message = 'Currently voting.'
             elif len(opinion.activity) == 4:
-                assert len(opinion.activity[3]) == 3
+                assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                 assert opinion.activity[3][1] in ('yes', 'no')
                 if opinion.activity[3][1] == 'yes':
                     message = 'Submitted into the Senate.'
