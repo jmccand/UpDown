@@ -15,15 +15,14 @@ import random
 
 class MyHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 2
+    DEBUG = 3
     
     def do_GET(self):
         print('\n')
         my_cookies = SimpleCookie(self.headers.get('Cookie'))
-        if not self.path == '/favicon.ico':
-            if MyHandler.DEBUG == 0:
-                print('\npath: ' + self.path)
-                print(f'{my_cookies=}')
+        if MyHandler.DEBUG == 0:
+            print('\npath: ' + self.path)
+            print(f'{my_cookies=}')
 
         invalid_cookie = True
         if 'code' in my_cookies:
@@ -44,8 +43,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 if self.path == '/':
                     self.opinions_page()
                 elif self.path == '/favicon.ico':
-                    self.send_response(404)
-                    self.end_headers()
+                    return self.load_image()
                 elif self.path.startswith('/check_email'):
                     self.path_root = '/check_email'
                     self.check_email()
@@ -144,6 +142,9 @@ class MyHandler(SimpleHTTPRequestHandler):
         finally:
             db.user_cookies_lock.release()
         print(f'{my_account.email} did {activity_unit}')
+
+    def load_image(self):
+        return SimpleHTTPRequestHandler.do_GET(self)
 
     def get_email(self):
         self.send_response(200)
