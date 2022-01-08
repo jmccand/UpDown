@@ -1292,10 +1292,30 @@ function forward(element) {{
             if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_email:
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(f'''<html><body><div>Committee page: {committee}<br /></div>'''.encode('utf8'))
+                self.wfile.write(f'''<html>
+<head>
+<style>
+td.raw {{
+  color: limegreen;
+}}
+td.impressions {{
+  color: darkGreen;
+}}
+</style>
+</head>
+<body>
+Committee page: {committee}<br /><table>'''.encode('utf8'))
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
-                        self.wfile.write(f'''<br />{opinion.text}'''.encode('utf8'))
+                        up_votes, down_votes, abstains = opinion.count_votes()
+                        raw_up_percent = 'N/A'
+                        if up_votes + down_votes != 0:
+                            raw_up_percent = up_votes / (up_votes + down_votes) * 100
+                        impressions_up_percent = 'N/A'
+                        if up_votes + down_votes + abstains != 0:
+                            impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
+                        self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
+                self.wfile.write('</table>'.encode('utf8'))
                 self.send_links()
                 self.wfile.write('''</body></html>'''.encode('utf8'))
         
