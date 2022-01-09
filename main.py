@@ -116,7 +116,29 @@ class MyHandler(SimpleHTTPRequestHandler):
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
 
-    def send_links(self):
+    def send_links_head(self):
+        self.wfile.write('''<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jQuery UI Menu - Default functionality</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+<script>
+$( function() {
+    $( "#menu" ).menu();
+} );
+</script>
+<style>
+.ui-menu {
+  width: 150px;
+}
+div.hamburger {
+  border: 5px solid black;
+}
+</style>'''.encode('utf8'))
+
+    def send_links_body(self):
         my_account = self.identify_user()
         self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/track_opinions'>Track an Opinion</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
         if my_account.email in local.MODERATORS and my_account.verified_email:
@@ -127,6 +149,42 @@ class MyHandler(SimpleHTTPRequestHandler):
         for committee, members in local.COMMITTEE_MEMBERS.items():
             if my_account.email in members and my_account.verified_email:
                 self.wfile.write(f'''<br /><a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+        
+        self.wfile.write('''
+<div class='hamburger'>
+<ul id="menu">
+  <li class="ui-state-disabled"><div>Toys (n/a)</div></li>
+  <li><div>Books</div></li>
+  <li><div>Clothing</div></li>
+  <li><div>Electronics</div>
+    <ul>
+      <li class="ui-state-disabled"><div>Home Entertainment</div></li>
+      <li><div>Car Hifi</div></li>
+      <li><div>Utilities</div></li>
+    </ul>
+  </li>
+  <li><div>Movies</div></li>
+  <li><div>Music</div>
+    <ul>
+      <li><div>Rock</div>
+        <ul>
+          <li><div>Alternative</div></li>
+          <li><div>Classic</div></li>
+        </ul>
+      </li>
+      <li><div>Jazz</div>
+        <ul>
+          <li><div>Freejazz</div></li>
+          <li><div>Big Band</div></li>
+          <li><div>Modern</div></li>
+        </ul>
+      </li>
+      <li><div>Pop</div></li>
+    </ul>
+  </li>
+  <li class="ui-state-disabled"><div>Specials (n/a)</div></li>
+</ul>
+</div>'''.encode('utf8'))
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
