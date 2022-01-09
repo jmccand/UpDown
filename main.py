@@ -340,16 +340,15 @@ Thank you for verifying. Your votes are now counted.<br />
         self.end_headers()
         day_of_the_week = datetime.date.today().weekday()
         if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
-            self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<body>
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''</head><body>
 Sorry, today's off.<br />
 See you soon!<br />'''.encode('utf8'))
         else:
-            self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<head>
-<style>
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''<style>
 div.unselected {
     color : black;
 }
@@ -493,7 +492,7 @@ function submit_opinion() {
     alert('Your opinion was submitted. Thank you!');
 }
 </script>'''.encode('utf8'))
-        self.send_links()
+        self.send_links_body()
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
@@ -502,9 +501,9 @@ function submit_opinion() {
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<head>
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''
 <style>
 div.unselected {
     color : black;
@@ -534,7 +533,7 @@ function vote(element_ID) {
     document.getElementById(opinion_ID).style = 'display : none;';
 }
 </script>'''.encode('utf8'))
-            self.send_links()
+            self.send_links_body()
             self.wfile.write('</body></html>'.encode('utf8'))
             self.log_activity()
 
@@ -542,9 +541,9 @@ function vote(element_ID) {
         my_account = self.identify_user()
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<body>'''.encode('utf8'))
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('</head><body>'.encode('utf8'))
         self.wfile.write('''Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
         self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: gray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
@@ -827,7 +826,7 @@ The Social Action Committee is concerned primarily with student activism and rel
 
 The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
 {local.CLIMATE}'''.encode('utf8'))
-        self.send_links()
+        self.send_links_body()
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
         
@@ -929,9 +928,9 @@ The Climate Committee is dedicated to creating a welcoming and vibrant community
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<head>
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''
 <style>
 table {
   border-collapse : collapse;
@@ -969,7 +968,7 @@ CALENDAR:
                 self.wfile.write('<td></td>'.encode('utf8'))
             self.wfile.write('</tr>'.encode('utf8'))
             self.wfile.write('</table>'.encode('utf8'))
-            self.send_links()
+            self.send_links_body()
             self.wfile.write('</body></html>'.encode('utf8'))
 
             self.log_activity()
@@ -989,9 +988,9 @@ CALENDAR:
                     raise ValueError(e + f'ip {self.client_address[0]} -- schedule date function got date {url_arguments["date"][0]}')
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<head>
+                self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+                self.send_links_head()
+                self.wfile.write('''
 <style>
 table {
   border-collapse : collapse;
@@ -1085,7 +1084,7 @@ function update_unselected(element) {{
     element.style = 'display: none;';
 }}
 </script>'''.encode('utf8'))
-                self.send_links()
+                self.send_links_body()
                 self.wfile.write('</body></html>'.encode('utf8'))
 
                 self.log_activity([this_date])
@@ -1192,10 +1191,9 @@ function update_unselected(element) {{
         my_account = self.identify_user()
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<!DOCTYPE HTML>
-<html>
-<body>
-<table>'''.encode('utf8'))
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('</head><body><table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
@@ -1219,7 +1217,7 @@ function update_unselected(element) {{
                     message = 'Currently voting.'
             elif len(opinion.activity) == 4:
                 assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                assert opinion.activity[3][1] in ('yes', 'no')
+                assert opinion.activity[3][1] in ('yes', 'no', 'abstain')
                 if opinion.activity[3][1] == 'yes':
                     message = 'Submitted into the Senate.'
                 else:
@@ -1236,7 +1234,7 @@ function update_unselected(element) {{
 </td>
 </tr>'''.encode('utf8'))
         self.wfile.write('</table>'.encode('utf8'))
-        self.send_links()
+        self.send_links_body()
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
@@ -1247,8 +1245,9 @@ function update_unselected(element) {{
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.send_response(200)
             self.end_headers()
-            self.wfile.write('''<html>
-<head>
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''
 <style>
 td.raw {
   color: limegreen;
@@ -1311,7 +1310,7 @@ function forward(element) {{
 }}
 
 </script>'''.encode('utf8'))
-            self.send_links()
+            self.send_links_body()
             self.wfile.write('''</body></html>'''.encode('utf8'))
             
             self.log_activity()
@@ -1350,9 +1349,9 @@ function forward(element) {{
             if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_email:
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(f'''<html>
-<head>
-<style>
+                self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
+                self.send_links_head()
+                self.wfile.write('''<style>
 td.raw {{
   color: limegreen;
 }}
@@ -1374,7 +1373,7 @@ Committee page: {committee}<br /><table>'''.encode('utf8'))
                             impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
                         self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
                 self.wfile.write('</table>'.encode('utf8'))
-                self.send_links()
+                self.send_links_body()
                 self.wfile.write('''</body></html>'''.encode('utf8'))
         
 
