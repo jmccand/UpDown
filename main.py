@@ -134,57 +134,35 @@ $( function() {
   width: 150px;
 }
 div.hamburger {
-  border: 5px solid black;
+  border: 2px solid black;
+  position: absolute;
+  top: 0%;
+  left: 0%;
 }
 </style>'''.encode('utf8'))
 
     def send_links_body(self):
         my_account = self.identify_user()
-        self.wfile.write('''<br /><a href='/'>Voice Your Opinions</a><br /><a href='/track_opinions'>Track an Opinion</a><br /><a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+        self.wfile.write('''<header><div class='hamburger'>
+<ul id="menu">
+<li><div>Ham</div>
+<ul>'''.encode('utf8'))
+        self.wfile.write('''<li><div><a href='/'>Voice Your Opinions</a></div></li>
+<li><div><a href='/track_opinions'>Track an Opinion</a></div></li>
+<li><div><a href='/senate'>The Student Faculty Senate</a></div></li>'''.encode('utf8'))
         if my_account.email in local.MODERATORS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<li><div><a href='/approve_opinions'>Approve Opinions</a></div></li>'''.encode('utf8'))
         if my_account.email in local.ADMINS and my_account.verified_email:
-            self.wfile.write('''<br /><a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
-            self.wfile.write('''<br /><a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<li><div><a href='/schedule_opinions'>Schedule Opinions</a></div></li>'''.encode('utf8'))
+            self.wfile.write('''<li><div><a href='/forward_opinions'>Forward Opinions</a></div></li>'''.encode('utf8'))
         for committee, members in local.COMMITTEE_MEMBERS.items():
             if my_account.email in members and my_account.verified_email:
-                self.wfile.write(f'''<br /><a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
-        
-        self.wfile.write('''
-<div class='hamburger'>
-<ul id="menu">
-  <li class="ui-state-disabled"><div>Toys (n/a)</div></li>
-  <li><div>Books</div></li>
-  <li><div>Clothing</div></li>
-  <li><div>Electronics</div>
-    <ul>
-      <li class="ui-state-disabled"><div>Home Entertainment</div></li>
-      <li><div>Car Hifi</div></li>
-      <li><div>Utilities</div></li>
-    </ul>
-  </li>
-  <li><div>Movies</div></li>
-  <li><div>Music</div>
-    <ul>
-      <li><div>Rock</div>
-        <ul>
-          <li><div>Alternative</div></li>
-          <li><div>Classic</div></li>
-        </ul>
-      </li>
-      <li><div>Jazz</div>
-        <ul>
-          <li><div>Freejazz</div></li>
-          <li><div>Big Band</div></li>
-          <li><div>Modern</div></li>
-        </ul>
-      </li>
-      <li><div>Pop</div></li>
-    </ul>
-  </li>
-  <li class="ui-state-disabled"><div>Specials (n/a)</div></li>
+                self.wfile.write(f'''<li><div><a href='/view_committee?committee={committee}'>{committee}</a></div></li>'''.encode('utf8'))        
+        self.wfile.write('''</ul>
+</li>
 </ul>
-</div>'''.encode('utf8'))
+</div>
+</header>'''.encode('utf8'))
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
@@ -342,7 +320,8 @@ Thank you for verifying. Your votes are now counted.<br />
         if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
-            self.wfile.write('''</head><body>
+            self.wfile.write('''</head>
+<body>
 Sorry, today's off.<br />
 See you soon!<br />'''.encode('utf8'))
         else:
