@@ -320,10 +320,9 @@ Thank you for verifying. Your votes are now counted.<br />
         if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
-            self.wfile.write('''</head>
-<body>
-Sorry, today's off.<br />
-See you soon!<br />'''.encode('utf8'))
+            self.wfile.write('</head><body>'.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br /></article>'''.encode('utf8'))
         else:
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -340,7 +339,8 @@ div.selected_down {
 </style>
 </head>
 <body>'''.encode('utf8'))
-            self.wfile.write('<table>'.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('<article><table>'.encode('utf8'))
             randomized = list(db.opinions_calendar[str(datetime.date.today())])
             random.shuffle(randomized)
             for opinion_ID in randomized:
@@ -375,7 +375,7 @@ div.selected_down {
                             self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
                     else:
                         self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-            self.wfile.write('</table>'.encode('utf8'))
+            self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write(str('''<script>
 const page_IDs = %s;
 function vote(element_ID) {
@@ -471,7 +471,6 @@ function submit_opinion() {
     alert('Your opinion was submitted. Thank you!');
 }
 </script>'''.encode('utf8'))
-        self.send_links_body()
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
@@ -493,11 +492,12 @@ div.selected {
 </style>
 </head>
 <body>'''.encode('utf8'))
-            self.wfile.write('<table>'.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('<article><table>'.encode('utf8'))
             for opinion_ID, opinion in db.opinions_database.items():
                 if opinion.approved == None:
                     self.wfile.write(f'''<tr id={opinion_ID}><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} yes' onclick='vote(this.id)'>&#10003;</div><div class='unselected' id='{opinion_ID} no' onclick='vote(this.id)'>&#10005;</div></td></tr>'''.encode('utf8'))
-            self.wfile.write('</table>'.encode('utf8'))
+            self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write('''<script>
 function vote(element_ID) {
     var xhttp = new XMLHttpRequest();
@@ -512,7 +512,6 @@ function vote(element_ID) {
     document.getElementById(opinion_ID).style = 'display : none;';
 }
 </script>'''.encode('utf8'))
-            self.send_links_body()
             self.wfile.write('</body></html>'.encode('utf8'))
             self.log_activity()
 
@@ -523,7 +522,8 @@ function vote(element_ID) {
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('</head><body>'.encode('utf8'))
-        self.wfile.write('''Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write('''<article>Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
         self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: gray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
 <ul>
@@ -805,8 +805,7 @@ The Social Action Committee is concerned primarily with student activism and rel
 
 The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
 {local.CLIMATE}'''.encode('utf8'))
-        self.send_links_body()
-        self.wfile.write('</body></html>'.encode('utf8'))
+        self.wfile.write('</article></body></html>'.encode('utf8'))
         self.log_activity()
         
     def submit_opinion(self):
@@ -923,8 +922,9 @@ td {
 }
 </style>
 </head>
-<body>
-CALENDAR:
+<body>'''.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('''<article>CALENDAR:
 <table>
 <tr>'''.encode('utf8'))
             today_date = datetime.date.today()
@@ -946,8 +946,7 @@ CALENDAR:
             for day in range(35 - (calendar.monthrange(today_date.year, today_date.month)[1]) - calendar.monthrange(today_date.year, today_date.month)[0]):
                 self.wfile.write('<td></td>'.encode('utf8'))
             self.wfile.write('</tr>'.encode('utf8'))
-            self.wfile.write('</table>'.encode('utf8'))
-            self.send_links_body()
+            self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write('</body></html>'.encode('utf8'))
 
             self.log_activity()
@@ -983,7 +982,10 @@ td {
 }
 </style>
 </head>
-<body>
+<body>'''.encode('utf8'))
+                self.send_links_body()
+                self.wfile.write('''
+<article>
 <table>
 <tr>
 <td>
@@ -1014,7 +1016,7 @@ td {
                     #for blank in range(10):
                         #self.wfile.write('<tr><td><br /></td></tr>'.encode('utf8'))
                 self.wfile.write('</table>'.encode('utf8'))
-                self.wfile.write('</td></tr></table>'.encode('utf8'))
+                self.wfile.write('</td></tr></table></article>'.encode('utf8'))
                 self.wfile.write(f'''<script>
 const this_date = '{this_date}';
 let selected = {list(selected)};
@@ -1063,7 +1065,6 @@ function update_unselected(element) {{
     element.style = 'display: none;';
 }}
 </script>'''.encode('utf8'))
-                self.send_links_body()
                 self.wfile.write('</body></html>'.encode('utf8'))
 
                 self.log_activity([this_date])
@@ -1172,7 +1173,9 @@ function update_unselected(element) {{
         self.end_headers()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
-        self.wfile.write('</head><body><table>'.encode('utf8'))
+        self.wfile.write('</head><body>'.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write('<article><table>'.encode('utf8'))
         for opinion_ID, opinion in db.opinions_database.items():
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
@@ -1212,8 +1215,7 @@ function update_unselected(element) {{
 {message}
 </td>
 </tr>'''.encode('utf8'))
-        self.wfile.write('</table>'.encode('utf8'))
-        self.send_links_body()
+        self.wfile.write('</table></article>'.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
@@ -1242,7 +1244,9 @@ tr.unselected {
 }
 </style>
 </head>
-<body>
+<body>'''.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('''<article>
 <table>
 <tr>
 <td>
@@ -1272,7 +1276,7 @@ tr.unselected {
 <button id='policy' onclick='forward(this);'>POLICY</button><br />
 <button id='social_action' onclick='forward(this);'>SOCIAL ACTION</button><br />
 <button id='climate' onclick='forward(this);'>CLIMATE</button><br />
-</td></tr></table>'''.encode('utf8'))
+</td></tr></table></article>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 opinionList = {opinion_ID_list};
 let selected = opinionList[0];
@@ -1289,7 +1293,6 @@ function forward(element) {{
 }}
 
 </script>'''.encode('utf8'))
-            self.send_links_body()
             self.wfile.write('''</body></html>'''.encode('utf8'))
             
             self.log_activity()
@@ -1339,8 +1342,9 @@ td.impressions {{
 }}
 </style>
 </head>
-<body>
-Committee page: {committee}<br /><table>'''.encode('utf8'))
+<body>'''.encode('utf8'))
+                self.send_links_body()
+                self.wfile.write('<article>Committee page: {committee}<br /><table>'.encode('utf8'))
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
                         up_votes, down_votes, abstains = opinion.count_votes()
@@ -1351,11 +1355,9 @@ Committee page: {committee}<br /><table>'''.encode('utf8'))
                         if up_votes + down_votes + abstains != 0:
                             impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
                         self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
-                self.wfile.write('</table>'.encode('utf8'))
-                self.send_links_body()
+                self.wfile.write('</table></article>'.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
         
-
         
 class ReuseHTTPServer(HTTPServer):    
     def server_bind(self):
