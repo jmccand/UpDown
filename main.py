@@ -145,6 +145,8 @@ div#menu {
   position: relative;
   top: 20px;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
 }
 #menu #x_menu {
   border: 2px solid black;
