@@ -121,17 +121,37 @@ class MyHandler(SimpleHTTPRequestHandler):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UpDown</title>
 <style>
+header {
+  width: 100%;
+}
 div#hamburger {
   border: 2px solid black;
   position: absolute;
   top: 0;
   left: 0;
+  width: 15%
+  display: inline-block;
+}
+#title {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  text-align: center;
+}
+#logo {
+  display: inline-block;
+  position: absolute;
+  width: 15%;
+  top: 0;
+  left: 85%;
 }
 article {
-  position: relative;
-  top: 25px;
+  position: absolute;
+  top: 8%;
 }
-div#menu {
+#menu {
   width: 0;
   position: fixed;
   z-index: 1;
@@ -158,7 +178,16 @@ div#menu {
 
     def send_links_body(self):
         my_account = self.identify_user()
-        self.wfile.write('''<header><div id='hamburger' onclick='open_menu();'>Ham</div>'''.encode('utf8'))
+        self.wfile.write('''<header>
+<div id='hamburger' onclick='open_menu();'>
+Ham
+</div>
+<div id='title'>
+Title
+</div>
+<div>
+<img id='logo' src='favicon.ico'/>
+</div>'''.encode('utf8'))
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div id='x_menu' onclick='close_menu();'>Ham</div>'''.encode('utf8'))
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
