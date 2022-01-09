@@ -139,6 +139,10 @@ div.hamburger {
   top: 0%;
   left: 0%;
 }
+article {
+  position: relative;
+  top: 25px;
+}
 </style>'''.encode('utf8'))
 
     def send_links_body(self):
@@ -322,7 +326,7 @@ Thank you for verifying. Your votes are now counted.<br />
             self.send_links_head()
             self.wfile.write('</head><body>'.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br /></article>'''.encode('utf8'))
+            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -375,7 +379,7 @@ div.selected_down {
                             self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
                     else:
                         self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-            self.wfile.write('</table></article>'.encode('utf8'))
+            self.wfile.write('</table>'.encode('utf8'))
             self.wfile.write(str('''<script>
 const page_IDs = %s;
 function vote(element_ID) {
@@ -471,7 +475,7 @@ function submit_opinion() {
     alert('Your opinion was submitted. Thank you!');
 }
 </script>'''.encode('utf8'))
-        self.wfile.write('</body></html>'.encode('utf8'))
+        self.wfile.write('</article></body></html>'.encode('utf8'))
         self.log_activity()
 
     def approve_opinions_page(self):
