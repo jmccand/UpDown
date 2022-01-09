@@ -119,54 +119,71 @@ class MyHandler(SimpleHTTPRequestHandler):
     def send_links_head(self):
         self.wfile.write('''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>jQuery UI Menu - Default functionality</title>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="/resources/demos/style.css">
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
-<script>
-$( function() {
-    $( "#menu" ).menu();
-} );
-</script>
+<title>UpDown</title>
 <style>
-.ui-menu {
-  width: 150px;
-}
-div.hamburger {
+div#hamburger {
   border: 2px solid black;
   position: absolute;
-  top: 0%;
-  left: 0%;
+  top: 0;
+  left: 0;
 }
 article {
   position: relative;
   top: 25px;
 }
+div#menu {
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  background-color: gray;
+  transition: 0.5s;
+}
+#menu a {
+  position: relative;
+  top: 20px;
+  display: block;
+}
+#menu #x_menu {
+  border: 2px solid black;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
 </style>'''.encode('utf8'))
 
     def send_links_body(self):
         my_account = self.identify_user()
-        self.wfile.write('''<header><div class='hamburger'>
-<ul id="menu">
-<li><div>Ham</div>
-<ul>'''.encode('utf8'))
-        self.wfile.write('''<li><div><a href='/'>Voice Your Opinions</a></div></li>
-<li><div><a href='/track_opinions'>Track an Opinion</a></div></li>
-<li><div><a href='/senate'>The Student Faculty Senate</a></div></li>'''.encode('utf8'))
+        self.wfile.write('''<header><div id='hamburger' onclick='open_menu();'>Ham</div>'''.encode('utf8'))
+        self.wfile.write('''<div id='menu'>'''.encode('utf8'))
+        self.wfile.write('''<div id='x_menu' onclick='close_menu();'>Ham</div>'''.encode('utf8'))
+        self.wfile.write('''<a href='/'>Voice Your Opinions</a>
+<a href='/track_opinions'>Track an Opinion</a>
+<a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
         if my_account.email in local.MODERATORS and my_account.verified_email:
-            self.wfile.write('''<li><div><a href='/approve_opinions'>Approve Opinions</a></div></li>'''.encode('utf8'))
+            self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
         if my_account.email in local.ADMINS and my_account.verified_email:
-            self.wfile.write('''<li><div><a href='/schedule_opinions'>Schedule Opinions</a></div></li>'''.encode('utf8'))
-            self.wfile.write('''<li><div><a href='/forward_opinions'>Forward Opinions</a></div></li>'''.encode('utf8'))
+            self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
         for committee, members in local.COMMITTEE_MEMBERS.items():
             if my_account.email in members and my_account.verified_email:
-                self.wfile.write(f'''<li><div><a href='/view_committee?committee={committee}'>{committee}</a></div></li>'''.encode('utf8'))        
-        self.wfile.write('''</ul>
-</li>
-</ul>
-</div>
-</header>'''.encode('utf8'))
+                self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+        self.wfile.write('''</div></header>'''.encode('utf8'))
+        self.wfile.write('''<script>
+function open_menu() {
+    if (screen.width < 300) {
+        document.getElementById('menu').style.width = '80%';
+    }
+    else {
+        document.getElementById('menu').style.width = '200px';
+    }
+}
+function close_menu() {
+    document.getElementById('menu').style.width = '0%';
+}
+</script>'''.encode('utf8'))
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
