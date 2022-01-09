@@ -44,6 +44,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                     self.opinions_page()
                 elif self.path == '/favicon.ico':
                     return self.load_image()
+                elif self.path == '/hamburger.png':
+                    return self.load_image()
                 elif self.path.startswith('/check_email'):
                     self.path_root = '/check_email'
                     self.check_email()
@@ -124,12 +126,11 @@ class MyHandler(SimpleHTTPRequestHandler):
 header {
   width: 100%;
 }
-div#hamburger {
-  border: 2px solid black;
+#hamburger {
   position: absolute;
   top: 0;
   left: 0;
-  width: 15%
+  width: 15%;
   display: inline-block;
 }
 #title {
@@ -169,18 +170,19 @@ article {
   overflow: hidden;
 }
 #menu #x_menu {
-  border: 2px solid black;
   position: absolute;
   top: 0;
   right: 0;
+  width: 19%;
+  z-index: 1;
 }
 </style>'''.encode('utf8'))
 
     def send_links_body(self):
         my_account = self.identify_user()
         self.wfile.write('''<header>
-<div id='hamburger' onclick='open_menu();'>
-Ham
+<div onclick='open_menu();'>
+<img id='hamburger' src='hamburger.png'/>
 </div>
 <div id='title'>
 Title
@@ -189,7 +191,7 @@ Title
 <img id='logo' src='favicon.ico'/>
 </div>'''.encode('utf8'))
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
-        self.wfile.write('''<div id='x_menu' onclick='close_menu();'>Ham</div>'''.encode('utf8'))
+        self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
 <a href='/track_opinions'>Track an Opinion</a>
 <a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
@@ -204,12 +206,7 @@ Title
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
-    if (screen.width < 300) {
-        document.getElementById('menu').style.width = '80%';
-    }
-    else {
-        document.getElementById('menu').style.width = '200px';
-    }
+    document.getElementById('menu').style.width = '80%';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0%';
