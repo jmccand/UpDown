@@ -166,7 +166,8 @@ article {
   top: 0;
   left: 0;
   overflow-x: hidden;
-  background-color: gray;
+  background-color: #f1c232ff;
+  /*background-color: #1155ccff;*/
   transition: 0.5s;
 }
 #menu a {
