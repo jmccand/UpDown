@@ -130,30 +130,37 @@ header {
   position: absolute;
   top: 0;
   left: 0;
-  width: 15%;
+  width: 18%;
+  height: 9%;
   display: inline-block;
 }
 #title {
   display: inline-block;
   position: absolute;
   top: 0;
-  left: 15%;
-  width: 70%;
+  left: 18%;
+  width: 64%;
+  height: 9%;
   text-align: center;
+  background-color: #f1c232ff;
+  font-size: 30px;
+  font-family: 'Times New Roman';
 }
 #logo {
   display: inline-block;
   position: absolute;
-  width: 15%;
+  width: 18%;
+  height: 9%;
   top: 0;
-  left: 85%;
+  right: 0;
 }
 article {
   position: absolute;
-  top: 8%;
+  top: 10%;
 }
 #menu {
   width: 0;
+  height: 100%;
   position: fixed;
   z-index: 1;
   top: 0;
@@ -173,7 +180,8 @@ article {
   position: absolute;
   top: 0;
   right: 0;
-  width: 19%;
+  width: 22%;
+  height: 9%;
   z-index: 1;
 }
 </style>'''.encode('utf8'))
@@ -206,7 +214,7 @@ Title
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
-    document.getElementById('menu').style.width = '80%';
+    document.getElementById('menu').style.width = '82%';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0%';
