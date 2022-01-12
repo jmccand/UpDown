@@ -387,28 +387,28 @@ Thank you for verifying. Your votes are now counted.<br />
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
-div.unselected_up {
+section.unselected_up {
   color : black;
   width: 30%;
   position: absolute;
   right: 0;
   top: 0;
 }
-div.unselected_down {
+section.unselected_down {
   color : black;
   width: 30%;
   position: absolute;
   right: 0;
   bottom: 0;
 }
-div.selected_up {
+section.selected_up {
   color : green;
   width: 30%;
   position: absolute;
   right: 0;
   top: 0;
 }
-div.selected_down {
+section.selected_down {
   color : red;
   width: 30%;
   position: absolute;
