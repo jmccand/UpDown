@@ -1,10 +1,10 @@
 import local
-import dbm.dumb
+import dbm.gnu
 import shelve
 import threading
 
 def open_db(filename):
-    db = dbm.dumb.open(filename)
+    db = dbm.gnu.open(filename, 'c')
     shelf = shelve.Shelf(db)
     return shelf
 
