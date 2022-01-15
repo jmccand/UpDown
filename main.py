@@ -585,11 +585,11 @@ div.selected_down {
   text-align: center;
 }
 span.left {
-  width: 80%;
-  height: 100%;
+  width: 75%;
+  height: 80%;
   position: absolute;
-  left: 0;
-  bottom: 0;
+  left: 5%;
+  top: 10%;
 }
 </style>
 </head>
