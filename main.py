@@ -163,6 +163,7 @@ article {
   width: 95%;
   height: 90%;
   z-index: 1;
+  overflow: scroll;
 }
 #menu {
   width: 0;
@@ -787,16 +788,19 @@ function vote(element_ID) {
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
 <ul>
 <li><a href='/senate#welcome'>Welcome!</a></li>
-<li><a href='/senate#about'>About the Senate</a></li>
-<li><a href='/senate#constitution'>Constitution</a></li>
-<li><a href='/senate#FAQ'>Frequently Asked Questions!</a></li>
 <li><a href='/senate#meet'>Meet the Senators</a></li>
+<!--<li><a href='/senate#about'>About the Senate</a></li>-->
+<li><a href='/senate#constitution'>Constitution</a></li>
+<li><a>Senate Bills</a></li>
+<li><a>Minutes</a></li>
+<li><a>Senate Attendance</a></li>
+<li><a href='/senate#FAQ'>Frequently Asked Questions!</a></li>
 </ul>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='welcome'>Welcome!</a></h2>
 Welcome to the Lexington High School Student-Faculty Senate! The Senate convenes at 3:15pm on Wednesdays in the Library Media Center.<br />
 We implement school-wide policies on a number of issues, from things as mundane as placing extra benches around the school to changes as significant as eliminating the community service requirement for open campus, allowing students to eat in the Quad, or determining what information will be printed on transcripts.<br />
 All meetings are open to the public! If you want to change something about the school, we would love to hear and discuss your ideas.<br />'''.encode('utf8'))
-        self.wfile.write('''<h2><a name='about'>About the Senate</a></h2>'''.encode('utf8'))
+        #self.wfile.write('''<h2><a name='about'>About the Senate</a></h2>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='constitution'>Constitution</a></h2>
 <div style='width:90%; height:200px; overflow:scroll; border:2px solid black; padding:5px;'>
 Article I: Philosophy<br />
