@@ -123,6 +123,9 @@ class MyHandler(SimpleHTTPRequestHandler):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UpDown</title>
 <style>
+body {
+  background-color: #1155ccff;
+}
 header {
   position: fixed;
   top: 0;
