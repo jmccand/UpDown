@@ -124,7 +124,9 @@ class MyHandler(SimpleHTTPRequestHandler):
 <title>UpDown</title>
 <style>
 header {
-  width: 100%;
+  position: fixed;
+  top: 0;
+  width: 95%;
   height: 9%;
 }
 #hamburger {
@@ -132,28 +134,27 @@ header {
   top: 0;
   left: 0;
   width: 18%;
-  height: 9%;
-  display: inline-block;
+  height: 100%;
+  z-index: 1;
 }
 #title {
-  display: inline-block;
   position: absolute;
   top: 0;
-  left: 18%;
-  width: 64%;
-  height: 9%;
+  left: 0;
+  width: 100%;
+  height: 100%;
   text-align: center;
   background-color: #f1c232ff;
   font-size: 30px;
   font-family: 'Times New Roman';
 }
 #logo {
-  display: inline-block;
   position: absolute;
   width: 18%;
-  height: 9%;
+  height: 100%;
   top: 0;
   right: 0;
+  z-index: 1;
 }
 article {
   position: absolute;
