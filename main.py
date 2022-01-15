@@ -160,7 +160,7 @@ header {
 article {
   position: absolute;
   top: 10%;
-  width: 100%;
+  width: 95%;
   height: 90%;
   z-index: 1;
 }
@@ -545,7 +545,7 @@ function submit_opinion() {
             self.send_links_head()
             self.wfile.write('''<style>
 section {
-  width: 95%;
+  width: 100%;
   height: 9%;
   position: relative;
   background-color: #f1c232ff;
