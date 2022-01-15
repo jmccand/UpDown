@@ -551,24 +551,28 @@ section {
 }
 div.unselected_up {
   color: black;
+  width: 20%;
   position: absolute;
   right: 0;
   top: 0;
 }
 div.unselected_down {
   color: black;
+  width: 20%;
   position: absolute;
   right: 0;
   bottom: 0;
 }
 div.selected_up {
   color : green;
+  width: 20%;
   position: absolute;
   right: 0;
   top: 0;
 }
 div.selected_down {
   color : red;
+  width: 20%;
   position: absolute;
   right: 0;
   bottom: 0;
