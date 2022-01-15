@@ -128,6 +128,7 @@ header {
   top: 0;
   width: 95%;
   height: 9%;
+  z-index: 2;
 }
 #hamburger {
   position: absolute;
@@ -161,12 +162,13 @@ article {
   top: 10%;
   width: 100%;
   height: 90%;
+  z-index: 1;
 }
 #menu {
   width: 0;
   height: 100%;
   position: fixed;
-  z-index: 1;
+  z-index: 2;
   top: 0;
   left: 0;
   overflow-x: hidden;
@@ -547,6 +549,7 @@ section {
   height: 9%;
   position: relative;
   background-color: #f1c232ff;
+  z-index: 1;
 }
 div.unselected_up {
   color: black;
