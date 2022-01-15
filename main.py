@@ -125,6 +125,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 <style>
 header {
   width: 100%;
+  height: 9%;
 }
 #hamburger {
   position: absolute;
@@ -192,15 +193,11 @@ article {
     def send_links_body(self):
         my_account = self.identify_user()
         self.wfile.write(f'''<header>
-<div onclick='open_menu();'>
-<img id='hamburger' src='hamburger.png'/>
-</div>
-<div id='title'>
+<img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
+<span id='title'>
 Title
-</div>
-<div>
-<img id='logo' src='favicon.ico'/>
-</div>'''.encode('utf8'))
+</span>
+<img id='logo' src='favicon.ico'/>'''.encode('utf8'))
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
@@ -545,9 +542,10 @@ function submit_opinion() {
             self.send_links_head()
             self.wfile.write('''<style>
 section {
-  width: 100%;
+  width: 95%;
   height: 9%;
   position: relative;
+  background-color: #f1c232ff;
 }
 div.unselected_up {
   color: black;
@@ -555,6 +553,7 @@ div.unselected_up {
   position: absolute;
   right: 0;
   top: 0;
+  text-align: center;
 }
 div.unselected_down {
   color: black;
@@ -562,6 +561,7 @@ div.unselected_down {
   position: absolute;
   right: 0;
   bottom: 0;
+  text-align: center;
 }
 div.selected_up {
   color : green;
@@ -569,6 +569,7 @@ div.selected_up {
   position: absolute;
   right: 0;
   top: 0;
+  text-align: center;
 }
 div.selected_down {
   color : red;
@@ -576,9 +577,11 @@ div.selected_down {
   position: absolute;
   right: 0;
   bottom: 0;
+  text-align: center;
 }
 span.left {
   width: 80%;
+  height: 100%;
   position: absolute;
   left: 0;
   bottom: 0;
