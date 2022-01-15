@@ -791,9 +791,9 @@ function vote(element_ID) {
 <li><a href='/senate#meet'>Meet the Senators</a></li>
 <!--<li><a href='/senate#about'>About the Senate</a></li>-->
 <li><a href='/senate#constitution'>Constitution</a></li>
-<li><a>Senate Bills</a></li>
-<li><a>Minutes</a></li>
-<li><a>Senate Attendance</a></li>
+<li><a href='/senate#bills'>Senate Bills</a></li>
+<li><a href='/senate#minutes'>Minutes</a></li>
+<li><a href='/senate#attendance'>Senate Attendance</a></li>
 <li><a href='/senate#FAQ'>Frequently Asked Questions!</a></li>
 </ul>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='welcome'>Welcome!</a></h2>
@@ -801,6 +801,24 @@ Welcome to the Lexington High School Student-Faculty Senate! The Senate convenes
 We implement school-wide policies on a number of issues, from things as mundane as placing extra benches around the school to changes as significant as eliminating the community service requirement for open campus, allowing students to eat in the Quad, or determining what information will be printed on transcripts.<br />
 All meetings are open to the public! If you want to change something about the school, we would love to hear and discuss your ideas.<br />'''.encode('utf8'))
         #self.wfile.write('''<h2><a name='about'>About the Senate</a></h2>'''.encode('utf8'))
+        self.wfile.write(f'''<h2><a name='meet'>Meet the Senators</a></h2>
+Executive<br />
+{local.EXECUTIVE}
+
+Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
+{local.COMMUNICATIONS}
+
+Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
+{local.OVERSIGHT}
+
+The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
+{local.POLICY}
+
+The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
+{local.SOCIAL_ACTION}
+
+The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
+{local.CLIMATE}'''.encode('utf8'))
         self.wfile.write('''<h2><a name='constitution'>Constitution</a></h2>
 <div style='width:90%; height:200px; overflow:scroll; border:2px solid black; padding:5px;'>
 Article I: Philosophy<br />
@@ -1035,6 +1053,9 @@ C. During this Senate meeting period, school shall have been terminated for the 
 D. This arrangement shall not decrease the amount of classroom time currently scheduled.<br />
 <br />
 E. No student or faculty member participating in Senate deliberations shall be penalized in any way for not participating in athletic, dramatic, debate, or club activities during the time designated for Senate meetings.<br /></div>'''.encode('utf8'))
+        self.wfile.write('''<h2><a name='bills'>Senate Bills</a></h2>'''.encode('utf8'))
+        self.wfile.write('''<h2><a name='minutes'>Minutes</a></h2>'''.encode('utf8'))
+        self.wfile.write('''<h2><a name='attendance'>Senator Attendance</a></h2>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='FAQ'>Frequently Asked Questions</a></h2>
 When and where does the Senate meet?<br />
 The Senate meets every Wednesday afternoon after school in the Library Media Center.<br />
@@ -1050,24 +1071,6 @@ There are up to 10 faculty senators, along with approximately 10 student senator
 <br />
 What are Senate Committees?<br />
 Each senator is assigned to a Committee at the beginning of the year. There are 6 committees: Executive, Community Service, Oversight, Climate, Policy, and Communications. Each committee meets once a week outside of the Senate meeting.'''.encode('utf8'))
-        self.wfile.write(f'''<h2><a name='meet'>Meet the Senators</a></h2>
-Executive<br />
-{local.EXECUTIVE}
-
-Communications' job is to let the student body know about the different actions Senate is doing! That includes running our Instagram, advertising events, and maintaining our Suggestions Box. This year, we also organized the Trash Can Giveaway for students to paint the LHS trash cans, social-distancing dots in the quad, and Course Advice for rising high schoolers. <br />
-{local.COMMUNICATIONS}
-
-Oversight looks at past legislation for review, which can then be reintroduced for edits or to be removed! We are focused on the school administration and student senate's accountability and efficiency. We are also responsible for maintaining the Senate website. This year, we've been passing resolutions to make vaccination resources available to the student body!<br />
-{local.OVERSIGHT}
-
-The Policy Committee works to discuss preliminary policies before they appear in front of the entire senate. In the past we have worked on Mental Health day as well as Brain Breaks, both of which are currently in the process of being passed. Through negotiation and communication, we aim to create and organize welcoming events for our school in order to maintain the community. Come join us >:D<br />
-{local.POLICY}
-
-The Social Action Committee is concerned primarily with student activism and relations between LHS and the surrounding community. It monitors community service programs and enforces volunteerism, improving life as a LHS student/faculty and solving problems important to our school.<br />
-{local.SOCIAL_ACTION}
-
-The Climate Committee is dedicated to creating a welcoming and vibrant community, and has strived to do so this year by organizing the LHS Mural Project. Climate has been working on assembling a team of artists to create a mural in the freshman mods so that all future classes will be able to enjoy the work of art on their way to class.<br />
-{local.CLIMATE}'''.encode('utf8'))
         self.wfile.write('</article></body></html>'.encode('utf8'))
         self.log_activity()
         
