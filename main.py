@@ -550,6 +550,7 @@ section {
   position: relative;
   background-color: #f1c232ff;
   z-index: 1;
+  border-radius: 15px;
 }
 div.unselected_up {
   color: black;
