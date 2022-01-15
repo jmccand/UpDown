@@ -550,7 +550,7 @@ section {
   height: 9%;
   margin: 1%;
   position: relative;
-  background-color: #f1c232ff;
+  background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 15px;
 }
