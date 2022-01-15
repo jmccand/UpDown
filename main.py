@@ -159,7 +159,7 @@ header {
 }
 article {
   position: absolute;
-  top: 10%;
+  top: 9%;
   width: 95%;
   height: 90%;
   z-index: 1;
@@ -547,6 +547,7 @@ function submit_opinion() {
 section {
   width: 100%;
   height: 9%;
+  margin: 1%;
   position: relative;
   background-color: #f1c232ff;
   z-index: 1;
