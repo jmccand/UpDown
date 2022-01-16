@@ -472,6 +472,11 @@ footer {
   height: 9%;
   z-index: 2;  
 }
+button.submit {
+  width: 100%;
+  height: 100%;
+  border-radius: 25px;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -599,7 +604,7 @@ function checkVoteValidity(new_vote, old_vote) {
 </article>''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
         self.wfile.write('''<footer>
 <!--<input id='opinion_text' type='text'/>-->
-<button onclick='submit_opinion()'>Submit your opinion</button>
+<button class='submit' onclick='submit_opinion()'>Submit your opinion</button>
 <script>
 function submit_opinion() {
     var xhttp = new XMLHttpRequest();
