@@ -1488,22 +1488,22 @@ function update_unselected(element) {{
                 else:
                     message = f'Rejected on {opinion.activity[1][0][2].date()}.'
             elif len(opinion.activity) == 3:
-                assert len(opinion.activity[2]) == 4
-                if datetime.date.today() < opinion.activity[2][2]:
+                #assert len(opinion.activity[2]) == 4
+                if datetime.date.today() < opinion.activity[2][0][2]:
                     message = 'Approved and scheduled.'
-                elif datetime.date.today() > opinion.activity[2][2]:
+                elif datetime.date.today() > opinion.activity[2][0][2]:
                     message = 'Waiting for submission into Senate.'
                 else:
                     message = 'Currently voting.'
             elif len(opinion.activity) == 4:
-                assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                assert opinion.activity[3][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                if opinion.activity[3][1] != 'no':
-                    message = f'Submitted into the {opinion.activity[3][1]} committee.'
+                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
+                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                if opinion.activity[3][0][1] != 'no':
+                    message = f'Submitted into the {opinion.activity[3][0][1]} committee.'
                 else:
                     message = 'Votes were not significant enough to submit to the Senate.'
             elif len(opinion.activity) == 5:
-                assert len(opinion.activity[4]) == 3
+                #assert len(opinion.activity[4]) == 3
                 message = 'The Senate has viewed the opinion. A first draft of a bill will be completed by the expected date {opinion.activity[4][1]}.'
             self.wfile.write(f'''<tr>
 <td>
