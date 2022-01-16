@@ -125,11 +125,13 @@ class MyHandler(SimpleHTTPRequestHandler):
 <style>
 body {
   background-color: #1155ccff;
+  margin: 0;
+  padding: 0;
 }
 header {
   position: fixed;
   top: 0;
-  width: 95%;
+  width: 100%;
   height: 9%;
   z-index: 2;
 }
@@ -163,7 +165,7 @@ header {
 article {
   position: absolute;
   top: 9%;
-  width: 95%;
+  width: 100%;
   height: 90%;
   z-index: 1;
   overflow: scroll;
@@ -549,7 +551,7 @@ function submit_opinion() {
             self.send_links_head()
             self.wfile.write('''<style>
 section {
-  width: 100%;
+  width: 98%;
   height: 9%;
   margin: 1%;
   position: relative;
