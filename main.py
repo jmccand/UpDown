@@ -413,7 +413,7 @@ article {
   position: absolute;
   top: 9%;
   width: 100%;
-  height: 82%;
+  height: 91%;
   z-index: 1;
   overflow: scroll;
 }
@@ -425,6 +425,11 @@ section {
   background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
+}
+div#end_block {
+  width: 100%;
+  height: 10%;
+  z-index: 1;
 }
 div.unselected_up {
   color: black;
@@ -520,7 +525,10 @@ button.submit {
                     else:
                         self.wfile.write(f'''<span>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                     self.wfile.write('</section>'.encode('utf8'))
-            self.wfile.write(str('''<script>
+            self.wfile.write(str('''
+<div id='end_block'>
+</div>
+<script>
 const page_IDs = %s;
 function vote(element_ID) {
     var xhttp = new XMLHttpRequest();
