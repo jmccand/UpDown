@@ -622,6 +622,14 @@ function submit_opinion() {
             self.send_links_head()
             self.wfile.write('''
 <style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
 div.unselected {
     color : black;
 }
@@ -660,6 +668,16 @@ function vote(element_ID) {
         self.end_headers()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
+        self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
+</style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('''<article>Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
@@ -1058,6 +1076,14 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             self.send_links_head()
             self.wfile.write('''
 <style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
 table {
   border-collapse : collapse;
 }
@@ -1118,6 +1144,14 @@ td {
                 self.send_links_head()
                 self.wfile.write('''
 <style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
 table {
   border-collapse : collapse;
 }
@@ -1328,6 +1362,16 @@ function update_unselected(element) {{
         self.end_headers()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
+        self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
+</style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article><table>'.encode('utf8'))
@@ -1386,6 +1430,14 @@ function update_unselected(element) {{
             self.send_links_head()
             self.wfile.write('''
 <style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
 td.up {
   color: limegreen;
 }
@@ -1494,6 +1546,14 @@ function forward(element) {{
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
                 self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 91%;
+  z-index: 1;
+  overflow: scroll;
+}
 td.up {
   color: limegreen;
 }
