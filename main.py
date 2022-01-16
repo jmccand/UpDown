@@ -478,9 +478,12 @@ footer {
   z-index: 2;  
 }
 button.submit {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  left: 2.5%;
+  width: 95%;
+  height: 90%;
   border-radius: 25px;
+  background-color: #f1c232ff;
 }
 </style>
 </head>
