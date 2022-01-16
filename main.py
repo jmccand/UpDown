@@ -1618,7 +1618,7 @@ function forward(element) {{
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         committee = url_arguments['committee'][0]
-        if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
+        if committee in ('Executive', 'Oversight'):
             if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_email:
                 self.send_response(200)
                 self.end_headers()
