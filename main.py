@@ -201,10 +201,26 @@ article {
 
     def send_links_body(self):
         my_account = self.identify_user()
+        title = ''
+        if self.path_root == '/':
+            title = 'Vote!'
+        elif self.path_root == '/track_opinions':
+            title = 'Track!'
+        elif self.path_root == '/senate':
+            title = 'Senate'
+        elif self.path_root == '/approve_opinions':
+            title = 'Approve'
+        elif self.path_root == '/schedule_opinions':
+            title = 'Schedule'
+        elif self.path_root == '/forward_opinions':
+            title = 'Forward'
+        elif self.path_root == '/view_committee':
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            title = url_arguments['committee'][0]
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
 <span id='title'>
-Title
+{title}
 </span>
 <img id='logo' src='favicon.ico'/>'''.encode('utf8'))
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
