@@ -598,16 +598,15 @@ function checkVoteValidity(new_vote, old_vote) {
 </script>
 </article>''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
         self.wfile.write('''<footer>
-<input id='opinion_text' type='text'/>
-<button onclick='submit_opinion()'>SUBMIT</button>
+<!--<input id='opinion_text' type='text'/>-->
+<button onclick='submit_opinion()'>Submit your opinion</button>
 <script>
 function submit_opinion() {
     var xhttp = new XMLHttpRequest();
-    const opinion_text = document.getElementById('opinion_text').value;
+    const opinion_text = prompt('Thank you for your input, please enter your opinion below:');
     xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
     xhttp.send();
-    document.getElementById('opinion_text').value = '';
-    alert('Your opinion was submitted. Thank you!');
+    //alert('Your opinion was submitted. Thank you!');
 }
 </script>
 </footer>'''.encode('utf8'))
