@@ -1568,12 +1568,12 @@ tr.unselected {
                         self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
                         opinion_ID_list.append(opinion_ID)
             self.wfile.write('''</table></td><td>
-<button id='executive' onclick='forward(this);'>EXECUTIVE</button><br />
-<button id='oversight' onclick='forward(this);'>OVERSIGHT</button><br />
-<button id='communications' onclick='forward(this);'>COMMUNICATIONS</button><br />
-<button id='policy' onclick='forward(this);'>POLICY</button><br />
-<button id='social_action' onclick='forward(this);'>SOCIAL ACTION</button><br />
-<button id='climate' onclick='forward(this);'>CLIMATE</button><br />
+<button id='Executive' onclick='forward(this);'>EXECUTIVE</button><br />
+<button id='Oversight' onclick='forward(this);'>OVERSIGHT</button><br />
+<!--<button id='Communications' onclick='forward(this);'>COMMUNICATIONS</button><br />-->
+<!--<button id='Policy' onclick='forward(this);'>POLICY</button><br />-->
+<!--<button id='Social_action' onclick='forward(this);'>SOCIAL ACTION</button><br />-->
+<!--<button id='Climate' onclick='forward(this);'>CLIMATE</button><br />-->
 </td></tr></table></article>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 opinionList = {opinion_ID_list};
@@ -1605,7 +1605,7 @@ function forward(element) {{
                 opinion_ID = url_arguments['opinion_ID'][0]
                 opinion = db.opinions_database[opinion_ID]
                 committee = url_arguments['committee'][0]
-                if committee in ('executive', 'communications', 'oversight', 'policy', 'social_action', 'climate'):
+                if committee in ('Executive', 'Oversight'):
     
                     self.log_activity([committee, opinion_ID])
 
