@@ -394,163 +394,6 @@ Thank you for verifying. Your votes are now counted.<br />
         else:
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
 
-    def opinions_page_og(self):
-        my_account = self.identify_user()
-        self.send_response(200)
-        self.end_headers()
-        day_of_the_week = datetime.date.today().weekday()
-        if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
-            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-            self.send_links_head()
-            self.wfile.write('</head><body>'.encode('utf8'))
-            self.send_links_body()
-            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
-        else:
-            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-            self.send_links_head()
-            self.wfile.write('''<style>
-div.unselected {
-    color : black;
-}
-div.selected_up {
-    color : green;
-}
-div.selected_down {
-    color : red;
-}
-</style>
-</head>
-<body>'''.encode('utf8'))
-            self.send_links_body()
-            self.wfile.write('<article><table>'.encode('utf8'))
-            randomized = list(db.opinions_calendar[str(datetime.date.today())])
-            random.shuffle(randomized)
-            for opinion_ID in randomized:
-                assert opinion_ID in db.opinions_database
-                opinion = db.opinions_database[opinion_ID]
-                assert opinion.approved == True
-                opinion_ID = str(opinion.ID)
-                if my_account.email in local.ADMINS and my_account.verified_email:
-                    up_votes, down_votes, abstains = opinion.count_votes()
-                    if opinion_ID in my_account.votes:
-                        my_vote = my_account.votes[opinion_ID]
-                        if my_vote[-1][0] == 'up':
-                            #arrow up = &#9650
-                            #arrow down = &#9660
-                            #thumbs up = &#128077;
-                            #thumbs down = &#128078;
-                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
-                        elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
-                        else:
-                            self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
-                    else:
-                        self.wfile.write(f'''<tr><td>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></td></tr>'''.encode('utf8'))
-                else:
-                    if opinion_ID in my_account.votes:
-                        my_vote = my_account.votes[opinion_ID]
-                        if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-                        elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-                        else:
-                            self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-                    else:
-                        self.wfile.write(f'''<tr><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></td></tr>'''.encode('utf8'))
-            self.wfile.write('</table>'.encode('utf8'))
-            self.wfile.write(str('''<script>
-const page_IDs = %s;
-function vote(element_ID) {
-    var xhttp = new XMLHttpRequest();
-    var split_ID = element_ID.split(' ');
-    const opinion_ID = split_ID[0];
-    let old_vote = '';
-    if (document.getElementById(opinion_ID + ' up').className.startsWith('selected')) {
-        old_vote = 'up';
-    }
-    else if (document.getElementById(opinion_ID + ' down').className.startsWith('selected')) {
-        old_vote = 'down';
-    }
-    else {
-        old_vote = 'abstain';
-    }
-    const my_click = split_ID[1];
-    let my_vote = '';
-    if (my_click != old_vote) {
-        my_vote = my_click;
-    }
-    else {
-        my_vote = 'abstain';
-    }
-    
-    if (checkVoteValidity(my_vote, old_vote)) {
-        xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
-        xhttp.send();
-        if (my_vote == old_vote) {
-            document.getElementById(element_ID).className = 'unselected';
-        }
-        else {
-            if (old_vote != 'abstain') {
-                let other_arrow = document.getElementById(opinion_ID + ' ' + old_vote);
-                other_arrow.className = 'unselected';
-            }
-            if (my_vote != 'abstain') {
-                if (my_vote == 'up') {
-                    document.getElementById(element_ID).className = 'selected_up';
-                }
-                else {
-                    document.getElementById(element_ID).className = 'selected_down';
-                }
-            }
-        }
-    }
-}
-function checkVoteValidity(new_vote, old_vote) {
-    let up_count = 0;
-    let down_count = 0;
-    for (let index = 0; index < page_IDs.length; index++) {
-        if (document.getElementById(page_IDs[index] + ' up').className.startsWith('selected')) {
-            up_count++;
-        }
-        else if (document.getElementById(page_IDs[index] + ' down').className.startsWith('selected')) {
-            down_count++;
-        }
-    }
-    let valid = true;
-    if (up_count == 5 && new_vote == 'up') {
-        alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
-        valid = false;
-    }
-    else if (down_count == 5 && new_vote == 'down') {
-        alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
-        valid = false;
-    }
-    if (old_vote == 'abstain') {
-        if (up_count + down_count == 8 && new_vote != 'abstain') {
-            alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
-            valid = false;
-        }
-    }
-    return valid;
-}
-</script>
-<br />''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
-        self.wfile.write('''<br />
-<input id='opinion_text' type='text'/>
-<button onclick='submit_opinion()'>SUBMIT</button>
-<script>
-function submit_opinion() {
-    var xhttp = new XMLHttpRequest();
-    const opinion_text = document.getElementById('opinion_text').value;
-    xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
-    xhttp.send();
-    document.getElementById('opinion_text').value = '';
-    alert('Your opinion was submitted. Thank you!');
-}
-</script>'''.encode('utf8'))
-        self.wfile.write('</article></body></html>'.encode('utf8'))
-        self.log_activity()
-        
     def opinions_page(self):
         my_account = self.identify_user()
         self.send_response(200)
@@ -613,6 +456,13 @@ span.left {
   position: absolute;
   left: 5%;
   top: 10%;
+}
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 9%;
+  z-index: 2;  
 }
 </style>
 </head>
@@ -738,8 +588,8 @@ function checkVoteValidity(new_vote, old_vote) {
     return valid;
 }
 </script>
-<br />''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
-        self.wfile.write('''<br />
+</article>''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
+        self.wfile.write('''<footer>
 <input id='opinion_text' type='text'/>
 <button onclick='submit_opinion()'>SUBMIT</button>
 <script>
@@ -751,8 +601,9 @@ function submit_opinion() {
     document.getElementById('opinion_text').value = '';
     alert('Your opinion was submitted. Thank you!');
 }
-</script>'''.encode('utf8'))
-        self.wfile.write('</article></body></html>'.encode('utf8'))
+</script>
+</footer>'''.encode('utf8'))
+        self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
     def approve_opinions_page(self):
@@ -1528,11 +1379,11 @@ function update_unselected(element) {{
             self.send_links_head()
             self.wfile.write('''
 <style>
-td.raw {
+td.up {
   color: limegreen;
 }
-td.impressions {
-  color: darkGreen;
+td.care {
+  color: black;
 }
 tr.selected {
   background-color: yellow;
@@ -1559,13 +1410,13 @@ tr.unselected {
                     for opinion_ID in list(opinion_set):
                         opinion = db.opinions_database[opinion_ID]
                         up_votes, down_votes, abstains = opinion.count_votes()
-                        raw_up_percent = 'N/A'
+                        up_percent = 'N/A'
                         if up_votes + down_votes != 0:
-                            raw_up_percent = up_votes / (up_votes + down_votes) * 100
-                        impressions_up_percent = 'N/A'
+                            up_percent = up_votes / (up_votes + down_votes) * 100
+                        care_percent = 'N/A'
                         if up_votes + down_votes + abstains != 0:
-                            impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
+                            care_percent = up_votes / (up_votes + down_votes + abstains) * 100
+                        self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
                         opinion_ID_list.append(opinion_ID)
             self.wfile.write('''</table></td><td>
 <button id='Executive' onclick='forward(this);'>EXECUTIVE</button><br />
@@ -1636,12 +1487,12 @@ function forward(element) {{
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
                 self.wfile.write('''<style>
-td.raw {{
+td.up {
   color: limegreen;
-}}
-td.impressions {{
-  color: darkGreen;
-}}
+}
+td.care {
+  color: black;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1650,13 +1501,13 @@ td.impressions {{
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
                         up_votes, down_votes, abstains = opinion.count_votes()
-                        raw_up_percent = 'N/A'
+                        up_percent = 'N/A'
                         if up_votes + down_votes != 0:
-                            raw_up_percent = up_votes / (up_votes + down_votes) * 100
-                        impressions_up_percent = 'N/A'
+                            up_percent = up_votes / (up_votes + down_votes) * 100
+                        care_percent = 'N/A'
                         if up_votes + down_votes + abstains != 0:
-                            impressions_up_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);'><td>{opinion.text}</td><td class='raw'>{raw_up_percent}%</td><td class='impressions'>{impressions_up_percent}%</td></tr>'''.encode('utf8'))
+                            care_percent = up_votes / (up_votes + down_votes + abstains) * 100
+                        self.wfile.write(f'''<tr id='{opinion_ID}' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
                 self.wfile.write('</table></article>'.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
         
