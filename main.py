@@ -1490,9 +1490,9 @@ function update_unselected(element) {{
                     message = 'Currently voting.'
             elif len(opinion.activity) == 4:
                 assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                assert opinion.activity[3][1] in ('yes', 'no', 'abstain')
-                if opinion.activity[3][1] == 'yes':
-                    message = 'Submitted into the Senate.'
+                assert opinion.activity[3][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                if opinion.activity[3][1] != 'no':
+                    message = f'Submitted into the {opinion.activity[3][1]} committee.'
                 else:
                     message = 'Votes were not significant enough to submit to the Senate.'
             elif len(opinion.activity) == 5:
