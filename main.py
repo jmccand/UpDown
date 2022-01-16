@@ -162,14 +162,14 @@ header {
   right: 0;
   z-index: 1;
 }
-article {
+/*article {
   position: absolute;
   top: 9%;
   width: 100%;
   height: 90%;
   z-index: 1;
   overflow: scroll;
-}
+}*/
 #menu {
   width: 0;
   height: 100%;
@@ -409,9 +409,17 @@ Thank you for verifying. Your votes are now counted.<br />
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 9%;
+  width: 100%;
+  height: 82%;
+  z-index: 1;
+  overflow: scroll;
+}
 section {
   width: 98%;
-  height: 9%;
+  height: 10%;
   margin: 1%;
   position: relative;
   background-color: #cfe2f3ff;
