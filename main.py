@@ -1378,7 +1378,11 @@ function update_unselected(element) {{
                 if opinion_ID in db.opinions_database:
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = True
-                    opinion.activity.append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now()))
+                    if len(opinion.activity) == 2:
+                        opinion.activity.append([(my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now())])
+                    else:
+                        opinion.activity[2].append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now()))
+                        
                     db.opinions_database_lock.acquire()
                     try:
                         db.opinions_database[opinion_ID] = opinion
@@ -1410,6 +1414,7 @@ function update_unselected(element) {{
                 raise ValueError(f'ip {self.client_address[0]} -- schedule function got url arguments {url_arguments}')
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
+
     def unschedule(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
@@ -1424,7 +1429,9 @@ function update_unselected(element) {{
                 if opinion_ID in db.opinions_database:
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = False
-                    opinion.activity.append((my_account.email, False, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
+                    assert len(opinion.activity) == 3, f'{len(opinion.activity)}'
+                    opinion.activity[2].append((my_account.email, False, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
+                    
                     db.opinions_database_lock.acquire()
                     try:
                         db.opinions_database[opinion_ID] = opinion
@@ -1602,7 +1609,11 @@ function forward(element) {{
     
                     self.log_activity([committee, opinion_ID])
 
-                    opinion.activity.append((my_account.email, committee, datetime.datetime.now()))
+                    if len(opinion.activity) == 3:
+                        opinion.activity.append([(my_account.email, committee, datetime.datetime.now())])
+                    else:
+                        opinion.activity[3].append((my_account.email, committee, datetime.datetime.now()))
+
                     opinion.committee_jurisdiction = committee
                     db.opinions_database_lock.acquire()
                     try:
