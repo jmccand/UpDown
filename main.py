@@ -1635,7 +1635,7 @@ td.impressions {{
 </head>
 <body>'''.encode('utf8'))
                 self.send_links_body()
-                self.wfile.write('<article>Committee page: {committee}<br /><table>'.encode('utf8'))
+                self.wfile.write(f'<article>Committee page: {committee}<br /><table>'.encode('utf8'))
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
                         up_votes, down_votes, abstains = opinion.count_votes()
