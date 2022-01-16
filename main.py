@@ -475,7 +475,7 @@ footer {
   bottom: 0;
   width: 100%;
   height: 9%;
-  z-index: 2;  
+  z-index: 1;  
 }
 button.submit {
   position: absolute;
@@ -484,6 +484,7 @@ button.submit {
   height: 90%;
   border-radius: 25px;
   background-color: #f1c232ff;
+  z-index: 1;
 }
 </style>
 </head>
