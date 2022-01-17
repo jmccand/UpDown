@@ -1402,6 +1402,7 @@ div#timeline {
   height: 100%;
 }
 div.element {
+  position: absolute;
   border: 3px solid black;
 }
 footer {
@@ -1425,22 +1426,22 @@ div#results {
         self.wfile.write('''<div id='timeline_line'>
 </div>
 <div id='timeline'>
-<div class='element'>
+<div class='element' style='top: 0;'>
 Creation
 </div>
-<div class='element'>
+<div class='element' style='top: 16.6%;'>
 Approval
 </div>
-<div class='element'>
+<div class='element' style='top: 33.2%;'>
 Scheduling
 </div>
-<div class='element'>
+<div class='element' style='top: 49.8%;'>
 Voting
 </div>
-<div class='element'>
+<div class='element' style='top: 66.4%;'>
 Senate
 </div>
-<div class='element'>
+<div class='element' style='top: 83%;'>
 Bill or Resolution
 </div>
 </div>'''.encode('utf8'))
