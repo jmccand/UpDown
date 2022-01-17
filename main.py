@@ -621,9 +621,11 @@ function checkVoteValidity(new_vote, old_vote) {
 function submit_opinion() {
     var xhttp = new XMLHttpRequest();
     const opinion_text = prompt('Thank you for your input, please enter your opinion below:');
-    xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
-    xhttp.send();
-    //alert('Your opinion was submitted. Thank you!');
+    if (opinion_text != '' && opinion_text != null) {
+        xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
+        xhttp.send();
+        //alert('Your opinion was submitted. Thank you!');
+    }
 }
 </script>
 </footer>'''.encode('utf8'))
@@ -693,12 +695,13 @@ article {
   height: 91%;
   z-index: 1;
   overflow: scroll;
+  background-color: #cfe2f3ff;
 }
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('''<article>Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
-        self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: gray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
+        self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: lightGray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
 <ul>
 <li><a href='/senate#welcome'>Welcome!</a></li>
