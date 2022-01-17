@@ -1388,12 +1388,21 @@ article {
   z-index: 1;
   overflow: scroll;
 }
-div#timeline {
+div#timeline_line {
   position: absolute;
   height: 100%;
   width: 3%;
   left: 10%;
   background-color: gray;
+}
+div#timeline {
+  position: absolute;
+  right: 0;
+  width: 85%;
+  height: 100%;
+}
+div.element {
+  border: 3px solid black;
 }
 footer {
   position: fixed;
@@ -1413,7 +1422,27 @@ div#results {
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article>'.encode('utf8'))
-        self.wfile.write('''<div id='timeline'>
+        self.wfile.write('''<div id='timeline_line'>
+</div>
+<div id='timeline'>
+<div class='element'>
+Creation
+</div>
+<div class='element'>
+Approval
+</div>
+<div class='element'>
+Scheduling
+</div>
+<div class='element'>
+Voting
+</div>
+<div class='element'>
+Senate
+</div>
+<div class='element'>
+Bill or Resolution
+</div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write('<footer><table>'.encode('utf8'))
