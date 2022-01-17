@@ -12,6 +12,7 @@ import datetime
 import smtplib
 import calendar
 import random
+import logging
 
 class MyHandler(SimpleHTTPRequestHandler):
 
@@ -253,13 +254,15 @@ function close_menu() {
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
         else:
             my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
-        db.user_cookies_lock.acquire()
-        try:
-            db.user_cookies[my_account.cookie_code] = my_account
-            db.user_cookies.sync()
-        finally:
-            db.user_cookies_lock.release()
-        print(f'{my_account.email} did {activity_unit}')
+        
+        # db.user_cookies_lock.acquire()
+        # try:
+        db.user_cookies[my_account.cookie_code] = my_account
+        db.user_cookies.sync()
+        #finally:
+        #db.user_cookies_lock.release()
+        # print(f'{my_account.email} did {activity_unit}')
+        logging.info(f'{my_account.email} with {my_account.cookie_code} did {activity_unit}')
 
     def load_image(self):
         return SimpleHTTPRequestHandler.do_GET(self)
@@ -1833,7 +1836,9 @@ def main():
             ID_set = db.opinions_calendar[this_date]
             print(f'  {this_date} : {ID_set}')
 
-        
+
+    logging.basicConfig(filename='UpDown.log', encoding='utf-8', level=logging.DEBUG)
+            
     httpd = ReuseHTTPServer(('0.0.0.0', 8888), MyHandler)
     httpd.serve_forever()
     
