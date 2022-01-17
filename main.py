@@ -1495,33 +1495,33 @@ Stat
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
             message = None
             if len(opinion.activity) == 1:
-                message = 'Waiting for approval.'
+                message = 'pre-approval'
             elif len(opinion.activity) == 2:
                 #assert opinion.activity[1][1] in ('yes', 'no')
                 #assert len(opinion.activity[1]) == 3
                 assert opinion.approved in (True, False)
                 if opinion.approved:
-                    message = f'Approved on {opinion.activity[1][0][2].date()}. Waiting to be scheduled.'
+                    message = f'approved'
                 else:
-                    message = f'Rejected on {opinion.activity[1][0][2].date()}.'
+                    message = f'rejected'
             elif len(opinion.activity) == 3:
                 #assert len(opinion.activity[2]) == 4
                 if datetime.date.today() < opinion.activity[2][0][2]:
-                    message = 'Approved and scheduled.'
+                    message = 'scheduled'
                 elif datetime.date.today() > opinion.activity[2][0][2]:
-                    message = 'Waiting for submission into Senate.'
+                    message = 'pre-Senate'
                 else:
-                    message = 'Currently voting.'
+                    message = 'voting'
             elif len(opinion.activity) == 4:
                 #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                 assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
                 if opinion.activity[3][0][1] != 'no':
-                    message = f'Submitted into the {opinion.activity[3][0][1]} committee.'
+                    message = f'{opinion.activity[3][0][1]}'
                 else:
-                    message = 'Votes were not significant enough to submit to the Senate.'
+                    message = 'unsuccessful'
             elif len(opinion.activity) == 5:
                 #assert len(opinion.activity[4]) == 3
-                message = 'The Senate has viewed the opinion. A first draft of a bill will be completed by the expected date {opinion.activity[4][1]}.'
+                message = 'pre-bill'
             self.wfile.write(f'''<tr>
 <td>
 {opinion.text}
