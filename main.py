@@ -1393,6 +1393,7 @@ footer {
   bottom: 0;
   width: 100%;
   height: 50%;
+  overflow: scroll;
   z-index: 1;
 }
 div#results {
