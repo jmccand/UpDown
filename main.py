@@ -1384,9 +1384,16 @@ article {
   position: absolute;
   top: 9%;
   width: 100%;
-  height: 39%;
+  height: 41%;
   z-index: 1;
   overflow: scroll;
+}
+div#timeline {
+  position: absolute;
+  height: 100%;
+  width: 3%;
+  left: 10%;
+  background-color: gray;
 }
 footer {
   position: fixed;
@@ -1406,6 +1413,8 @@ div#results {
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article>'.encode('utf8'))
+        self.wfile.write('''<div id='timeline'>
+</div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write('<footer><table>'.encode('utf8'))
         
