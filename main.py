@@ -1404,7 +1404,9 @@ div#results {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('<article><table>'.encode('utf8'))
+        self.wfile.write('<article>'.encode('utf8'))
+        self.wfile.write('</article>'.encode('utf8'))
+        self.wfile.write('<footer><table>'.encode('utf8'))
         
         for opinion_ID, opinion in db.opinions_database.items():
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
@@ -1446,7 +1448,7 @@ div#results {
 {message}
 </td>
 </tr>'''.encode('utf8'))
-        self.wfile.write('</table></article>'.encode('utf8'))
+        self.wfile.write('</table></footer>'.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
