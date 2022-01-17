@@ -1,7 +1,7 @@
 import urllib.parse
 import socket
 from http.cookies import SimpleCookie
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from datetime import datetime
 import re
 import json
@@ -521,7 +521,7 @@ button.submit {
                     if opinion_ID in my_account.votes:
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<span>{opiion.text}</span><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
+                            self.wfile.write(f'''<span>{opinion.text}</span><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                         elif my_vote[-1][0] == 'down':
                             self.wfile.write(f'''<span>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                         else:
@@ -1760,8 +1760,8 @@ td.care {
                 self.wfile.write('</table></article>'.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
         
-        
-class ReuseHTTPServer(HTTPServer):    
+
+class ReuseHTTPServer(ThreadingHTTPServer):
     def server_bind(self):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(self.server_address)
