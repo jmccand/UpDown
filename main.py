@@ -1392,7 +1392,7 @@ div#timeline_line {
   position: absolute;
   height: 100%;
   width: 3%;
-  left: 10%;
+  left: 6%;
   background-color: gray;
 }
 div#timeline {
@@ -1403,7 +1403,20 @@ div#timeline {
 }
 div.element {
   position: absolute;
-  border: 3px solid black;
+  right: 7%;
+  width: 93%;
+  height: 8%;
+}
+div.label {
+  position: absolute;
+  left: 0;
+  width: 60%;
+}
+div.stat {
+  position: absolute;
+  right: 0;
+  width: 40%;
+  text-align: right;
 }
 footer {
   position: fixed;
@@ -1427,22 +1440,51 @@ div#results {
 </div>
 <div id='timeline'>
 <div class='element' style='top: 0;'>
+<div class='label'>
 Creation
 </div>
+<div class='stat'>
+Stat
+</div>
+</div>
 <div class='element' style='top: 16.6%;'>
+<div class='label'>
 Approval
 </div>
+<div class='stat'>
+Stat
+</div>
+</div>
 <div class='element' style='top: 33.2%;'>
+<div class='label'>
 Scheduling
 </div>
+<div class='stat'>
+Stat
+</div>
+</div>
 <div class='element' style='top: 49.8%;'>
+<div class='label'>
 Voting
 </div>
+<div class='stat'>
+Stat
+</div>
+</div>
 <div class='element' style='top: 66.4%;'>
+<div class='label'>
 Senate
 </div>
+<div class='stat'>
+Stat
+</div>
+</div>
 <div class='element' style='top: 83%;'>
+<div class='label'>
 Bill or Resolution
+</div>
+<div class='stat'>
+Stat
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
