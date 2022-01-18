@@ -254,6 +254,22 @@ function close_menu() {
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
         else:
             my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
+
+        def update_user_activity():
+            db.user_cookies[my_account.cookie_code] = my_account
+        
+        self.run_and_sync(db.user_cookies_lock,
+                          update_user_activity,
+                          db.user_cookies)
+        logging.info(f'{my_account.email} with {my_account.cookie_code} did {activity_unit}')
+        
+    def log_activity_old(self, what=[]):
+        my_account = self.identify_user()
+        activity_unit = [self.path_root] + what + [datetime.datetime.now()]
+        if datetime.date.today() in my_account.activity:
+            my_account.activity[datetime.date.today()].append(tuple(activity_unit))
+        else:
+            my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
         
         # db.user_cookies_lock.acquire()
         # try:
@@ -263,6 +279,13 @@ function close_menu() {
         #db.user_cookies_lock.release()
         # print(f'{my_account.email} did {activity_unit}')
         logging.info(f'{my_account.email} with {my_account.cookie_code} did {activity_unit}')
+
+    def run_and_sync(self, lock_needed, change, database):
+        lock_needed.acquire()
+        try:
+            change()
+        finally:
+            lock_needed.release()
 
     def load_image(self):
         return SimpleHTTPRequestHandler.do_GET(self)
