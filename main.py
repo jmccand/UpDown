@@ -564,7 +564,6 @@ function vote(element_ID) {
     var xhttp = new XMLHttpRequest();
     var split_ID = element_ID.split(' ');
     const opinion_ID = split_ID[0];
-
     let old_vote = '';
     if (document.getElementById(opinion_ID + ' up').className.startsWith('selected')) {
         old_vote = 'up';
@@ -575,9 +574,7 @@ function vote(element_ID) {
     else {
         old_vote = 'abstain';
     }
-
     const my_click = split_ID[1];
-
     let my_vote = '';
     if (my_click != old_vote) {
         my_vote = my_click;
@@ -587,10 +584,8 @@ function vote(element_ID) {
     }
     
     if (checkVoteValidity(my_vote, old_vote)) {
-
         xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
         xhttp.send();
-
         if (my_vote == old_vote) {
             document.getElementById(element_ID).className = 'unselected_' + my_vote;
         }
