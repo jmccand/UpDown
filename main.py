@@ -360,12 +360,9 @@ function checkEmail() {
 
                 # change the databases
                 assert(my_uuid not in db.user_cookies and my_uuid not in db.verification_links)
-                db.verification_links_lock.acquire()
-                try:
+                def update_verification_links():
                     db.verification_links[link_uuid] = my_uuid
-                    db.verification_links.sync()
-                finally:
-                    db.verification_links_lock.release()
+                run_and_sync(self, verification_links_lock, update_verification_links, db.verification_links)
                 db.user_cookies_lock.acquire()
                 try:
                     db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
