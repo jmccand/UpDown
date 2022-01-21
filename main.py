@@ -425,16 +425,9 @@ Thank you for verifying. Your votes are now counted.<br />
         self.send_response(200)
         self.end_headers()
         day_of_the_week = datetime.date.today().weekday()
-        if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
-            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-            self.send_links_head()
-            self.wfile.write('</head><body>'.encode('utf8'))
-            self.send_links_body()
-            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
-        else:
-            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-            self.send_links_head()
-            self.wfile.write('''<style>
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('''<style>
 article {
   position: absolute;
   top: 9%;
@@ -515,7 +508,10 @@ button.submit {
 </style>
 </head>
 <body>'''.encode('utf8'))
-            self.send_links_body()
+        self.send_links_body()
+        if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
+            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
+        else:
             self.wfile.write('<article>'.encode('utf8'))
             randomized = list(db.opinions_calendar[str(datetime.date.today())])
             random.shuffle(randomized)
