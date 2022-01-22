@@ -263,23 +263,6 @@ function close_menu() {
                           db.user_cookies)
         logging.info(f'{my_account.email} with {my_account.cookie_code} did {activity_unit}')
         
-    def log_activity_old(self, what=[]):
-        my_account = self.identify_user()
-        activity_unit = [self.path_root] + what + [datetime.datetime.now()]
-        if datetime.date.today() in my_account.activity:
-            my_account.activity[datetime.date.today()].append(tuple(activity_unit))
-        else:
-            my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
-        
-        # db.user_cookies_lock.acquire()
-        # try:
-        db.user_cookies[my_account.cookie_code] = my_account
-        db.user_cookies.sync()
-        #finally:
-        #db.user_cookies_lock.release()
-        # print(f'{my_account.email} did {activity_unit}')
-        logging.info(f'{my_account.email} with {my_account.cookie_code} did {activity_unit}')
-
     def run_and_sync(self, lock_needed, change, database):
         lock_needed.acquire()
         try:
@@ -362,13 +345,10 @@ function checkEmail() {
                 assert(my_uuid not in db.user_cookies and my_uuid not in db.verification_links)
                 def update_verification_links():
                     db.verification_links[link_uuid] = my_uuid
-                run_and_sync(self, verification_links_lock, update_verification_links, db.verification_links)
-                db.user_cookies_lock.acquire()
-                try:
+                self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+                def update_user_cookies():
                     db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
-                    db.user_cookies.sync()
-                finally:
-                    db.user_cookies_lock.release()
+                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                 #redirect to homepage so they can vote
                 self.send_response(302)
@@ -391,12 +371,9 @@ function checkEmail() {
                 my_account.verified_email = True
 
                 # update the database
-                db.user_cookies_lock.acquire()
-                try:
+                def update_user_cookies():
                     db.user_cookies[my_account.cookie_code] = my_account
-                    db.user_cookies.sync()
-                finally:
-                    db.user_cookies_lock.release()
+                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                 # send success page
                 self.send_response(200)
@@ -1012,12 +989,9 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             opinion_text = url_arguments['opinion_text'][0]
             opinion_ID = len(db.opinions_database)
             assert str(opinion_ID) not in db.opinions_database
-            db.opinions_database_lock.acquire()
-            try:
+            def update_opinions_database():
                 db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
-                db.opinions_database.sync()
-            finally:
-                db.opinions_database_lock.release()
+            self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             self.send_response(200)
             self.end_headers()
             self.log_activity([opinion_ID])
@@ -1038,12 +1012,10 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                 for other_opinion_ID in db.opinions_calendar[str(datetime.date.today())]:
                     if other_opinion_ID != opinion_ID and other_opinion_ID not in my_account.votes:
                         my_account.votes[other_opinion_ID] = [('abstain', datetime.datetime.now())]
-                db.user_cookies_lock.acquire()
-                try:
-                    db.user_cookies[my_account.cookie_code] = my_account
-                    db.user_cookies.sync()
-                finally:
-                    db.user_cookies_lock.release()
+
+                def update_user_cookies():
+                    db.user_cookies[my_account.cookie_code] = my_account                    
+                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                 self.send_response(200)
                 self.end_headers()
@@ -1074,20 +1046,14 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                             opinion.approved = False
                     else:
                         opinion.activity[1].append((my_account.email, my_vote, datetime.datetime.now()))
-                        
-                    db.opinions_database_lock.acquire()
-                    try:
-                        db.opinions_database[opinion_ID] = opinion
-                        db.opinions_database.sync()
-                    finally:
-                        db.opinions_database_lock.release()
 
-                    db.user_cookies_lock.acquire()
-                    try:
+                    def update_opinions_database():
+                        db.opinions_database[opinion_ID] = opinion
+                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+
+                    def update_user_cookies():
                         db.user_cookies[my_account.cookie_code] = my_account
-                        db.user_cookies.sync()
-                    finally:
-                        db.user_cookies_lock.release()
+                    self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                     self.send_response(200)
                     self.end_headers()
@@ -1308,13 +1274,11 @@ function update_unselected(element) {{
                         opinion.activity.append([(my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now())])
                     else:
                         opinion.activity[2].append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now()))
-                        
-                    db.opinions_database_lock.acquire()
-                    try:
+
+                    def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                        db.opinions_database.sync()
-                    finally:
-                        db.opinions_database_lock.release()
+                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+
                     selected = set()
                     if this_date in db.opinions_calendar:
                         selected = db.opinions_calendar[this_date]
@@ -1323,12 +1287,11 @@ function update_unselected(element) {{
                     selected.add(opinion_ID)
                     if MyHandler.DEBUG < 2:
                         print(f'selected after: {selected}')
-                    db.opinions_calendar_lock.acquire()
-                    try:
+                        
+                    def update_opinions_calendar():
                         db.opinions_calendar[this_date] = selected
-                        db.opinions_calendar.sync()
-                    finally:
-                        db.opinions_calendar_lock.release()
+                    self.run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
+                    
                     self.send_response(200)
                     self.end_headers()
 
@@ -1357,13 +1320,11 @@ function update_unselected(element) {{
                     opinion.scheduled = False
                     assert len(opinion.activity) == 3, f'{len(opinion.activity)}'
                     opinion.activity[2].append((my_account.email, False, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
-                    
-                    db.opinions_database_lock.acquire()
-                    try:
+
+                    def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                        db.opinions_database.sync()
-                    finally:
-                        db.opinions_database_lock.release()
+                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+
                     selected = set()
                     if this_date in db.opinions_calendar:
                         selected = db.opinions_calendar[this_date]
@@ -1372,12 +1333,11 @@ function update_unselected(element) {{
                     selected.remove(opinion_ID)
                     if MyHandler.DEBUG < 2:
                         print(f'selected after: {selected}')
-                    db.opinions_calendar_lock.acquire()
-                    try:
+
+                    def update_opinions_calendar():
                         db.opinions_calendar[this_date] = selected
-                        db.opinions_calendar.sync()
-                    finally:
-                        db.opinions_calendar_lock.release()
+                    self.run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
+
                     self.send_response(200)
                     self.end_headers()
 
@@ -1721,12 +1681,9 @@ function forward(element) {{
                         opinion.activity[3].append((my_account.email, committee, datetime.datetime.now()))
 
                     opinion.committee_jurisdiction = committee
-                    db.opinions_database_lock.acquire()
-                    try:
+                    def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                        db.opinions_database.sync()
-                    finally:
-                        db.opinions_database_lock.release()
+                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
 
                     self.send_response(200)
                     self.end_headers()
