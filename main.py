@@ -421,7 +421,7 @@ section {
 }
 div#end_block {
   width: 100%;
-  height: 10%;
+  height: 55px;
   z-index: 1;
 }
 div.unselected_up {
@@ -467,8 +467,8 @@ footer {
   position: fixed;
   bottom: 0;
   width: 100%;
-  height: 9%;
-  z-index: 1;  
+  height: 55px;
+  z-index: 1; 
 }
 button.submit {
   position: absolute;
