@@ -133,14 +133,14 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  height: 9%;
+  height: 45px;
   z-index: 2;
 }
 #hamburger {
   position: absolute;
   top: 0;
   left: 0;
-  width: 18%;
+  width: 50px;
   height: 100%;
   z-index: 1;
 }
@@ -157,7 +157,7 @@ header {
 }
 #logo {
   position: absolute;
-  width: 18%;
+  width: 50px;
   height: 100%;
   top: 0;
   right: 0;
@@ -404,7 +404,7 @@ Thank you for verifying. Your votes are now counted.<br />
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -634,7 +634,7 @@ function submit_opinion() {
 <style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -681,7 +681,7 @@ function vote(element_ID) {
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -1078,7 +1078,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 <style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -1146,7 +1146,7 @@ td {
 <style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -1359,7 +1359,7 @@ function update_unselected(element) {{
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 41%;
   z-index: 1;
@@ -1521,7 +1521,7 @@ Stat
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -1588,7 +1588,7 @@ article {
 <style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
@@ -1701,7 +1701,7 @@ function forward(element) {{
                 self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 9%;
+  top: 50px;
   width: 100%;
   height: 91%;
   z-index: 1;
