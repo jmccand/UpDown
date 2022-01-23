@@ -412,7 +412,7 @@ article {
 }
 section {
   width: 98%;
-  height: 10%;
+  height: 50px;
   margin: 1%;
   position: relative;
   background-color: #cfe2f3ff;
@@ -431,6 +431,7 @@ div.unselected_up {
   right: 0;
   top: 0;
   text-align: center;
+  font-size: 22px;
 }
 div.unselected_down {
   color: black;
@@ -439,6 +440,7 @@ div.unselected_down {
   right: 0;
   bottom: 0;
   text-align: center;
+  font-size: 22px;
 }
 div.selected_up {
   color : green;
@@ -447,6 +449,7 @@ div.selected_up {
   right: 0;
   top: 0;
   text-align: center;
+  font-size: 22px;
 }
 div.selected_down {
   color : red;
@@ -455,6 +458,7 @@ div.selected_down {
   right: 0;
   bottom: 0;
   text-align: center;
+  font-size: 22px;
 }
 span.left {
   width: 75%;
