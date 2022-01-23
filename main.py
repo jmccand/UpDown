@@ -517,13 +517,13 @@ button.submit {
                     if opinion_ID in my_account.votes:
                         my_vote = my_account.votes[opinion_ID]
                         if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<span>{opinion.text}</span><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
+                            self.wfile.write(f'''<span class='left'>{opinion.text}</span><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                         elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<span>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
+                            self.wfile.write(f'''<span class='left'>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                         else:
-                            self.wfile.write(f'''<span>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
+                            self.wfile.write(f'''<span class='left'>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                     else:
-                        self.wfile.write(f'''<span>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
+                        self.wfile.write(f'''<span class='left'>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
                     self.wfile.write('</section>'.encode('utf8'))
             self.wfile.write(str('''
 <div id='end_block'>
