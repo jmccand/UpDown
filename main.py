@@ -1372,20 +1372,20 @@ article {
 div#timeline_line {
   position: absolute;
   height: 100%;
-  width: 3%;
-  left: 6%;
+  width: 10px;
+  left: 20px;
   background-color: gray;
 }
 div#timeline {
   position: absolute;
   right: 0;
-  width: 85%;
+  left: 50px;
   height: 100%;
 }
 div.element {
   position: absolute;
-  right: 7%;
-  width: 93%;
+  right: 20px;
+  left: 0;
   height: 8%;
 }
 div.label {
