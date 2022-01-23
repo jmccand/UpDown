@@ -194,8 +194,8 @@ header {
   position: absolute;
   top: 0;
   right: 0;
-  width: 22%;
-  height: 9%;
+  width: 50px;
+  height: 45px;
   z-index: 1;
 }
 </style>'''.encode('utf8'))
