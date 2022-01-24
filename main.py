@@ -1767,17 +1767,17 @@ class Opinion:
         down_votes = 0
         abstains = 0
         for user in db.user_cookies.values():
-            if str(self.ID) in user.votes:
-                this_vote = user.votes[str(self.ID)][-1][0]
-                #print(f'{user.email=} has voted {this_vote=}')
-                if this_vote == 'up':
-                    up_votes += 1
-                elif this_vote == 'down':
-                    down_votes += 1
-                elif this_vote == 'abstain':
-                    abstains += 1
-                else:
-                    raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
+            if user.verified_email and str(self.ID) in user.votes:
+                    this_vote = user.votes[str(self.ID)][-1][0]
+                    #print(f'{user.email=} has voted {this_vote=}')
+                    if this_vote == 'up':
+                        up_votes += 1
+                    elif this_vote == 'down':
+                        down_votes += 1
+                    elif this_vote == 'abstain':
+                        abstains += 1
+                    else:
+                        raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
         return up_votes, down_votes, abstains
 
 class invalidCookie(ValueError):
