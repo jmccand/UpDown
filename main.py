@@ -36,7 +36,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path =}\n')
 
-        if invalid_cookie and not self.path.startswith('/check_email'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken'):
             self.get_email()
         else:
             try:
@@ -50,6 +50,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/check_email'):
                     self.path_root = '/check_email'
                     self.check_email()
+                elif self.path.startswith('/email_taken'):
+                    self.path_root = '/email_taken'
+                    self.email_taken()
                 elif self.path == '/about_the_senate':
                     self.path_root = '/about_the_senate'
                     self.about_the_senate_page()
@@ -315,57 +318,100 @@ function checkEmail() {{
         if 'email' in url_arguments:
             user_email = url_arguments['email'][0]
             if user_email.endswith('@lexingtonma.org') or user_email in local.EXCEPTION_EMAILS:
-                #set up uuids so that they are unique
-                my_uuid = uuid.uuid4().hex
-                while my_uuid in db.user_cookies or my_uuid in db.verification_links:
+                email_taken = False
+                existing_uuid = None
+                for cookie, user in db.user_cookies.items():
+                    if user.email == user_email:
+                        email_taken = True
+                        assert user.cookie_code == cookie
+                        existing_uuid = user.cookie_code
+
+                if email_taken:
+                    # send email
+                    email_address = user_email
+                    gmail_user = local.EMAIL
+                    gmail_password = local.PASSWORD
+                    sent_from = gmail_user
+                    to = email_address
+                    subject = 'Add your votes to the count?'
+                    body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={existing_uuid}'
+                    email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
+                    try:
+                        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+                        server.ehlo()
+                        server.login(gmail_user, gmail_password)
+                        server.sendmail(sent_from, to, email_text)
+                        server.close()
+                        if MyHandler.DEBUG < 2:
+                            print(f'New user with email {email_address}!')
+                    except:
+                        raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
+                    
+                    self.send_response(302)
+                    self.send_header('Location', f'/email_taken?email={user_email}')
+                    self.end_headers()
+                else:
+                    #set up uuids so that they are unique
                     my_uuid = uuid.uuid4().hex
-                
-                link_uuid = uuid.uuid4().hex
-                while link_uuid in db.user_cookies or link_uuid in db.verification_links or link_uuid == my_uuid:
+                    while my_uuid in db.user_cookies or my_uuid in db.verification_links:
+                        my_uuid = uuid.uuid4().hex
+
                     link_uuid = uuid.uuid4().hex
-                if MyHandler.DEBUG < 2:
-                    print(f'{my_uuid=} {link_uuid=}')
-
-                # send email
-                assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
-                email_address = user_email
-                gmail_user = local.EMAIL
-                gmail_password = local.PASSWORD
-                sent_from = gmail_user
-                to = email_address
-                subject = 'Add your votes to the count?'
-                body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
-                email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
-                try:
-                    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-                    server.ehlo()
-                    server.login(gmail_user, gmail_password)
-                    server.sendmail(sent_from, to, email_text)
-                    server.close()
+                    while link_uuid in db.user_cookies or link_uuid in db.verification_links or link_uuid == my_uuid:
+                        link_uuid = uuid.uuid4().hex
                     if MyHandler.DEBUG < 2:
-                        print(f'New user with email {email_address}!')
-                except:
-                    raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
+                        print(f'{my_uuid=} {link_uuid=}')
+                    assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
 
-                # change the databases
-                assert(my_uuid not in db.user_cookies and my_uuid not in db.verification_links)
-                def update_verification_links():
-                    db.verification_links[link_uuid] = my_uuid
-                self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
-                def update_user_cookies():
-                    db.user_cookies[my_uuid] = User(user_email, my_uuid)
-                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+                    # send email
+                    email_address = user_email
+                    gmail_user = local.EMAIL
+                    gmail_password = local.PASSWORD
+                    sent_from = gmail_user
+                    to = email_address
+                    subject = 'Add your votes to the count?'
+                    body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
+                    email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
+                    try:
+                        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+                        server.ehlo()
+                        server.login(gmail_user, gmail_password)
+                        server.sendmail(sent_from, to, email_text)
+                        server.close()
+                        if MyHandler.DEBUG < 2:
+                            print(f'New user with email {email_address}!')
+                    except:
+                        raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
 
-                #redirect to homepage so they can vote
-                self.send_response(302)
-                self.send_header('Location', '/')
-                self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
-                self.end_headers()
-                self.log_activity()
+                    # change the databases
+                    assert(my_uuid not in db.user_cookies and my_uuid not in db.verification_links)
+                    def update_verification_links():
+                        db.verification_links[link_uuid] = my_uuid
+                    self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+                    def update_user_cookies():
+                        db.user_cookies[my_uuid] = User(user_email, my_uuid)
+                    self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+
+                    #redirect to homepage so they can vote
+                    self.send_response(302)
+                    self.send_header('Location', '/')
+                    self.send_header('Set-Cookie', f'code={my_uuid}; path=/')
+                    self.end_headers()
+                    self.log_activity()
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
+
+    def email_taken(self):
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        if 'email' in url_arguments:
+            user_email = url_arguments['email'][0]
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(f'''<!DOCTYPE HTML><html><body>The email {user_email} has already been verified. If you want to use this device, click on the link sent to {user_email} using this device.</body></html>'''.encode('utf8'))
+        else:
+            raise ValueError(f"ip {self.client_address[0]} -- email taken function got url_arguments {url_arguments}")
 
     def verify_email(self):
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
