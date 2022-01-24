@@ -276,7 +276,7 @@ function close_menu() {
     def get_email(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('''<!DOCTYPE HTML>
+        self.wfile.write(f'''<!DOCTYPE HTML>
 <html>
 <body>
 <form method='GET' action='/check_email'>
@@ -286,20 +286,25 @@ Enter your school email (must end in @lexingtonma.org):
 </form>
 
 <script>
+exceptionEmails = {list(local.EXCEPTION_EMAILS)}
 setTimeout(checkEmail, 1000);
-function checkEmail() {
+function checkEmail() {{
     current_email = document.getElementById('email_box').value;
     console.log('email: ' + current_email);
-    if (current_email.endsWith('@lexingtonma.org')) {
+    if (current_email.endsWith('@lexingtonma.org')) {{
         console.log('PROPER EMAIL');
         document.getElementById('submit').disabled = false;
-    }
-    else {
+    }}
+    else if (exceptionEmails.indexOf(current_email) != -1) {{
+        console.log('EXCEPTION EMAIL');
+        document.getElementById('submit').disabled = false;
+    }}
+    else {{
         console.log('IMPROPER EMAIL');
         document.getElementById('submit').disabled = true;
-    }
+    }}
     setTimeout(checkEmail, 1000);
-}
+}}
 </script>
 
 </body>
@@ -308,7 +313,8 @@ function checkEmail() {
     def check_email(self):
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         if 'email' in url_arguments:
-            if url_arguments['email'][0].endswith('@lexingtonma.org'):
+            user_email = url_arguments['email'][0]
+            if user_email.endswith('@lexingtonma.org') or user_email in local.EXCEPTION_EMAILS:
                 #set up uuids so that they are unique
                 my_uuid = uuid.uuid4().hex
                 while my_uuid in db.user_cookies or my_uuid in db.verification_links:
@@ -322,7 +328,7 @@ function checkEmail() {
 
                 # send email
                 assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
-                email_address = url_arguments['email'][0]
+                email_address = user_email
                 gmail_user = local.EMAIL
                 gmail_password = local.PASSWORD
                 sent_from = gmail_user
@@ -347,7 +353,7 @@ function checkEmail() {
                     db.verification_links[link_uuid] = my_uuid
                 self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
                 def update_user_cookies():
-                    db.user_cookies[my_uuid] = User(url_arguments['email'][0], my_uuid)
+                    db.user_cookies[my_uuid] = User(user_email, my_uuid)
                 self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                 #redirect to homepage so they can vote
@@ -357,7 +363,7 @@ function checkEmail() {
                 self.end_headers()
                 self.log_activity()
             else:
-                raise ValueError(f"ip {self.client_address[0]} -- check email function got email {url_arguments['email'][0]}")
+                raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
