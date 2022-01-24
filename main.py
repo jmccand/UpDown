@@ -458,7 +458,7 @@ article {
   position: absolute;
   top: 50px;
   width: 100%;
-  height: 91%;
+  bottom: 0;
   z-index: 1;
   overflow: scroll;
 }
