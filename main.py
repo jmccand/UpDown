@@ -409,7 +409,7 @@ function checkEmail() {{
             user_email = url_arguments['email'][0]
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(f'''<!DOCTYPE HTML><html><body>The email {user_email} has already been verified. If you want to use this device, click on the link sent to {user_email} using this device.</body></html>'''.encode('utf8'))
+            self.wfile.write(f'''<!DOCTYPE HTML><html><body>Another device already has the  email {user_email}. If you want to use this email on this device, click on the link sent to {user_email} using this device.</body></html>'''.encode('utf8'))
         else:
             raise ValueError(f"ip {self.client_address[0]} -- email taken function got url_arguments {url_arguments}")
 
