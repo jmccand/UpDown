@@ -1869,7 +1869,7 @@ def main():
 
     logging.basicConfig(filename='UpDown.log', encoding='utf-8', level=logging.DEBUG)
             
-    httpd = ReuseHTTPServer(('0.0.0.0', 8888), MyHandler)
+    httpd = ReuseHTTPServer(('0.0.0.0', 80), MyHandler)
     httpd.serve_forever()
     
 
