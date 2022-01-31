@@ -331,7 +331,7 @@ function checkEmail() {{
                     email_address = user_email
                     gmail_user = local.EMAIL
                     gmail_password = local.PASSWORD
-                    sent_from = gmail_user
+                    sent_from = local.FROM_EMAIL
                     to = email_address
                     subject = 'Add your votes to the count?'
                     body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={existing_uuid}'
