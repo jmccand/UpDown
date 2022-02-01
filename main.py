@@ -36,7 +36,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path =}\n')
 
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email'):
             self.get_email()
         else:
             try:
@@ -118,7 +118,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got code {my_code}')
         else:
             if nocookie:
-                return
+                return None
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
 
@@ -320,11 +320,15 @@ function checkEmail() {{
             if user_email.endswith('@lexingtonma.org') or user_email in local.EXCEPTION_EMAILS:
                 email_taken = False
                 existing_uuid = None
+                existing_code = None
                 for cookie, user in db.user_cookies.items():
                     if user.email == user_email:
                         email_taken = True
                         assert user.cookie_code == cookie
-                        existing_uuid = user.cookie_code
+                        existing_code = user.cookie_code
+                for v_code, c_code in db.verification_links.items():
+                    if c_code == existing_code:
+                        existing_uuid = v_code
 
                 if email_taken:
                     # send email
@@ -367,7 +371,7 @@ function checkEmail() {{
                     email_address = user_email
                     gmail_user = local.EMAIL
                     gmail_password = local.PASSWORD
-                    sent_from = gmail_user
+                    sent_from = local.FROM_EMAIL
                     to = email_address
                     subject = 'Add your votes to the count?'
                     body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
@@ -415,34 +419,36 @@ function checkEmail() {{
 
     def verify_email(self):
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-        my_account = self.identify_user()
+        my_account = self.identify_user(True)
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
-            if db.verification_links[link_uuid] == my_account.cookie_code:
-                # change the account locally
-                my_account.verified_email = True
+            if my_account == None:
+                print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
+            #if db.verification_links[link_uuid] == my_account.cookie_code:
+            # change the account locally
+            my_account = db.user_cookies[db.verification_links[link_uuid]]
+            my_account.verified_email = True
 
-                # update the database
-                def update_user_cookies():
-                    db.user_cookies[my_account.cookie_code] = my_account
-                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+            # update the database
+            def update_user_cookies():
+                db.user_cookies[my_account.cookie_code] = my_account
+            self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
-                # send success page
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write('''<!DOCTYPE HTML>
+            # send success page
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write('''<!DOCTYPE HTML>
 <html>
 <body>
 Thank you for verifying. Your votes are now counted.<br />
 <a href='/'>Return to homepage</a>
 </body>
 </html>'''.encode('utf8'))
-                if MyHandler.DEBUG < 2:
-                    print(f'{my_account.email} just verified their email!')
-
-                self.log_activity()
-            else:
-                raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
+            if MyHandler.DEBUG < 2:
+                print(f'{my_account.email} just verified their email!')
+            self.log_activity()
+            #else:
+                #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
         else:
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
 
