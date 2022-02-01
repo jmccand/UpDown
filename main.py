@@ -16,7 +16,7 @@ import logging
 
 class MyHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 3
+    DEBUG = 0
     
     def do_GET(self):
         print('\n')
@@ -436,6 +436,7 @@ function checkEmail() {{
 
             # send success page
             self.send_response(200)
+            self.send_header('Set-Cookie', f'code={my_account.cookie_code}; path=/')
             self.end_headers()
             self.wfile.write('''<!DOCTYPE HTML>
 <html>
