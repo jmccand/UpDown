@@ -1468,8 +1468,8 @@ footer {
 #search_bar {
   position: absolute;
   top: 0;
-  left: 2%;
-  width: 96%;
+  left: 1%;
+  width: 98%;
   height: 26px;
   padding: 2;
   border: 0;
@@ -1559,7 +1559,7 @@ Stat
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
-        self.wfile.write('''<footer><input id='search_bar' type='text'/><div id='results'><table>'''.encode('utf8'))
+        self.wfile.write('''<footer><form method='GET' action='/search'><input id='search_bar' type='text' name='words'/></form><div id='results'>'''.encode('utf8'))
         
         for opinion_ID, opinion in db.opinions_database.items():
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
@@ -1601,7 +1601,7 @@ Stat
 {message}
 </span>
 </div>'''.encode('utf8'))
-        self.wfile.write('</table></div></footer>'.encode('utf8'))
+        self.wfile.write('</div></footer>'.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
