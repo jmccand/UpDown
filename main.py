@@ -1468,15 +1468,40 @@ footer {
 #search_bar {
   position: absolute;
   top: 0;
-  width: 100%;
-  height: 15%;
+  left: 2%;
+  width: 96%;
+  height: 26px;
+  padding: 2;
+  border: 0;
 }
 div#results {
   position: absolute;
   bottom: 0;
+  top: 32px;
   width: 100%;
-  height: 85%;
   overflow: scroll;
+}
+div.result {
+  width: 99%;
+  height: 50px;
+  margin: 0.5%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+}
+span.left {
+  height: 80%;
+  top: 10%;
+  position: absolute;
+  left: 5px;
+  right: 80px;
+}
+span.status {
+  width: 80px;
+  height: 100%;
+  position: absolute;
+  right: 0;
 }
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
@@ -1568,14 +1593,14 @@ Stat
             elif len(opinion.activity) == 5:
                 #assert len(opinion.activity[4]) == 3
                 message = 'pre-bill'
-            self.wfile.write(f'''<tr>
-<td>
+            self.wfile.write(f'''<div class='result'>
+<span class='left'>
 {opinion.text}
-</td>
-<td>
+</span>
+<span class='status'>
 {message}
-</td>
-</tr>'''.encode('utf8'))
+</span>
+</div>'''.encode('utf8'))
         self.wfile.write('</table></div></footer>'.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
