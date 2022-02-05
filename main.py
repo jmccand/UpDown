@@ -16,7 +16,7 @@ import logging
 
 class MyHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 0
+    DEBUG = 3
     
     def do_GET(self):
         print('\n')
@@ -1534,7 +1534,7 @@ Stat
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
-        self.wfile.write('''<footer><div id='results'><input id='search_bar' type='text'/>><table>'''.encode('utf8'))
+        self.wfile.write('''<footer><input id='search_bar' type='text'/><div id='results'><table>'''.encode('utf8'))
         
         for opinion_ID, opinion in db.opinions_database.items():
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
