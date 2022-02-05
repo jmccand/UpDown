@@ -92,7 +92,7 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/unschedule'):
                     self.path_root = '/unschedule'
                     self.unschedule()
-                elif self.path == '/track_opinions':
+                elif self.path.startswith('/track_opinions'):
                     self.path_root = '/track_opinions'
                     self.track_opinions_page()
                 elif self.path == '/forward_opinions':
@@ -1415,6 +1415,7 @@ function update_unselected(element) {{
 
     def track_opinions_page(self):
         my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         self.send_response(200)
         self.end_headers()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -1559,41 +1560,44 @@ Stat
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
-        self.wfile.write('''<footer><form method='GET' action='/search'><input id='search_bar' type='text' name='words'/></form><div id='results'>'''.encode('utf8'))
-        
-        for opinion_ID, opinion in db.opinions_database.items():
-            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
-            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-            message = None
-            if len(opinion.activity) == 1:
-                message = 'pre-approval'
-            elif len(opinion.activity) == 2:
-                #assert opinion.activity[1][1] in ('yes', 'no')
-                #assert len(opinion.activity[1]) == 3
-                assert opinion.approved in (True, False)
-                if opinion.approved:
-                    message = f'approved'
-                else:
-                    message = f'rejected'
-            elif len(opinion.activity) == 3:
-                #assert len(opinion.activity[2]) == 4
-                if datetime.date.today() < opinion.activity[2][0][2]:
-                    message = 'scheduled'
-                elif datetime.date.today() > opinion.activity[2][0][2]:
-                    message = 'pre-Senate'
-                else:
-                    message = 'voting'
-            elif len(opinion.activity) == 4:
-                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                if opinion.activity[3][0][1] != 'no':
-                    message = f'{opinion.activity[3][0][1]}'
-                else:
-                    message = 'unsuccessful'
-            elif len(opinion.activity) == 5:
-                #assert len(opinion.activity[4]) == 3
-                message = 'pre-bill'
-            self.wfile.write(f'''<div class='result'>
+        self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words'/></form><div id='results'>'''.encode('utf8'))
+
+        if 'words' in url_arguments:
+            return 0;
+        else:
+            for opinion_ID, opinion in db.opinions_database.items():
+                # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
+                # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
+                message = None
+                if len(opinion.activity) == 1:
+                    message = 'pre-approval'
+                elif len(opinion.activity) == 2:
+                    #assert opinion.activity[1][1] in ('yes', 'no')
+                    #assert len(opinion.activity[1]) == 3
+                    assert opinion.approved in (True, False)
+                    if opinion.approved:
+                        message = f'approved'
+                    else:
+                        message = f'rejected'
+                elif len(opinion.activity) == 3:
+                    #assert len(opinion.activity[2]) == 4
+                    if datetime.date.today() < opinion.activity[2][0][2]:
+                        message = 'scheduled'
+                    elif datetime.date.today() > opinion.activity[2][0][2]:
+                        message = 'pre-Senate'
+                    else:
+                        message = 'voting'
+                elif len(opinion.activity) == 4:
+                    #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
+                    assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                    if opinion.activity[3][0][1] != 'no':
+                        message = f'{opinion.activity[3][0][1]}'
+                    else:
+                        message = 'unsuccessful'
+                elif len(opinion.activity) == 5:
+                    #assert len(opinion.activity[4]) == 3
+                    message = 'pre-bill'
+                self.wfile.write(f'''<div class='result'>
 <span class='left'>
 {opinion.text}
 </span>
@@ -1601,75 +1605,10 @@ Stat
 {message}
 </span>
 </div>'''.encode('utf8'))
-        self.wfile.write('</div></footer>'.encode('utf8'))
-        self.wfile.write('''</body></html>'''.encode('utf8'))
+            self.wfile.write('</div></footer>'.encode('utf8'))
+            self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
-
-    def track_opinions_page_old(self):
-        my_account = self.identify_user()
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-        self.send_links_head()
-        self.wfile.write('''<style>
-article {
-  position: absolute;
-  top: 50px;
-  width: 100%;
-  height: 91%;
-  z-index: 1;
-  overflow: scroll;
-}
-</style>'''.encode('utf8'))
-        self.wfile.write('</head><body>'.encode('utf8'))
-        self.send_links_body()
-        self.wfile.write('<article><table>'.encode('utf8'))
-        for opinion_ID, opinion in db.opinions_database.items():
-            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
-            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-            message = None
-            if len(opinion.activity) == 1:
-                message = 'Waiting for approval.'
-            elif len(opinion.activity) == 2:
-                #assert opinion.activity[1][1] in ('yes', 'no')
-                #assert len(opinion.activity[1]) == 3
-                assert opinion.approved in (True, False)
-                if opinion.approved:
-                    message = f'Approved on {opinion.activity[1][0][2].date()}. Waiting to be scheduled.'
-                else:
-                    message = f'Rejected on {opinion.activity[1][0][2].date()}.'
-            elif len(opinion.activity) == 3:
-                #assert len(opinion.activity[2]) == 4
-                if datetime.date.today() < opinion.activity[2][0][2]:
-                    message = 'Approved and scheduled.'
-                elif datetime.date.today() > opinion.activity[2][0][2]:
-                    message = 'Waiting for submission into Senate.'
-                else:
-                    message = 'Currently voting.'
-            elif len(opinion.activity) == 4:
-                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                if opinion.activity[3][0][1] != 'no':
-                    message = f'Submitted into the {opinion.activity[3][0][1]} committee.'
-                else:
-                    message = 'Votes were not significant enough to submit to the Senate.'
-            elif len(opinion.activity) == 5:
-                #assert len(opinion.activity[4]) == 3
-                message = 'The Senate has viewed the opinion. A first draft of a bill will be completed by the expected date {opinion.activity[4][1]}.'
-            self.wfile.write(f'''<tr>
-<td>
-{opinion.text}
-</td>
-<td>
-{message}
-</td>
-</tr>'''.encode('utf8'))
-        self.wfile.write('</table></article>'.encode('utf8'))
-        self.wfile.write('''</body></html>'''.encode('utf8'))
-
-        self.log_activity()
-        
 
     def forward_opinions_page(self):
         my_account = self.identify_user()
