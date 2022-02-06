@@ -1971,7 +1971,7 @@ def search(input_text):
                 results[opinion_ID] = 1
 
     tuple_results = list(results.items())
-    tuple_results.sort(key=lambda x: x[1])
+    tuple_results.sort(key=lambda x: -x[1])
     ordered_results = [x[0] for x in tuple_results]
     
     return ordered_results
