@@ -1645,7 +1645,48 @@ Stat
         self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words'/></form><div id='results'>'''.encode('utf8'))
 
         if 'words' in url_arguments:
-            return 0;
+            for opinion_ID in search(url_arguments['words'][0]):
+                opinion = db.opinions_database[str(opinion_ID)]
+                # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
+                # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
+                message = None
+                if len(opinion.activity) == 1:
+                    message = 'pre-approval'
+                elif len(opinion.activity) == 2:
+                    #assert opinion.activity[1][1] in ('yes', 'no')
+                    #assert len(opinion.activity[1]) == 3
+                    assert opinion.approved in (True, False)
+                    if opinion.approved:
+                        message = f'approved'
+                    else:
+                        message = f'rejected'
+                elif len(opinion.activity) == 3:
+                    #assert len(opinion.activity[2]) == 4
+                    if datetime.date.today() < opinion.activity[2][0][2]:
+                        message = 'scheduled'
+                    elif datetime.date.today() > opinion.activity[2][0][2]:
+                        message = 'pre-Senate'
+                    else:
+                        message = 'voting'
+                elif len(opinion.activity) == 4:
+                    #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
+                    assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                    if opinion.activity[3][0][1] != 'no':
+                        message = f'{opinion.activity[3][0][1]}'
+                    else:
+                        message = 'unsuccessful'
+                elif len(opinion.activity) == 5:
+                    #assert len(opinion.activity[4]) == 3
+                    message = 'pre-bill'
+                self.wfile.write(f'''<div class='result'>
+<span class='left'>
+{opinion.text}
+</span>
+<span class='status'>
+{message}
+</span>
+</div>'''.encode('utf8'))
+            
         else:
             for opinion_ID, opinion in db.opinions_database.items():
                 # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
@@ -1920,9 +1961,20 @@ def build_search_index():
 
 def search(input_text):
     split_text = simplify_text(input_text)
-    if split_text[0] in SEARCH_INDEX:
-        results = set(SEARCH_INDEX[split_text[0]])
-        
+    results = {}
+    for word in split_text:
+        matching_IDs = SEARCH_INDEX[split_text[0]]
+        for opinion_ID in matching_IDs:
+            if opinion_ID in results:
+                results[opinion_ID] += 1
+            else:
+                results[opinion_ID] = 1
+
+    tuple_results = list(results.items())
+    tuple_results.sort(key=lambda x: x[1])
+    ordered_results = [x[0] for x in tuple_results]
+    
+    return ordered_results
     
 
 def main():
