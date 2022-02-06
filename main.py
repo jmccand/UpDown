@@ -1780,15 +1780,16 @@ tr.unselected {
                     self.wfile.write(f'''<tr><td colspan='3'>{this_date}</td></tr>'''.encode('utf8'))
                     for opinion_ID in list(opinion_set):
                         opinion = db.opinions_database[opinion_ID]
-                        up_votes, down_votes, abstains = opinion.count_votes()
-                        up_percent = 'N/A'
-                        if up_votes + down_votes != 0:
-                            up_percent = up_votes / (up_votes + down_votes) * 100
-                        care_percent = 'N/A'
-                        if up_votes + down_votes + abstains != 0:
-                            care_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
-                        opinion_ID_list.append(opinion_ID)
+                        if opinion.committee_jurisdiction == None:
+                            up_votes, down_votes, abstains = opinion.count_votes()
+                            up_percent = 'N/A'
+                            if up_votes + down_votes != 0:
+                                up_percent = up_votes / (up_votes + down_votes) * 100
+                            care_percent = 'N/A'
+                            if up_votes + down_votes + abstains != 0:
+                                care_percent = up_votes / (up_votes + down_votes + abstains) * 100
+                            self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
+                            opinion_ID_list.append(opinion_ID)
             self.wfile.write('''</table></td><td>
 <button id='Executive' onclick='forward(this);'>EXECUTIVE</button><br />
 <button id='Oversight' onclick='forward(this);'>OVERSIGHT</button><br />
@@ -1810,6 +1811,7 @@ function forward(element) {{
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/forward?committee=' + element.id + '&opinion_ID=' + selected, true);
     xhttp.send();
+    document.getElementById(selected).style = 'display: none;';
 }}
 
 </script>'''.encode('utf8'))
