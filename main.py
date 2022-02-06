@@ -1965,12 +1965,13 @@ def search(input_text):
     split_text = simplify_text(input_text)
     results = {}
     for word in split_text:
-        matching_IDs = SEARCH_INDEX[split_text[0]]
-        for opinion_ID in matching_IDs:
-            if opinion_ID in results:
-                results[opinion_ID] += 1
-            else:
-                results[opinion_ID] = 1
+        if word in SEARCH_INDEX:
+            matching_IDs = SEARCH_INDEX[word]
+            for opinion_ID in matching_IDs:
+                if opinion_ID in results:
+                    results[opinion_ID] += 1
+                else:
+                    results[opinion_ID] = 1
 
     tuple_results = list(results.items())
     tuple_results.sort(key=lambda x: -x[1])
