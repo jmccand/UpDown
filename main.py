@@ -1578,10 +1578,10 @@ span.left {
   top: 10%;
   position: absolute;
   left: 5px;
-  right: 80px;
+  right: 100px;
 }
 span.status {
-  width: 80px;
+  width: 100px;
   height: 100%;
   position: absolute;
   right: 0;
@@ -1651,33 +1651,33 @@ Stat
                 # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
                 message = None
                 if len(opinion.activity) == 1:
-                    message = 'pre-approval'
+                    message = 'PRE-APPROVAL'
                 elif len(opinion.activity) == 2:
                     #assert opinion.activity[1][1] in ('yes', 'no')
                     #assert len(opinion.activity[1]) == 3
                     assert opinion.approved in (True, False)
                     if opinion.approved:
-                        message = f'approved'
+                        message = f'APPROVED'
                     else:
-                        message = f'rejected'
+                        message = f'REJECTED'
                 elif len(opinion.activity) == 3:
                     #assert len(opinion.activity[2]) == 4
                     if datetime.date.today() < opinion.activity[2][0][2]:
-                        message = 'scheduled'
+                        message = 'SCHEDULED'
                     elif datetime.date.today() > opinion.activity[2][0][2]:
-                        message = 'pre-Senate'
+                        message = 'PRE-SENATE'
                     else:
-                        message = 'voting'
+                        message = 'VOTING'
                 elif len(opinion.activity) == 4:
                     #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                     assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
                     if opinion.activity[3][0][1] != 'no':
-                        message = f'{opinion.activity[3][0][1]}'
+                        message = f'{opinion.activity[3][0][1].upper()}'
                     else:
-                        message = 'unsuccessful'
+                        message = 'UNSUCCESSFUL'
                 elif len(opinion.activity) == 5:
                     #assert len(opinion.activity[4]) == 3
-                    message = 'pre-bill'
+                    message = 'PRE-BILL'
                 self.wfile.write(f'''<div class='result'>
 <span class='left'>
 {opinion.text}
@@ -1693,33 +1693,33 @@ Stat
                 # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
                 message = None
                 if len(opinion.activity) == 1:
-                    message = 'pre-approval'
+                    message = 'PRE-APPROVAL'
                 elif len(opinion.activity) == 2:
                     #assert opinion.activity[1][1] in ('yes', 'no')
                     #assert len(opinion.activity[1]) == 3
                     assert opinion.approved in (True, False)
                     if opinion.approved:
-                        message = f'approved'
+                        message = f'APPROVED'
                     else:
-                        message = f'rejected'
+                        message = f'REJECTED'
                 elif len(opinion.activity) == 3:
                     #assert len(opinion.activity[2]) == 4
                     if datetime.date.today() < opinion.activity[2][0][2]:
-                        message = 'scheduled'
+                        message = 'SCHEDULED'
                     elif datetime.date.today() > opinion.activity[2][0][2]:
-                        message = 'pre-Senate'
+                        message = 'PRE-SENATE'
                     else:
-                        message = 'voting'
+                        message = 'VOTING'
                 elif len(opinion.activity) == 4:
                     #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                     assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
                     if opinion.activity[3][0][1] != 'no':
-                        message = f'{opinion.activity[3][0][1]}'
+                        message = f'{opinion.activity[3][0][1].upper()}'
                     else:
-                        message = 'unsuccessful'
+                        message = 'UNSUCCESSFUL'
                 elif len(opinion.activity) == 5:
                     #assert len(opinion.activity[4]) == 3
-                    message = 'pre-bill'
+                    message = 'PRE-BILL'
                 self.wfile.write(f'''<div class='result'>
 <span class='left'>
 {opinion.text}
