@@ -325,7 +325,7 @@ header {
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
-    document.getElementById('menu').style.width = '82%';
+    document.getElementById('menu').style.width = '200px';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
