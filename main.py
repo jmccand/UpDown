@@ -826,18 +826,25 @@ function vote(element_ID) {
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 50px;
+  top: 80px;
+  bottom: 0;
   width: 100%;
-  height: 91%;
   z-index: 1;
   overflow: scroll;
   background-color: #cfe2f3ff;
 }
+#back_to_top {
+  position: absolute;
+  top: 50px;
+  width: 100%;
+  border: 2px solid black;
+  background-color: lightGray;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
+        self.wfile.write('''<div id='back_to_top'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<article>Click <a name='top' href='https://senate.lex.ma/constitution/'>here</a> to see the Senate's website!'''.encode('utf8'))
-        self.wfile.write('''<div style='position: sticky; top: 1%; border: 2px solid black; background-color: lightGray;'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
 <ul>
 <li><a href='/senate#welcome'>Welcome!</a></li>
