@@ -328,7 +328,7 @@ function open_menu() {
     document.getElementById('menu').style.width = '82%';
 }
 function close_menu() {
-    document.getElementById('menu').style.width = '0%';
+    document.getElementById('menu').style.width = '0';
 }
 </script>'''.encode('utf8'))
 
@@ -1554,7 +1554,7 @@ footer {
   left: 1%;
   width: 98%;
   height: 26px;
-  padding: 2;
+  padding: 2px;
   border: 0;
 }
 div#results {
@@ -1642,7 +1642,7 @@ Stat
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
-        self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words'/></form><div id='results'>'''.encode('utf8'))
+        self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
         if 'words' in url_arguments:
             for opinion_ID in search(url_arguments['words'][0]):
