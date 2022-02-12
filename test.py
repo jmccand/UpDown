@@ -1,10 +1,11 @@
 import smtplib
 import local
 
+from_gmail_user = local.FROM_EMAIL
 gmail_user = local.EMAIL
 gmail_password = local.PASSWORD
 
-sent_from = gmail_user
+sent_from = from_gmail_user
 to = gmail_user
 subject = 'Do you get this?'
 body = 'Testing 1 2 3 testing...'
