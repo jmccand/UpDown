@@ -15,14 +15,16 @@ import random
 import logging
 from wsgiref.simple_server import make_server
 import io
+import traceback
+import os
 
-def handle(environ, start_response):
-    print('response')
+def application(environ, start_response):
+    for key, item in environ.items():
+        print(f'{key}       {item}')
     handler_object = MyWSGIHandler(environ, start_response)
     handler_object.do_GET()
-    the_value = handler_object.wfile.getvalue()
-    print(the_value)
-    return [the_value]
+        
+    return [handler_object.wfile.getvalue()]
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
@@ -31,7 +33,10 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
     def __init__(self, environ, start_response):
         self.headers = {}
         self.path = environ['PATH_INFO']
-
+        self.client_address = (environ['REMOTE_ADDR'],)
+        self.query_string = environ['QUERY_STRING']
+        self.my_cookies = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+        print(self.my_cookies)
         self.wfile = io.BytesIO()
 
         self.start_response = start_response
@@ -39,18 +44,17 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
     
     def do_GET(self):
         print('\n')
-        my_cookies = SimpleCookie(self.headers.get('Cookie'))
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
-            print(f'{my_cookies=}')
+            print(f'{self.my_cookies=}')
 
         invalid_cookie = True
-        if 'code' in my_cookies:
-            if my_cookies['code'].value in db.user_cookies:
+        if 'code' in self.my_cookies:
+            if self.my_cookies['code'].value in db.user_cookies:
                 invalid_cookie = False
             else:
                 if not self.path == '/favicon.ico':
-                    print(f'INVALID COOKIE FOUND: {self.path=} and {my_cookies["code"].value=}\n')
+                    print(f'INVALID COOKIE FOUND: {self.path=} and {self.my_cookies["code"].value=}\n')
         else:
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path =}\n')
@@ -125,12 +129,13 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                     self.view_committee_page()
             except ValueError as error:
                 print(str(error))
+                traceback.print_exc()
+                self.start_response('500 SERVER ERROR', [])
                 
 
     def identify_user(self, nocookie=False):
-        my_cookies = SimpleCookie(self.headers.get('Cookie'))
-        if 'code' in my_cookies:
-            my_code = my_cookies['code'].value
+        if 'code' in self.my_cookies:
+            my_code = self.my_cookies['code'].value
             if my_code in db.user_cookies:
                 return db.user_cookies[my_code]
             else:
@@ -320,7 +325,7 @@ header {
         elif self.path_root == '/forward_opinions':
             title = 'Forward'
         elif self.path_root == '/view_committee':
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             title = url_arguments['committee'][0]
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
@@ -375,7 +380,11 @@ function close_menu() {
             lock_needed.release()
 
     def load_image(self):
-        return SimpleHTTPRequestHandler.do_GET(self)
+        image_type = os.path.splitext(self.path)[1][1:]
+        if image_type in ('ico', 'png'):
+            image_data = open(self.path[1:], 'rb').read()
+            self.start_response('200 OK', [('content-type', f'image/{image_type}'), ('content-length', str(len(image_data)))])
+            self.wfile.write(image_data)
 
     def get_email(self):
         self.start_response('200 OK', [])
@@ -414,7 +423,7 @@ function checkEmail() {{
 </html>'''.encode('utf8'))
 
     def check_email(self):
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'email' in url_arguments:
             user_email = url_arguments['email'][0]
             if user_email.endswith('@lexingtonma.org') or user_email in local.EXCEPTION_EMAILS:
@@ -504,7 +513,7 @@ function checkEmail() {{
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
     def email_taken(self):
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'email' in url_arguments:
             user_email = url_arguments['email'][0]
             self.start_response('200 OK', [])
@@ -513,7 +522,7 @@ function checkEmail() {{
             raise ValueError(f"ip {self.client_address[0]} -- email taken function got url_arguments {url_arguments}")
 
     def verify_email(self):
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         my_account = self.identify_user(True)
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
@@ -1143,7 +1152,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         self.log_activity()
         
     def submit_opinion(self):
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         my_account = self.identify_user()
         if 'opinion_text' in url_arguments and not my_account == False:
             opinion_text = url_arguments['opinion_text'][0]
@@ -1159,7 +1168,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
     def vote(self):
         my_account = self.identify_user()
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
             opinion_ID = url_arguments['opinion_ID'][0]
             my_vote = url_arguments['my_vote'][0]
@@ -1189,7 +1198,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
     def approve(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
                 my_vote = url_arguments['my_vote'][0]
@@ -1287,7 +1296,7 @@ td {
     def schedule_date_page(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 this_date = url_arguments["date"][0]
                 try:
@@ -1414,7 +1423,7 @@ function update_unselected(element) {{
     def schedule(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -1461,7 +1470,7 @@ function update_unselected(element) {{
     def unschedule(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -1505,7 +1514,7 @@ function update_unselected(element) {{
 
     def track_opinions_page(self):
         my_account = self.identify_user()
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         self.start_response('200 OK', [])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
@@ -1830,7 +1839,7 @@ function forward(element) {{
     def forward(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'opinion_ID' in url_arguments and 'committee' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
                 opinion = db.opinions_database[opinion_ID]
@@ -1853,7 +1862,7 @@ function forward(element) {{
 
     def view_committee_page(self):
         my_account = self.identify_user()
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments['committee'][0]
         if committee in ('Executive', 'Oversight'):
             if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_email:
@@ -1892,10 +1901,123 @@ td.care {
                         self.wfile.write(f'''<tr id='{opinion_ID}' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
                 self.wfile.write('</table></article>'.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8')) 
+
+class User:
+
+    def __init__(self, email, cookie_code, activity={}, votes={}, verified_email=False):
+
+        self.email = email
+        self.cookie_code = cookie_code
+        self.activity = activity
+        self.votes = votes
+        self.verified_email = verified_email
+
+class Opinion:
+
+    def __init__(self, ID, text, activity, approved=None, scheduled=False, committee_jurisdiction=None):
+
+        self.ID = ID
+        self.text = text
+        self.activity = activity
+        self.approved = approved
+        self.scheduled = scheduled
+        self.committee_jurisdiction = committee_jurisdiction
+
+    def count_votes(self):
+        up_votes = 0
+        down_votes = 0
+        abstains = 0
+        for user in db.user_cookies.values():
+            if user.verified_email and str(self.ID) in user.votes:
+                    this_vote = user.votes[str(self.ID)][-1][0]
+                    #print(f'{user.email=} has voted {this_vote=}')
+                    if this_vote == 'up':
+                        up_votes += 1
+                    elif this_vote == 'down':
+                        down_votes += 1
+                    elif this_vote == 'abstain':
+                        abstains += 1
+                    else:
+                        raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
+        return up_votes, down_votes, abstains
+
+class invalidCookie(ValueError):
+    def __init__(self, message):
+        super().__init__(message)
+
+def simplify_text(text):
+    split_text = re.split('''\W+''', text)
+    if split_text[-1] == '':
+        split_text = split_text[:-1]
+    for index in range(len(split_text)):
+        split_text[index] = split_text[index].lower()
+    return split_text
+
+def build_search_index():
+    for opinion_ID in range(len(db.opinions_database)):
+        opinion = db.opinions_database[str(opinion_ID)]
+        split_text = simplify_text(opinion.text)
+            
+        print(f'{opinion.text} -- {split_text=}')
+
+        for word in split_text:
+            if word in SEARCH_INDEX:
+                SEARCH_INDEX[word].append(opinion_ID)
+            else:
+                SEARCH_INDEX[word] = [opinion_ID]
+
+        print(f'{SEARCH_INDEX}')
+
+def search(input_text):
+    split_text = simplify_text(input_text)
+    results = {}
+    for word in split_text:
+        if word in SEARCH_INDEX:
+            matching_IDs = SEARCH_INDEX[word]
+            for opinion_ID in matching_IDs:
+                if opinion_ID in results:
+                    results[opinion_ID] += 1
+                else:
+                    results[opinion_ID] = 1
+
+    tuple_results = list(results.items())
+    tuple_results.sort(key=lambda x: -x[1])
+    ordered_results = [x[0] for x in tuple_results]
+    
+    return ordered_results
+    
 def main():
-    httpd = make_server(
-        '10.17.4.17', 8888, handle)
+    print('Student Change Web App... running...')
+
+    build_search_index()
+
+    if MyWSGIHandler.DEBUG == 0:
+        print(f'\n{db.user_cookies=}')
+        for cookie, user in db.user_cookies.items():
+            print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.verified_email})')
+
+        print(f'\n{db.verification_links=}')
+        for link, ID in db.verification_links.items():
+            print(f'  {link} : {ID}')
+
+        print(f'\n{db.opinions_database=}')
+        for ID, opinion in db.opinions_database.items():
+            print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity}, {opinion.approved})')
+
+        print(f'\n{db.opinions_calendar=}')
+        sorted_calendar = list(db.opinions_calendar.keys())
+        sorted_calendar.sort()
+        for this_date in sorted_calendar:
+            ID_set = db.opinions_calendar[this_date]
+            print(f'  {this_date} : {ID_set}')
+
+
+    logging.basicConfig(filename='UpDown.log', encoding='utf-8', level=logging.DEBUG)
+
+    httpd = make_server('10.17.4.17', 8888, application)
     httpd.serve_forever()
+
+SEARCH_INDEX = {}    
 
 if __name__ == '__main__':
     main()
