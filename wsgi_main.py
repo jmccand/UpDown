@@ -585,7 +585,7 @@ section {
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
   display: flex;
   flex-direction: column;
-  min-height: 50px;
+  min-height: 40px;
 }
 div#end_block {
   width: 100%;
@@ -653,17 +653,41 @@ button.submit {
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
   font-weight: bold;
 }
+article#popup {
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  width: 92%;
+  height: 92%;
+  background-color: #cfe2f3ff;
+  border-radius: 6px;
+  z-index: 4;
+  display: none;
+}
+section#popuptext {
+
+}
+button#closepop {
+  position: absolute;
+  bottom: 0;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
+
+        if len(my_account.activity) == 1:
+            self.wfile.write('''<script>
+openpop('test!');
+</script>'''.encode('utf8'))
+        
         see_day = None
         today_date = datetime.date.today()
         if (today_date.weekday() + 1) % 7 < 3:
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
         if (today_date.weekday() + 1) % 7 > 3:
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 + 4)
-        print(f'day of the week that opinions page is viewing: {see_day}')
+        #print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
             self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
@@ -769,16 +793,16 @@ function checkVoteValidity(new_vote, old_vote) {
     }
     let valid = true;
     if (up_count == 5 && new_vote == 'up') {
-        alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        openpop('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
     }
     else if (down_count == 5 && new_vote == 'down') {
-        alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        openpop('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
     }
     if (old_vote == 'abstain') {
         if (up_count + down_count == 8 && new_vote != 'abstain') {
-            alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+            openpop('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
             valid = false;
         }
     }
@@ -800,7 +824,22 @@ function submit_opinion() {
     }
 }
 </script>
-</footer>'''.encode('utf8'))
+</footer>
+<article id='popup'>
+<section id='popuptext'>text</section>
+<button id='closepop' onclick='closepop();'>
+OK
+</button>
+</article>
+<script>
+function openpop(text) {
+    document.getElementById('popuptext').innerHTML = text;
+    document.getElementById('popup').style.display = 'table-cell';
+}
+function closepop() {
+    document.getElementById('popup').style.display = 'none';
+}
+</script>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
