@@ -180,7 +180,8 @@ header {
   text-align: center;
   background-color: #f1c232ff;
   font-size: 30px;
-  font-family: 'Times New Roman';
+  //font-family: 'Times New Roman';
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
 }
 #logo {
   position: absolute;
@@ -557,7 +558,7 @@ Thank you for verifying. Your votes are now counted.<br />
             #print('verify email done!')
         else:
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
-
+        
     def opinions_page(self):
         my_account = self.identify_user()
         self.start_response('200 OK', [])
@@ -581,6 +582,7 @@ section {
   background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
 }
 div#end_block {
   width: 100%;
@@ -645,6 +647,8 @@ button.submit {
   border-radius: 25px;
   background-color: #f1c232ff;
   z-index: 1;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  font-weight: bold;
 }
 </style>
 </head>
