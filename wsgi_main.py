@@ -650,11 +650,18 @@ button.submit {
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
-        if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
+        see_day = None
+        today_date = datetime.date.today()
+        if (today_date.weekday() + 1) % 7 < 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
+        if (today_date.weekday() + 1) % 7 > 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 + 4)
+        print(f'day of the week that opinions page is viewing: {see_day}')
+        if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
             self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
             self.wfile.write('<article>'.encode('utf8'))
-            randomized = list(db.opinions_calendar[str(datetime.date.today())])
+            randomized = list(db.opinions_calendar[str(see_day)])
             random.shuffle(randomized)
             for opinion_ID in randomized:
                 assert opinion_ID in db.opinions_database
