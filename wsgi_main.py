@@ -575,14 +575,17 @@ article {
   overflow: scroll;
 }
 section {
-  width: 98%;
-  height: 50px;
+  width: 94%;
   margin: 1%;
+  padding: 2%;
   position: relative;
   background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
 }
 div#end_block {
   width: 100%;
@@ -627,10 +630,10 @@ div.selected_down {
 }
 span.left {
   width: 75%;
-  height: 80%;
-  position: absolute;
-  left: 5%;
-  top: 10%;
+  //height: 80%;
+  //position: absolute;
+  //left: 5%;
+  //top: 10%;
 }
 footer {
   position: fixed;
