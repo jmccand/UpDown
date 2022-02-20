@@ -507,6 +507,7 @@ function checkEmail() {{
 
                     #redirect to homepage so they can vote
                     self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={my_uuid}; path=/')])
+                    self.my_cookies['code'] = my_uuid
                     self.log_activity()
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
