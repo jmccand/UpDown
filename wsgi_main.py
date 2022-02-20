@@ -17,7 +17,6 @@ from wsgiref.simple_server import make_server
 import io
 import traceback
 import os
-
 def application(environ, start_response):
     for key, item in environ.items():
         print(f'{key}       {item}')
@@ -134,6 +133,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 
 
     def identify_user(self, nocookie=False):
+        #print('identify user function called!')
         if 'code' in self.my_cookies:
             my_code = self.my_cookies['code'].value
             if my_code in db.user_cookies:
@@ -527,7 +527,7 @@ function checkEmail() {{
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
             if my_account == None:
-                print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
+               print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
             #if db.verification_links[link_uuid] == my_account.cookie_code:
             # change the account locally
             my_account = db.user_cookies[db.verification_links[link_uuid]]
@@ -549,9 +549,12 @@ Thank you for verifying. Your votes are now counted.<br />
 </html>'''.encode('utf8'))
             if MyWSGIHandler.DEBUG < 2:
                 print(f'{my_account.email} just verified their email!')
+
+            self.my_cookies['code'] = my_account.cookie_code
             self.log_activity()
             #else:
                 #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
+            #print('verify email done!')
         else:
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
 
