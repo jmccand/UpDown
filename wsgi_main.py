@@ -530,37 +530,40 @@ function checkEmail() {{
         my_account = self.identify_user(True)
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
-            if my_account == None:
-               print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
-            #if db.verification_links[link_uuid] == my_account.cookie_code:
-            # change the account locally
-            my_account = db.user_cookies[db.verification_links[link_uuid]]
-            my_account.verified_email = True
+            if link_uuid in db.verification_links:
+                if my_account == None:
+                   print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
+                #if db.verification_links[link_uuid] == my_account.cookie_code:
+                # change the account locally
+                my_account = db.user_cookies[db.verification_links[link_uuid]]
+                my_account.verified_email = True
 
-            # update the database
-            def update_user_cookies():
-                db.user_cookies[my_account.cookie_code] = my_account
-            self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+                # update the database
+                def update_user_cookies():
+                    db.user_cookies[my_account.cookie_code] = my_account
+                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
-            # send success page
-            self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/')])
-            self.wfile.write('''<!DOCTYPE HTML>
+                # send success page
+                self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/')])
+                self.wfile.write('''<!DOCTYPE HTML>
 <html>
 <body>
 Thank you for verifying. Your votes are now counted.<br />
 <a href='/'>Return to homepage</a>
 </body>
 </html>'''.encode('utf8'))
-            if MyWSGIHandler.DEBUG < 2:
-                print(f'{my_account.email} just verified their email!')
+                if MyWSGIHandler.DEBUG < 2:
+                    print(f'{my_account.email} just verified their email!')
 
-            self.my_cookies['code'] = my_account.cookie_code
-            self.log_activity()
-            #else:
-                #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
-            #print('verify email done!')
+                self.my_cookies['code'] = my_account.cookie_code
+                self.log_activity()
+                #else:
+                    #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
+                #print('verify email done!')
+            else:
+                raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}, which is not in the verification database")
         else:
-            raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}")
+            raise ValueError(f"ip {self.client_address[0]} -- verify email function got url_arguments {url_arguments}")
         
     def opinions_page(self):
         my_account = self.identify_user()
@@ -812,7 +815,7 @@ function checkVoteValidity(new_vote, old_vote) {
     return valid;
 }
 </script>
-</article>''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
+</article>''' % (list(db.opinions_calendar[str(see_day)]))).encode('utf8'))
         self.wfile.write('''<footer>
 <!--<input id='opinion_text' type='text'/>-->
 <button class='submit' onclick='submit_opinion()'>Enter a new Opinion</button>
