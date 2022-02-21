@@ -581,6 +581,20 @@ article {
   overflow: scroll;
 }
 section {
+  width: 96%;
+  margin: 1%;
+  padding: 1%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  display: flex;
+  flex-direction: column;
+  min-height: 40px;
+}
+@media screen and (max-width: 600px) {
+section {
   width: 94%;
   margin: 1%;
   padding: 2%;
@@ -592,6 +606,7 @@ section {
   display: flex;
   flex-direction: column;
   min-height: 40px;
+}
 }
 div#end_block {
   width: 100%;
