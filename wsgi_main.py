@@ -17,6 +17,8 @@ from wsgiref.simple_server import make_server
 import io
 import traceback
 import os
+
+
 def application(environ, start_response):
     for key, item in environ.items():
         print(f'{key}       {item}')
@@ -45,7 +47,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
-            print(f'{self.my_cookies=}')
+            print(f'{self.my_cookies}')
 
         invalid_cookie = True
         if 'code' in self.my_cookies:
@@ -53,10 +55,10 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 invalid_cookie = False
             else:
                 if not self.path == '/favicon.ico':
-                    print(f'INVALID COOKIE FOUND: {self.path=} and {self.my_cookies["code"].value=}\n')
+                    print(f'INVALID COOKIE FOUND: {self.path} and {self.my_cookies["code"].value}\n')
         else:
             if not self.path == '/favicon.ico':
-                print(f'INVALID COOKIE FOUND: {self.path =}\n')
+                print(f'INVALID COOKIE FOUND: {self.path }\n')
 
         if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email'):
             self.get_email()
@@ -473,7 +475,7 @@ function checkEmail() {{
                     while link_uuid in db.user_cookies or link_uuid in db.verification_links or link_uuid == my_uuid:
                         link_uuid = uuid.uuid4().hex
                     if MyWSGIHandler.DEBUG < 2:
-                        print(f'{my_uuid=} {link_uuid=}')
+                        print(f'{my_uuid} {link_uuid}')
                     assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
 
                     # send email
@@ -1244,7 +1246,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
                 self.start_response('200 OK', [])
                 if MyWSGIHandler.DEBUG < 2:
-                    print(f'{my_account.email=} has voted {my_vote=}')
+                    print(f'{my_account.email} has voted {my_vote}')
 
                 self.log_activity([my_vote, opinion_ID])
             else:
@@ -1997,7 +1999,7 @@ class Opinion:
         for user in db.user_cookies.values():
             if user.verified_email and str(self.ID) in user.votes:
                     this_vote = user.votes[str(self.ID)][-1][0]
-                    #print(f'{user.email=} has voted {this_vote=}')
+                    #print(f'{user.email} has voted {this_vote}')
                     if this_vote == 'up':
                         up_votes += 1
                     elif this_vote == 'down':
@@ -2025,7 +2027,7 @@ def build_search_index():
         opinion = db.opinions_database[str(opinion_ID)]
         split_text = simplify_text(opinion.text)
             
-        print(f'{opinion.text} -- {split_text=}')
+        print(f'{opinion.text} -- {split_text}')
 
         for word in split_text:
             if word in SEARCH_INDEX:
@@ -2059,19 +2061,19 @@ def main():
     build_search_index()
 
     if MyWSGIHandler.DEBUG == 0:
-        print(f'\n{db.user_cookies=}')
+        print(f'\n{db.user_cookies}')
         for cookie, user in db.user_cookies.items():
             print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.verified_email})')
 
-        print(f'\n{db.verification_links=}')
+        print(f'\n{db.verification_links}')
         for link, ID in db.verification_links.items():
             print(f'  {link} : {ID}')
 
-        print(f'\n{db.opinions_database=}')
+        print(f'\n{db.opinions_database}')
         for ID, opinion in db.opinions_database.items():
             print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity}, {opinion.approved})')
 
-        print(f'\n{db.opinions_calendar=}')
+        print(f'\n{db.opinions_calendar}')
         sorted_calendar = list(db.opinions_calendar.keys())
         sorted_calendar.sort()
         for this_date in sorted_calendar:
