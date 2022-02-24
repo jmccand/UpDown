@@ -708,8 +708,8 @@ openpop('test!');
         if (today_date.weekday() + 1) % 7 < 3:
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
         if (today_date.weekday() + 1) % 7 > 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 + 4)
-        #print(f'day of the week that opinions page is viewing: {see_day}')
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
+        print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
             self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
