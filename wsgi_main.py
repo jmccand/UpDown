@@ -1748,6 +1748,9 @@ Bill or Resolution
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
+        def to_date(dt):
+            return datetime.date(dt.year, dt.month, dt.day)
+
         json_stats = {}
         search_results = []
         if 'words' in url_arguments:
@@ -1762,7 +1765,7 @@ Bill or Resolution
             message = None
             if len(opinion.activity) >= 1:
                 message = 'PRE-APPROVAL'
-                json_stats[opinion_ID].append(str(opinion.activity[0][1]))
+                json_stats[opinion_ID].append(str(to_date(opinion.activity[0][1])))
             if len(opinion.activity) >= 2:
                 #assert opinion.activity[1][1] in ('yes', 'no')
                 #assert len(opinion.activity[1]) == 3
@@ -1771,7 +1774,7 @@ Bill or Resolution
                     message = f'APPROVED'
                 else:
                     message = f'REJECTED'
-                json_stats[opinion_ID].append(str(opinion.activity[1][0][1]))
+                json_stats[opinion_ID].append(str(to_date(opinion.activity[1][0][2])))
             if len(opinion.activity) >= 3:
                 #assert len(opinion.activity[2]) == 4
                 if datetime.date.today() < opinion.activity[2][0][2]:
@@ -1780,7 +1783,9 @@ Bill or Resolution
                     message = 'PRE-SENATE'
                 else:
                     message = 'VOTING'
-                json_stats[opinion_ID].append(str(opinion.activity[2][0][1]))
+                json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][3])))
+                if datetime.date.today() >= opinion.activity[2][0][2]:
+                    json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][2])))                    
             if len(opinion.activity) >= 4:
                 #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                 assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
@@ -1788,11 +1793,11 @@ Bill or Resolution
                     message = f'{opinion.activity[3][0][1].upper()}'
                 else:
                     message = 'UNSUCCESSFUL'
-                json_stats[opinion_ID].append(str(opinion.activity[3][1]))
+                json_stats[opinion_ID].append(str(to_date(opinion.activity[3][0][2])))
             if len(opinion.activity) >= 5:
                 #assert len(opinion.activity[4]) == 3
                 message = 'PRE-BILL'
-                json_stats[opinion_ID].append(str(opinion.activity[4][1]))
+                json_stats[opinion_ID].append(str(to_date(opinion.activity[4][0][2])))
             self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
 <span class='left'>
 {opinion.text}
