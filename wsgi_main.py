@@ -17,6 +17,7 @@ from wsgiref.simple_server import make_server
 import io
 import traceback
 import os
+import updown
 
 
 def application(environ, start_response):
@@ -504,7 +505,7 @@ function checkEmail() {{
                         db.verification_links[link_uuid] = my_uuid
                     self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
                     def update_user_cookies():
-                        db.user_cookies[my_uuid] = User(user_email, my_uuid)
+                        db.user_cookies[my_uuid] = updown.User(user_email, my_uuid)
                     self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                     #redirect to homepage so they can vote
@@ -1236,7 +1237,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             opinion_ID = len(db.opinions_database)
             assert str(opinion_ID) not in db.opinions_database
             def update_opinions_database():
-                db.opinions_database[str(opinion_ID)] = Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
+                db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
             self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             self.start_response('200 OK', [])
             self.log_activity([opinion_ID])
@@ -1700,130 +1701,99 @@ span.status {
 <div class='label'>
 Creation
 </div>
-<div class='stat'>
-Stat
+<div id='stat0' class='stat'>
+---
 </div>
 </div>
 <div class='element' style='top: 16.6%;'>
 <div class='label'>
 Approval
 </div>
-<div class='stat'>
-Stat
+<div id='stat1' class='stat'>
+---
 </div>
 </div>
 <div class='element' style='top: 33.2%;'>
 <div class='label'>
 Scheduling
 </div>
-<div class='stat'>
-Stat
+<div id='stat2' class='stat'>
+---
 </div>
 </div>
 <div class='element' style='top: 49.8%;'>
 <div class='label'>
 Voting
 </div>
-<div class='stat'>
-Stat
+<div id='stat3' class='stat'>
+---
 </div>
 </div>
 <div class='element' style='top: 66.4%;'>
 <div class='label'>
 Senate
 </div>
-<div class='stat'>
-Stat
+<div id='stat4' class='stat'>
+---
 </div>
 </div>
 <div class='element' style='top: 83%;'>
 <div class='label'>
 Bill or Resolution
 </div>
-<div class='stat'>
-Stat
+<div id='stat5' class='stat'>
+---
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
+        json_stats = {}
+        search_results = []
         if 'words' in url_arguments:
-            for opinion_ID in search(url_arguments['words'][0]):
-                opinion = db.opinions_database[str(opinion_ID)]
-                # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
-                # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-                message = None
-                if len(opinion.activity) == 1:
-                    message = 'PRE-APPROVAL'
-                elif len(opinion.activity) == 2:
-                    #assert opinion.activity[1][1] in ('yes', 'no')
-                    #assert len(opinion.activity[1]) == 3
-                    assert opinion.approved in (True, False)
-                    if opinion.approved:
-                        message = f'APPROVED'
-                    else:
-                        message = f'REJECTED'
-                elif len(opinion.activity) == 3:
-                    #assert len(opinion.activity[2]) == 4
-                    if datetime.date.today() < opinion.activity[2][0][2]:
-                        message = 'SCHEDULED'
-                    elif datetime.date.today() > opinion.activity[2][0][2]:
-                        message = 'PRE-SENATE'
-                    else:
-                        message = 'VOTING'
-                elif len(opinion.activity) == 4:
-                    #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                    assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                    if opinion.activity[3][0][1] != 'no':
-                        message = f'{opinion.activity[3][0][1].upper()}'
-                    else:
-                        message = 'UNSUCCESSFUL'
-                elif len(opinion.activity) == 5:
-                    #assert len(opinion.activity[4]) == 3
-                    message = 'PRE-BILL'
-                self.wfile.write(f'''<div class='result'>
-<span class='left'>
-{opinion.text}
-</span>
-<span class='status'>
-{message}
-</span>
-</div>'''.encode('utf8'))
-            
+            search_results = search(url_arguments['words'][0])
         else:
-            for opinion_ID, opinion in db.opinions_database.items():
-                # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
-                # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-                message = None
-                if len(opinion.activity) == 1:
-                    message = 'PRE-APPROVAL'
-                elif len(opinion.activity) == 2:
-                    #assert opinion.activity[1][1] in ('yes', 'no')
-                    #assert len(opinion.activity[1]) == 3
-                    assert opinion.approved in (True, False)
-                    if opinion.approved:
-                        message = f'APPROVED'
-                    else:
-                        message = f'REJECTED'
-                elif len(opinion.activity) == 3:
-                    #assert len(opinion.activity[2]) == 4
-                    if datetime.date.today() < opinion.activity[2][0][2]:
-                        message = 'SCHEDULED'
-                    elif datetime.date.today() > opinion.activity[2][0][2]:
-                        message = 'PRE-SENATE'
-                    else:
-                        message = 'VOTING'
-                elif len(opinion.activity) == 4:
-                    #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                    assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                    if opinion.activity[3][0][1] != 'no':
-                        message = f'{opinion.activity[3][0][1].upper()}'
-                    else:
-                        message = 'UNSUCCESSFUL'
-                elif len(opinion.activity) == 5:
-                    #assert len(opinion.activity[4]) == 3
-                    message = 'PRE-BILL'
-                self.wfile.write(f'''<div class='result'>
+            search_results = list(db.opinions_database.keys())
+        for opinion_ID in search_results:
+            json_stats[opinion_ID] = []
+            opinion = db.opinions_database[str(opinion_ID)]
+            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
+            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
+            message = None
+            if len(opinion.activity) >= 1:
+                message = 'PRE-APPROVAL'
+                json_stats[opinion_ID].append(str(opinion.activity[0][1]))
+            if len(opinion.activity) >= 2:
+                #assert opinion.activity[1][1] in ('yes', 'no')
+                #assert len(opinion.activity[1]) == 3
+                assert opinion.approved in (True, False)
+                if opinion.approved:
+                    message = f'APPROVED'
+                else:
+                    message = f'REJECTED'
+                json_stats[opinion_ID].append(str(opinion.activity[1][0][1]))
+            if len(opinion.activity) >= 3:
+                #assert len(opinion.activity[2]) == 4
+                if datetime.date.today() < opinion.activity[2][0][2]:
+                    message = 'SCHEDULED'
+                elif datetime.date.today() > opinion.activity[2][0][2]:
+                    message = 'PRE-SENATE'
+                else:
+                    message = 'VOTING'
+                json_stats[opinion_ID].append(str(opinion.activity[2][0][1]))
+            if len(opinion.activity) >= 4:
+                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
+                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                if opinion.activity[3][0][1] != 'no':
+                    message = f'{opinion.activity[3][0][1].upper()}'
+                else:
+                    message = 'UNSUCCESSFUL'
+                json_stats[opinion_ID].append(str(opinion.activity[3][1]))
+            if len(opinion.activity) >= 5:
+                #assert len(opinion.activity[4]) == 3
+                message = 'PRE-BILL'
+                json_stats[opinion_ID].append(str(opinion.activity[4][1]))
+            self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
 <span class='left'>
 {opinion.text}
 </span>
@@ -1831,8 +1801,21 @@ Stat
 {message}
 </span>
 </div>'''.encode('utf8'))
-            self.wfile.write('</div></footer>'.encode('utf8'))
-            self.wfile.write('''</body></html>'''.encode('utf8'))
+        self.wfile.write('</div></footer>'.encode('utf8'))
+        self.wfile.write(f'''<script>
+const stats = {json.dumps(json_stats)};
+function updateStats(element) {{
+    const this_ID = element.id;
+    const these_stats = stats[this_ID];
+    for (let i = 0; i < these_stats.length; i++) {{
+        document.getElementById('stat' + i).innerHTML = these_stats[i];
+    }}
+    for (let i = these_stats.length; i < 6; i++) {{
+        document.getElementById('stat' + i).innerHTML = '---';
+    }}
+}}
+</script>'''.encode('utf8'))
+        self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
 
@@ -1987,47 +1970,8 @@ td.care {
                             care_percent = up_votes / (up_votes + down_votes + abstains) * 100
                         self.wfile.write(f'''<tr id='{opinion_ID}' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
                 self.wfile.write('</table></article>'.encode('utf8'))
-                self.wfile.write('''</body></html>'''.encode('utf8')) 
-
-class User:
-
-    def __init__(self, email, cookie_code, activity={}, votes={}, verified_email=False):
-
-        self.email = email
-        self.cookie_code = cookie_code
-        self.activity = activity
-        self.votes = votes
-        self.verified_email = verified_email
-
-class Opinion:
-
-    def __init__(self, ID, text, activity, approved=None, scheduled=False, committee_jurisdiction=None):
-
-        self.ID = ID
-        self.text = text
-        self.activity = activity
-        self.approved = approved
-        self.scheduled = scheduled
-        self.committee_jurisdiction = committee_jurisdiction
-
-    def count_votes(self):
-        up_votes = 0
-        down_votes = 0
-        abstains = 0
-        for user in db.user_cookies.values():
-            if user.verified_email and str(self.ID) in user.votes:
-                    this_vote = user.votes[str(self.ID)][-1][0]
-                    #print(f'{user.email} has voted {this_vote}')
-                    if this_vote == 'up':
-                        up_votes += 1
-                    elif this_vote == 'down':
-                        down_votes += 1
-                    elif this_vote == 'abstain':
-                        abstains += 1
-                    else:
-                        raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
-        return up_votes, down_votes, abstains
-
+                self.wfile.write('''</body></html>'''.encode('utf8'))
+                
 class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
