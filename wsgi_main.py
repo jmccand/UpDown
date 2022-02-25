@@ -1690,11 +1690,21 @@ span.status {
   position: absolute;
   right: 0;
 }
+div#circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: absolute;
+  left: 15px;
+  background-color: green;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article>'.encode('utf8'))
         self.wfile.write('''<div id='timeline_line'>
+</div>
+<div id='circle'>
 </div>
 <div id='timeline'>
 <div class='element' style='top: 0;'>
@@ -1758,14 +1768,16 @@ Bill or Resolution
         else:
             search_results = list(db.opinions_database.keys())
         for opinion_ID in search_results:
-            json_stats[opinion_ID] = []
+            json_stats[opinion_ID] = [0, []]
             opinion = db.opinions_database[str(opinion_ID)]
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
             message = None
+            dot = 0
             if len(opinion.activity) >= 1:
                 message = 'PRE-APPROVAL'
-                json_stats[opinion_ID].append(str(to_date(opinion.activity[0][1])))
+                json_stats[opinion_ID][1].append(str(to_date(opinion.activity[0][1])))
+                dot = 100 / 6
             if len(opinion.activity) >= 2:
                 #assert opinion.activity[1][1] in ('yes', 'no')
                 #assert len(opinion.activity[1]) == 3
@@ -1774,7 +1786,8 @@ Bill or Resolution
                     message = f'APPROVED'
                 else:
                     message = f'REJECTED'
-                json_stats[opinion_ID].append(str(to_date(opinion.activity[1][0][2])))
+                json_stats[opinion_ID][1].append(str(to_date(opinion.activity[1][0][2])))
+                dot = 100 / 3
             if len(opinion.activity) >= 3:
                 #assert len(opinion.activity[2]) == 4
                 if datetime.date.today() < opinion.activity[2][0][2]:
@@ -1783,9 +1796,11 @@ Bill or Resolution
                     message = 'PRE-SENATE'
                 else:
                     message = 'VOTING'
-                json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][3])))
+                json_stats[opinion_ID][1].append(str(to_date(opinion.activity[2][0][3])))
+                dot = 100 / 2
                 if datetime.date.today() >= opinion.activity[2][0][2]:
-                    json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][2])))                    
+                    json_stats[opinion_ID][1].append(str(to_date(opinion.activity[2][0][2])))
+                    dot = 100 / 2 + 100 / 12
             if len(opinion.activity) >= 4:
                 #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                 assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
@@ -1793,11 +1808,14 @@ Bill or Resolution
                     message = f'{opinion.activity[3][0][1].upper()}'
                 else:
                     message = 'UNSUCCESSFUL'
-                json_stats[opinion_ID].append(str(to_date(opinion.activity[3][0][2])))
+                json_stats[opinion_ID][1].append(str(to_date(opinion.activity[3][0][2])))
+                dot = 100 / 3 * 2
             if len(opinion.activity) >= 5:
                 #assert len(opinion.activity[4]) == 3
                 message = 'PRE-BILL'
-                json_stats[opinion_ID].append(str(to_date(opinion.activity[4][0][2])))
+                json_stats[opinion_ID][1].append(str(to_date(opinion.activity[4][0][2])))
+                dot = 100 / 6 * 5
+            json_stats[opinion_ID][0] = dot
             self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
 <span class='left'>
 {opinion.text}
@@ -1811,13 +1829,14 @@ Bill or Resolution
 const stats = {json.dumps(json_stats)};
 function updateStats(element) {{
     const this_ID = element.id;
-    const these_stats = stats[this_ID];
+    const these_stats = stats[this_ID][1];
     for (let i = 0; i < these_stats.length; i++) {{
         document.getElementById('stat' + i).innerHTML = these_stats[i];
     }}
     for (let i = these_stats.length; i < 6; i++) {{
         document.getElementById('stat' + i).innerHTML = '---';
     }}
+    document.getElementById('circle').style.top = stats[this_ID][0] + '%';
 }}
 </script>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
