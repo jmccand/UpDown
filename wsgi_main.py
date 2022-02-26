@@ -882,15 +882,78 @@ function closepop() {
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
-            self.wfile.write('''
-<style>
+            self.wfile.write('''<style>
 article {
   position: absolute;
   top: 50px;
   width: 100%;
-  height: 91%;
+  bottom: 50%;
   z-index: 1;
   overflow: scroll;
+}
+section {
+  width: 96%;
+  margin: 1%;
+  padding: 1%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
+}
+@media screen and (max-width: 600px) {
+section {
+  width: 94%;
+  margin: 1%;
+  padding: 2%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
+}
+}
+div#end_block {
+  width: 100%;
+  height: 55px;
+  z-index: 1;
+}
+div.left {
+  width: 94%;
+}
+div.right {
+  position: absolute;
+  right: 1%;
+  width: 5%;
+  height: 100%;
+  top: 0;
+  font-size: 22px;
+}
+@media screen and (max-width: 600px) {
+div.left {
+  width: 85%;
+}
+div.right {
+  position: absolute;
+  right: 4%;
+  width: 11%;
+  height: 100%;
+  top: 0;
+  font-size: 22px;
+}
+}
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  z-index: 1; 
 }
 div.unselected {
     color : black;
@@ -902,10 +965,10 @@ div.selected {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('<article><table>'.encode('utf8'))
+            self.wfile.write('<article>'.encode('utf8'))
             for opinion_ID, opinion in db.opinions_database.items():
                 if opinion.approved == None:
-                    self.wfile.write(f'''<tr id={opinion_ID}><td>{opinion.text}</td><td><div class='unselected' id='{opinion_ID} yes' onclick='vote(this.id)'>&#10003;</div><div class='unselected' id='{opinion_ID} no' onclick='vote(this.id)'>&#10005;</div></td></tr>'''.encode('utf8'))
+                    self.wfile.write(f'''<section id='{opinion_ID}' class='unselected'><div class='left'>{opinion.text}</div><div class='right'><div id='{opinion_ID} yes' onclick='vote(this.id)'>&#10003;</div><div id='{opinion_ID} no' onclick='vote(this.id)'>&#10005;</div></div></section>'''.encode('utf8'))
             self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write('''<script>
 function vote(element_ID) {
