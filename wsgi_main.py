@@ -896,7 +896,6 @@ section {
   margin: 1%;
   padding: 1%;
   position: relative;
-  background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
@@ -910,7 +909,6 @@ section {
   margin: 1%;
   padding: 2%;
   position: relative;
-  background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
@@ -955,23 +953,35 @@ footer {
   height: 50%;
   z-index: 1; 
 }
-div.unselected {
-    color : black;
+section.unselected {
+  background-color: #cfe2f3ff;
 }
-div.selected {
-    color : red;
+section.selected {
+  background-color: red;
 }
 </style>
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write('<article>'.encode('utf8'))
+            unapproved_list = []
             for opinion_ID, opinion in db.opinions_database.items():
                 if opinion.approved == None:
-                    self.wfile.write(f'''<section id='{opinion_ID}' class='unselected'><div class='left'>{opinion.text}</div><div class='right'><div id='{opinion_ID} yes' onclick='vote(this.id)'>&#10003;</div><div id='{opinion_ID} no' onclick='vote(this.id)'>&#10005;</div></div></section>'''.encode('utf8'))
-            self.wfile.write('</table></article>'.encode('utf8'))
-            self.wfile.write('''<script>
-function vote(element_ID) {
+                    self.wfile.write(f'''<section id='{opinion_ID}' class='unselected' onclick='select(this);'><div class='left'>{opinion.text}</div><div class='right'><div id='{opinion_ID} yes' onclick='vote(this.id)'>&#10003;</div><div id='{opinion_ID} no' onclick='vote(this.id)'>&#10005;</div></div></section>'''.encode('utf8'))
+                    unapproved_list.append(opinion_ID)
+            self.wfile.write('</article>'.encode('utf8'))
+            self.wfile.write(f'''<script>
+const opinionList = {unapproved_list};
+if (opinionList.length > 0) {{
+  let selected = opinionList[0];
+  document.getElementById(selected).className = 'selected';
+}}
+function select(element) {{
+    document.getElementById(selected).className = 'unselected';
+    element.className = 'selected';
+    selected = element.id;
+}}
+function vote(element_ID) {{
     var xhttp = new XMLHttpRequest();
     var split_ID = element_ID.split(' ');
     const opinion_ID = split_ID[0];
@@ -981,8 +991,8 @@ function vote(element_ID) {
     xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
 
-    document.getElementById(opinion_ID).style = 'display : none;';
-}
+    document.getElementById(opinion_ID).style = 'display: none';
+}}
 </script>'''.encode('utf8'))
             self.wfile.write('</body></html>'.encode('utf8'))
             self.log_activity()
@@ -1982,7 +1992,7 @@ tr.unselected {
 <!--<button id='Climate' onclick='forward(this);'>CLIMATE</button><br />-->
 </td></tr></table></article>'''.encode('utf8'))
             self.wfile.write(f'''<script>
-opinionList = {opinion_ID_list};
+const opinionList = {opinion_ID_list};
 let selected = opinionList[0];
 document.getElementById(selected).className = 'selected';
 function select(element) {{
