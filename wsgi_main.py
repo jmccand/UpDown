@@ -374,7 +374,7 @@ function close_menu() {
         self.run_and_sync(db.user_cookies_lock,
                           update_user_activity,
                           db.user_cookies)
-        logging.info(f'{my_account.email} with {my_account.cookie_code} did {activity_unit}')
+        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.cookie_code} did {activity_unit}')
         
     def run_and_sync(self, lock_needed, change, database):
         lock_needed.acquire()
@@ -532,10 +532,26 @@ function checkEmail() {{
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
             if link_uuid in db.verification_links:
-                if my_account == None:
+                different_device = False
+                if my_account != db.user_cookies[db.verification_links[link_uuid]]:
                    print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
-                #if db.verification_links[link_uuid] == my_account.cookie_code:
-                # change the account locally
+                   different_device = True
+                # clear votes for a different device
+                if different_device:
+                    old_cookie_code = db.verification_links[link_uuid]
+                    new_uuid = uuid.uuid4().hex
+                    while new_uuid in db.user_cookies or new_uuid in db.verification_links or new_uuid == old_cookie_code:
+                        new_uuid = uuid.uuid4().hex
+                    my_account = db.user_cookies[db.verification_links[link_uuid]]
+                    def change_uuid_in_user_cookies():
+                        my_account.cookie_code = new_uuid
+                        db.user_cookies[new_uuid] = my_account
+                        del db.user_cookies[old_cookie_code]
+                    self.run_and_sync(db.user_cookies_lock, change_uuid_in_user_cookies, db.user_cookies)
+                    def change_uuid_in_verification():
+                        db.verification_links[link_uuid] = new_uuid
+                    self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
+                # continue to send verification
                 my_account = db.user_cookies[db.verification_links[link_uuid]]
                 my_account.verified_email = True
 
