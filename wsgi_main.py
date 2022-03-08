@@ -543,9 +543,9 @@ function checkEmail() {{
                     while new_uuid in db.user_cookies or new_uuid in db.verification_links or new_uuid == old_cookie_code:
                         new_uuid = uuid.uuid4().hex
                     my_account = db.user_cookies[db.verification_links[link_uuid]]
+                    my_new_account = updown.User(my_account.email, new_uuid)
                     def change_uuid_in_user_cookies():
-                        my_account.cookie_code = new_uuid
-                        db.user_cookies[new_uuid] = my_account
+                        db.user_cookies[new_uuid] = my_new_account
                         del db.user_cookies[old_cookie_code]
                     self.run_and_sync(db.user_cookies_lock, change_uuid_in_user_cookies, db.user_cookies)
                     def change_uuid_in_verification():
