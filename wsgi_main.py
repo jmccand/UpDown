@@ -61,7 +61,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path }\n')
 
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path.startswith('/manifest.json'):
             self.get_email()
         else:
             try:
@@ -72,6 +72,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                     return self.load_image()
                 elif self.path == '/hamburger.png':
                     return self.load_image()
+                elif self.path == '/manifest.json':
+                    return self.load_file()
                 elif self.path.startswith('/check_email'):
                     self.path_root = '/check_email'
                     self.check_email()
@@ -389,6 +391,12 @@ function close_menu() {
             image_data = open(self.path[1:], 'rb').read()
             self.start_response('200 OK', [('content-type', f'image/{image_type}'), ('content-length', str(len(image_data)))])
             self.wfile.write(image_data)
+
+    def load_file(self):
+        if self.path == '/manifest.json':
+            file_data = open(self.path[1:], 'rb').read()
+            self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(file_data)))])
+            self.wfile.write(file_data)
 
     def get_email(self):
         self.start_response('200 OK', [])
