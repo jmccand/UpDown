@@ -552,6 +552,7 @@ function checkEmail() {{
                         db.verification_links[link_uuid] = new_uuid
                     self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
                 # continue to send verification
+                assert my_account.user_cookie != db.verification_links[link_uuid]
                 my_account = db.user_cookies[db.verification_links[link_uuid]]
                 my_account.verified_email = True
 
