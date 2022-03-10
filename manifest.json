@@ -1,0 +1,15 @@
+{
+  "short_name": "UpDown",
+  "name": "UpDown",
+  "icons": [
+      {
+	  "src": "/favicon.ico",
+	  "sizes": "512x512",
+	  "type": "image/png"
+      }
+  ],
+  "start_url": "/",
+  "background_color": "#f1c232",
+  "theme_color": "#1155cc",
+  "display": "standalone"
+}
