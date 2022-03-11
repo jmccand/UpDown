@@ -416,7 +416,7 @@ if ('serviceWorker' in navigator) {{
         console.log('Registered!');
         }}, function(err) {{
             console.log('ServiceWorker registration failed: ', err);
-        }}).catch(function(err) {
+        }}).catch(function(err) {{
             console.log(err);
         }});
     }});
