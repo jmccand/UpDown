@@ -61,11 +61,12 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             if not self.path == '/favicon.ico':
                 print(f'INVALID COOKIE FOUND: {self.path }\n')
 
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path.startswith('/manifest.json'):
+        self.path_root = '/'
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path.startswith('/manifest.json') and not self.path.startswith('/hamburger.png') and not self.path.startswith('/favicon.ico'):
             self.get_email()
         else:
             try:
-                self.path_root = '/'
+                #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
                 elif self.path == '/favicon.ico':
@@ -317,7 +318,7 @@ header {
 </style>'''.encode('utf8'))
         
     def send_links_body(self):
-        my_account = self.identify_user()
+        my_account = self.identify_user(True)
         title = ''
         if self.path_root == '/':
             title = 'Vote!'
@@ -345,14 +346,15 @@ header {
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
 <a href='/track_opinions'>Track an Opinion</a>
 <a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
-        if my_account.email in local.MODERATORS and my_account.verified_email:
-            self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-        if my_account.email in local.ADMINS and my_account.verified_email:
-            self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
-            self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
-        for committee, members in local.COMMITTEE_MEMBERS.items():
-            if my_account.email in members and my_account.verified_email:
-                self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+        if my_account != None:
+            if my_account.email in local.MODERATORS and my_account.verified_email:
+                self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            if my_account.email in local.ADMINS and my_account.verified_email:
+                self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
+                self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
+            for committee, members in local.COMMITTEE_MEMBERS.items():
+                if my_account.email in members and my_account.verified_email:
+                    self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
@@ -405,6 +407,7 @@ function close_menu() {
 
     def get_email(self):
         self.start_response('200 OK', [])
+        self.wfile.write('<html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
