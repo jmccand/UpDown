@@ -18,7 +18,6 @@
 	    "type": "image/png"
 	}
     ],
-    "apple-touch-icon": "/favicon.png",
     "start_url": "/",
     "background_color": "#f1c232",
     "theme_color": "#1155cc",
