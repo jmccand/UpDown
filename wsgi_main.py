@@ -400,15 +400,15 @@ function close_menu() {
             self.wfile.write(file_data)
         elif self.path == '/service-worker.js':
             file_data = open(self.path[1:], 'rb').read()
-            self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(file_data)))])
+            self.start_response('200 OK', [('content-type', f'text/javascript'), ('content-length', str(len(file_data)))])
             self.wfile.write(file_data)
 
     def get_email(self):
         self.start_response('200 OK', [])
-        self.wfile.write(f'''<!DOCTYPE HTML>
-<html>
-<body>
-<form method='GET' action='/check_email'>
+        self.send_links_head()
+        self.wfile.write('</head><body>'.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write(f'''<form method='GET' action='/check_email'>
 Enter your school email (must end in @lexingtonma.org):
 <input id='email_box' type='email' name='email'/>
 <input id='submit' type='submit' disabled='true'/>
