@@ -161,6 +161,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UpDown</title>
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/favicon.png">
 <style>
 body {
   background-color: #1155ccff;
