@@ -62,7 +62,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 print(f'INVALID COOKIE FOUND: {self.path }\n')
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path.startswith('/manifest.json') and not self.path.startswith('/service-worker.js') and not self.path.startswith('/hamburger.png') and not self.path.startswith('/favicon.ico'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path == '/manifest.json' and not self.path == '/service-worker.js' and not self.path == '/hamburger.png' and not self.path == '/favicon.ico':
             self.get_email()
         else:
             try:
@@ -74,6 +74,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/hamburger.png':
                     return self.load_image()
                 elif self.path == '/manifest.json':
+                    return self.load_file()
+                elif self.path == '/service-worker.js':
                     return self.load_file()
                 elif self.path.startswith('/check_email'):
                     self.path_root = '/check_email'
