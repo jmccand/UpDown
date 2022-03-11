@@ -155,6 +155,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         self.wfile.write('''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UpDown</title>
+<link rel="manifest" href="/manifest.json">
 <style>
 body {
   background-color: #1155ccff;
@@ -394,6 +395,10 @@ function close_menu() {
 
     def load_file(self):
         if self.path == '/manifest.json':
+            file_data = open(self.path[1:], 'rb').read()
+            self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(file_data)))])
+            self.wfile.write(file_data)
+        elif self.path == '/service-worker.js':
             file_data = open(self.path[1:], 'rb').read()
             self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(file_data)))])
             self.wfile.write(file_data)
