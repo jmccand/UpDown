@@ -62,7 +62,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 print(f'INVALID COOKIE FOUND: {self.path }\n')
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path == '/manifest.json' and not self.path == '/service-worker.js' and not self.path == '/hamburger.png' and not self.path == '/favicon.ico':
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path == '/manifest.json' and not self.path == '/service-worker.js' and not self.path == '/hamburger.png' and not self.path == '/favicon.ico' and not self.path == '/favicon.png':
             self.get_email()
         else:
             try:
@@ -70,6 +70,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 if self.path == '/':
                     self.opinions_page()
                 elif self.path == '/favicon.ico':
+                    return self.load_image()
+                elif self.path == '/favicon.png':
                     return self.load_image()
                 elif self.path == '/hamburger.png':
                     return self.load_image()
