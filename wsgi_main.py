@@ -445,15 +445,14 @@ article {
         self.send_links_body()
         self.wfile.write(f'''<article>
 Welcome to UpDown, LHS's student representation app.<br /><br />
-This app was created to amplify the power of the student body. As LHS has over 2000 students, we have a strength in numbers. When we unite our demands, we can catch the attention of the administration and call for real change.<br /><br />
-Using UpDown, students submit their opinions and vote up or down others' opinions. In this way, the student body can agree on opinions that we care about.<br /><br />
-Opinions that are most popular are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />
-On UpDown, everything you do is kept anonymous. All that UpDown needs from you is an honest display of your opinions about our school. Your name will not be tied to the votes that you make, nor the opinions that you submit.<br /><br />
-That being said, to maintain the integrity of the vote, UpDown needs your lexingtonma email:<br /><br />
+This app was created to channel the power of the student body. As LHS has over 2000 students, we have strength in numbers. By uniting our demands, we can draw the attention of the administration and call for real change.<br /><br />
+Using UpDown, students submit and vote on opinions. In this way, the student body can raise issues that we care about.<br /><br />
+The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />
+In order to ensure that each student can only vote once, UpDown needs your lexingtonma email:<br /><br />
 <form method='GET' action='/check_email'>
 <input id='email_box' type='email' name='email'/><br /><br />
-This ensures that each student can only vote once, and that each student's vote is valued equally.<br /><br />
-Everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy only extends so long as you obey LHS's Code of Conduct outlawing bullying, cyberbullying, and hate speech. Not-safe-for-work content is not allowed either. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher that you dislike or about how much you hate school.<br /><br />
+On UpDown, everything you do is kept anonymous. All that UpDown needs from you is your honest opinions about our school. Your name will not be tied to your votes, nor the opinions that you submit.<br /><br />
+That said, everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy is contingent on your following LHS's Code of Conduct which outlaws bullying, cyberbullying, and hate speech. Not-safe-for-work content is also not allowed. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher or how much you hate school.<br /><br />
 If you agree with our privacy policy and have entered your email, click the button below:<br /><br />
 <input id='submit' type='submit' value='GET STARTED' disabled='true'/>
 </form>
