@@ -1,9 +1,8 @@
-import local
-import db
 import sys
+import local
+local.redo_paths(sys.argv[1])
+import db
 from wsgi_main import *
-
-local.redo_paths(sys.argv[0])
 
 print(f'\n{db.user_cookies}')
 for cookie, user in db.user_cookies.items():
