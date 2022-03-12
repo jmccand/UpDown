@@ -63,6 +63,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 
         self.path_root = '/'
         if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path == '/manifest.json' and not self.path == '/service-worker.js' and not self.path == '/hamburger.png' and not self.path == '/favicon.ico' and not self.path == '/favicon.png':
+            self.path_root = '/get_email'
             self.get_email()
         else:
             try:
@@ -327,6 +328,8 @@ header {
         title = ''
         if self.path_root == '/':
             title = 'Vote!'
+        elif self.path_root == '/get_email':
+            title = 'Welcome!'
         elif self.path_root == '/track_opinions':
             title = 'Track!'
         elif self.path_root == '/senate':
@@ -414,13 +417,47 @@ function close_menu() {
         self.start_response('200 OK', [])
         self.wfile.write('<html><head>'.encode('utf8'))
         self.send_links_head()
+        self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 50px;
+  width: 96%;
+  padding: 1%;
+  bottom: 0;
+  z-index: 1;
+  overflow: scroll;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+}
+@media screen and (max-width: 600px) {
+article {
+  position: absolute;
+  top: 50px;
+  width: 96%;
+  padding: 2%;
+  bottom: 0;
+  z-index: 1;
+  overflow: scroll;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+}
+}
+</style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.wfile.write(f'''<form method='GET' action='/check_email'>
-Enter your school email (must end in @lexingtonma.org):
-<input id='email_box' type='email' name='email'/>
-<input id='submit' type='submit' disabled='true'/>
+        self.wfile.write(f'''<article>
+Welcome to UpDown, LHS's student representation app.<br /><br />
+This app was created to amplify the power of the student body. As LHS has over 2000 students, we have a strength in numbers. When we unite our demands, we can catch the attention of the administration and call for real change.<br /><br />
+Using UpDown, students submit their opinions and vote up or down others' opinions. In this way, the student body can agree on opinions that we care about.<br /><br />
+Opinions that are most popular are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />
+On UpDown, everything you do is kept anonymous. All that UpDown needs from you is an honest display of your opinions about our school. Your name will not be tied to the votes that you make, nor the opinions that you submit.<br /><br />
+That being said, to maintain the integrity of the vote, UpDown needs your lexingtonma email:<br /><br />
+<form method='GET' action='/check_email'>
+<input id='email_box' type='email' name='email'/><br /><br />
+This ensures that each student can only vote once, and that each student's vote is valued equally.<br /><br />
+Everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy only extends so long as you obey LHS's Code of Conduct outlawing bullying, cyberbullying, and hate speech. Not-safe-for-work content is not allowed either. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher that you dislike or about how much you hate school.<br /><br />
+If you agree with our privacy policy and have entered your email, click the button below:<br /><br />
+<input id='submit' type='submit' value='GET STARTED' disabled='true'/>
 </form>
+</article>
 
 <script>
 if ('serviceWorker' in navigator) {{
@@ -597,7 +634,7 @@ function checkEmail() {{
                         db.verification_links[link_uuid] = new_uuid
                     self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
                 # continue to send verification
-                assert my_account.user_cookie != db.verification_links[link_uuid]
+                assert my_account.cookie_code != db.verification_links[link_uuid]
                 my_account = db.user_cookies[db.verification_links[link_uuid]]
                 my_account.verified_email = True
 
