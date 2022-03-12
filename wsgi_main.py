@@ -615,11 +615,12 @@ function checkEmail() {{
             link_uuid = url_arguments['verification_id'][0]
             if link_uuid in db.verification_links:
                 different_device = False
+                verified_account = db.user_cookies[db.verification_links[link_uuid]]
                 if my_account != db.user_cookies[db.verification_links[link_uuid]]:
                    print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
                    different_device = True
                 # clear votes for a different device
-                if different_device:
+                if different_device and not verified_account.verified_email:
                     old_cookie_code = db.verification_links[link_uuid]
                     new_uuid = uuid.uuid4().hex
                     while new_uuid in db.user_cookies or new_uuid in db.verification_links or new_uuid == old_cookie_code:
@@ -633,8 +634,8 @@ function checkEmail() {{
                     def change_uuid_in_verification():
                         db.verification_links[link_uuid] = new_uuid
                     self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
+                    assert my_account.cookie_code != db.verification_links[link_uuid]
                 # continue to send verification
-                assert my_account.cookie_code != db.verification_links[link_uuid]
                 my_account = db.user_cookies[db.verification_links[link_uuid]]
                 my_account.verified_email = True
 
