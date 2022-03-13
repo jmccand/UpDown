@@ -18,6 +18,7 @@ import io
 import traceback
 import os
 import updown
+import threading
 
 
 def application(environ, start_response):
@@ -30,7 +31,7 @@ def application(environ, start_response):
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 3
+    DEBUG = 0
 
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -1422,6 +1423,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             def update_opinions_database():
                 db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
             self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+            search_index_add_opinion(db.opinions_database[str(opinion_ID)])
             self.start_response('200 OK', [])
             self.log_activity([opinion_ID])
         else:
@@ -2193,19 +2195,26 @@ def simplify_text(text):
     return split_text
 
 def build_search_index():
+    search_index_lock.acquire()
     for opinion_ID in range(len(db.opinions_database)):
         opinion = db.opinions_database[str(opinion_ID)]
-        split_text = simplify_text(opinion.text)
-            
-        print(f'{opinion.text} -- {split_text}')
-
-        for word in split_text:
-            if word in SEARCH_INDEX:
-                SEARCH_INDEX[word].append(opinion_ID)
-            else:
-                SEARCH_INDEX[word] = [opinion_ID]
-
+        search_index_add_opinion(opinion)
         print(f'{SEARCH_INDEX}')
+
+    search_index_lock.release()
+
+def search_index_add_opinion(opinion):
+    search_index_lock.acquire()
+    split_text = simplify_text(opinion.text)
+
+    print(f'{opinion.text} -- {split_text}')
+
+    for word in split_text:
+        if word in SEARCH_INDEX:
+            SEARCH_INDEX[word].append(opinion.ID)
+        else:
+            SEARCH_INDEX[word] = [opinion.ID]
+    search_index_lock.release()
 
 def search(input_text):
     split_text = simplify_text(input_text)
@@ -2256,7 +2265,8 @@ def main():
     httpd = make_server('10.17.4.17', 8888, application)
     httpd.serve_forever()
 
-SEARCH_INDEX = {}    
+SEARCH_INDEX = {}
+search_index_lock = threading.RLock()
 
 if __name__ == '__main__':
     main()
