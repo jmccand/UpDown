@@ -357,7 +357,7 @@ header {
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
 <a href='/track_opinions'>Track an Opinion</a>
-<a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+<a href='/senate'>The Student-Faculty Senate</a>'''.encode('utf8'))
         if my_account != None:
             if my_account.email in local.MODERATORS and my_account.verified_email:
                 self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
