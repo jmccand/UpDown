@@ -1551,7 +1551,7 @@ td {
                     self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date - datetime.timedelta((this_date.weekday() + 1) % 7 % 4)}"' colspan='{3 - ((this_date.weekday() + 1) % 7) % 4}'>{day_number}-{first_day}<br />{already_selected}/10</td>'''.encode('utf8'))
                 if ((this_date.weekday() + 1) % 7) % 4 == 0:
                     if day_number + 3 > month_days:
-                        self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='{day_number + 3 - month_days}'>{day_number}-{month_days}<br />{already_selected}/10</td>'''.encode('utf8'))
+                        self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='{month_days - day_number}'>{day_number}-{month_days}<br />{already_selected}/10</td>'''.encode('utf8'))
                     else:
                         self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='3'>{day_number}, {day_number + 1}, {day_number + 2}<br />{already_selected}/10</td>'''.encode('utf8'))
                 elif this_date.weekday() == 2:
