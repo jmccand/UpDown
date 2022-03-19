@@ -473,6 +473,7 @@ article {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
+        YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
         self.wfile.write(f'''<article>
 Welcome to UpDown, LHS's student representation app.<br /><br />
 This app was created to channel the power of the student body. As LHS has over 2000 students, we have strength in numbers. By uniting our preferences, we can draw the attention of the administration and call for real change.<br /><br />
@@ -489,12 +490,13 @@ If you agree with our privacy policy and have entered your email, click the butt
 </article>
 
 <script>
-exceptionEmails = {list(local.EXCEPTION_EMAILS)}
+const exceptionEmails = {list(local.EXCEPTION_EMAILS)};
+const YOGS = {YOGS};
 setTimeout(checkEmail, 1000);
 function checkEmail() {{
     current_email = document.getElementById('email_box').value;
     console.log('email: ' + current_email);
-    if (current_email.endsWith('@lexingtonma.org')) {{
+    if (current_email.endsWith('@lexingtonma.org') && YOGS.indexOf(current_email[0] + current_email[1]) != -1) {{
         console.log('PROPER EMAIL');
         document.getElementById('submit').disabled = false;
     }}
@@ -517,7 +519,10 @@ function checkEmail() {{
         url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'email' in url_arguments:
             user_email = url_arguments['email'][0]
-            if user_email.endswith('@lexingtonma.org') or user_email in local.EXCEPTION_EMAILS:
+            email_grad = user_email[:2]
+            YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
+            print(YOGS)
+            if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
                 email_taken = False
                 existing_uuid = None
                 existing_code = None
