@@ -1993,6 +1993,8 @@ Bill or Resolution
             search_results = search(url_arguments['words'][0])
         else:
             search_results = list(db.opinions_database.keys())
+        if search_results == []:
+            self.wfile.write('Sorry, there were no results. Try using different keywords.'.encode('utf8'))
         for opinion_ID in search_results:
             json_stats[opinion_ID] = [0, []]
             opinion = db.opinions_database[str(opinion_ID)]
