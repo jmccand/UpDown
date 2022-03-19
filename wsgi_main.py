@@ -162,8 +162,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         self.wfile.write('''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UpDown</title>
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/favicon.png">
 <style>
 body {
   background-color: #1155ccff;
@@ -460,30 +458,6 @@ If you agree with our privacy policy and have entered your email, click the butt
 </article>
 
 <script>
-if ('serviceWorker' in navigator) {{
-    window.addEventListener('load', function() {{
-        navigator.serviceWorker.register('service-worker.js').then(function(registration) {{
-        console.log('Registered!');
-        }}, function(err) {{
-            console.log('ServiceWorker registration failed: ', err);
-        }}).catch(function(err) {{
-            console.log(err);
-        }});
-    }});
-}} else {{
-  console.log('service worker is not supported');
-}}
-
-self.addEventListener('install', function() {{
-  console.log('Install!');
-}});
-self.addEventListener("activate", event => {{
-  console.log('Activate!');
-}});
-self.addEventListener('fetch', function(event) {{
-  console.log('Fetch!', event.request);
-}});
-
 exceptionEmails = {list(local.EXCEPTION_EMAILS)}
 setTimeout(checkEmail, 1000);
 function checkEmail() {{
@@ -671,6 +645,8 @@ Thank you for verifying. Your votes are now counted.<br />
         self.start_response('200 OK', [])
         day_of_the_week = datetime.date.today().weekday()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.wfile.write('''<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
 article {
@@ -811,7 +787,7 @@ button#closepop {
 
         if len(my_account.activity) == 1:
             self.wfile.write('''<script>
-openpop('test!');
+openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app to your homescreen!');
 </script>'''.encode('utf8'))
         
         see_day = None
@@ -972,6 +948,29 @@ function openpop(text) {
 function closepop() {
     document.getElementById('popup').style.display = 'none';
 }
+if ('serviceWorker' in navigator) {{
+    window.addEventListener('load', function() {{
+        navigator.serviceWorker.register('service-worker.js').then(function(registration) {{
+        console.log('Registered!');
+        }}, function(err) {{
+            console.log('ServiceWorker registration failed: ', err);
+        }}).catch(function(err) {{
+            console.log(err);
+        }});
+    }});
+}} else {{
+  console.log('service worker is not supported');
+}}
+
+self.addEventListener('install', function() {{
+  console.log('Install!');
+}});
+self.addEventListener("activate", event => {{
+  console.log('Activate!');
+}});
+self.addEventListener('fetch', function(event) {{
+  console.log('Fetch!', event.request);
+}});
 </script>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
