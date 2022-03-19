@@ -827,7 +827,7 @@ button#closepop {
 
         if len(my_account.activity) == 1:
             self.wfile.write('''<script>
-openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app to your homescreen!');
+openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app to your homescreen! To add the app with an Apple device, open this page in safari, click on the icon in the top right with an arrow coming out of a box, and select "Add to Home Screen". On an Android device, tap the menu icon in the top right (the 3 dots) and select "Add to Home Screen".');
 </script>'''.encode('utf8'))
         
         see_day = None
