@@ -78,7 +78,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/hamburger.png':
                     return self.load_image()
                 elif self.path == '/manifest.json':
-                    return self.load_file()
+                    return self.handle_manifest()
                 elif self.path == '/service-worker.js':
                     return self.load_file()
                 elif self.path.startswith('/check_email'):
@@ -403,14 +403,40 @@ function close_menu() {
             self.wfile.write(image_data)
 
     def load_file(self):
-        if self.path == '/manifest.json':
-            file_data = open(self.path[1:], 'rb').read()
-            self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(file_data)))])
-            self.wfile.write(file_data)
-        elif self.path == '/service-worker.js':
+        if self.path == '/service-worker.js':
             file_data = open(self.path[1:], 'rb').read()
             self.start_response('200 OK', [('content-type', f'text/javascript'), ('content-length', str(len(file_data)))])
             self.wfile.write(file_data)
+
+    def handle_manifest(self):
+        my_account = self.identify_user()
+        manifest = '''{
+    "short_name": "UpDown",
+    "name": "UpDown",
+    "icons": [
+	{
+	    "src": "/favicon.ico",
+	    "sizes": "512x512",
+	    "type": "image/png"
+	},
+	{
+	    "src": "/favicon.png",
+	    "sizes": "192x192",
+	    "type": "image/png"
+	},
+	{
+	    "src": "/favicon512x512.png",
+	    "sizes": "512x512",
+	    "type": "image/png"
+	}
+    ],
+    "start_url": "/?cookie_code=%s",
+    "background_color": "#f1c232",
+    "theme_color": "#1155cc",
+    "display": "standalone"
+}''' % (my_account.cookie_code)
+        self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(manifest)))])
+        self.wfile.write(manifest.encode('utf8'))
 
     def get_email(self):
         self.start_response('200 OK', [])
