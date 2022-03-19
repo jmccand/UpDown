@@ -1072,8 +1072,9 @@ section.selected {
             self.wfile.write('</article>'.encode('utf8'))
             self.wfile.write(f'''<script>
 const opinionList = {unapproved_list};
+let selected = null;
 if (opinionList.length > 0) {{
-  let selected = opinionList[0];
+  selected = opinionList[0];
   document.getElementById(selected).className = 'selected';
 }}
 function select(element) {{
