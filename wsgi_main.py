@@ -64,8 +64,13 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 
         self.path_root = '/'
         if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path == '/manifest.json' and not self.path == '/service-worker.js' and not self.path == '/hamburger.png' and not self.path == '/favicon.ico' and not self.path == '/favicon.png':
-            self.path_root = '/get_email'
-            self.get_email()
+            url_arguments = urllib.parse.parse_qs(self.query_string)
+            if self.path == '/' and 'cookie_code' in url_arguments:
+                self.path_root = '/'
+                self.opinions_page()
+            else:
+                self.path_root = '/get_email'
+                self.get_email()
         else:
             try:
                 #self.path_root = '/'
@@ -667,8 +672,17 @@ Thank you for verifying. Your votes are now counted.<br />
             raise ValueError(f"ip {self.client_address[0]} -- verify email function got url_arguments {url_arguments}")
         
     def opinions_page(self):
+        reset_cookie = False
+        if not 'code' in self.my_cookies:
+            url_arguments = urllib.parse.parse_qs(self.query_string)
+            if 'cookie_code' in url_arguments:
+                self.my_cookies['code'] = url_arguments['cookie_code'][0]
+                reset_cookie = True
         my_account = self.identify_user()
-        self.start_response('200 OK', [])
+        if reset_cookie:
+            self.start_response('200 OK', [('Set-Cookie', f'code={url_arguments["cookie_code"][0]}; path=/')])
+        else:
+            self.start_response('200 OK', [])
         day_of_the_week = datetime.date.today().weekday()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.wfile.write('''<link rel="manifest" href="/manifest.json">
