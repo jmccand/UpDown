@@ -475,7 +475,7 @@ article {
         self.send_links_body()
         self.wfile.write(f'''<article>
 Welcome to UpDown, LHS's student representation app.<br /><br />
-This app was created to channel the power of the student body. As LHS has over 2000 students, we have strength in numbers. By uniting our demands, we can draw the attention of the administration and call for real change.<br /><br />
+This app was created to channel the power of the student body. As LHS has over 2000 students, we have strength in numbers. By uniting our preferences, we can draw the attention of the administration and call for real change.<br /><br />
 Using UpDown, students submit and vote on opinions. In this way, the student body can raise issues that we care about.<br /><br />
 The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />
 In order to ensure that each student can only vote once, UpDown needs your lexingtonma email:<br /><br />
