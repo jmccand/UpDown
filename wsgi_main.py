@@ -538,7 +538,7 @@ function checkEmail() {{
                     sent_from = local.FROM_EMAIL
                     to = email_address
                     subject = 'Add your votes to the count?'
-                    body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={existing_uuid}'
+                    body = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={existing_uuid}'
                     email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
                     try:
                         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
@@ -573,7 +573,7 @@ function checkEmail() {{
                     sent_from = local.FROM_EMAIL
                     to = email_address
                     subject = 'Add your votes to the count?'
-                    body = f'Welcome to the Student Rep App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
+                    body = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
                     email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
                     try:
                         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
@@ -838,7 +838,7 @@ openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
-            self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
+            self.wfile.write('''<article>Sorry, nothing to vote on today.<br />See you soon!<br />'''.encode('utf8'))
         else:
             self.wfile.write('<article>'.encode('utf8'))
             randomized = list(db.opinions_calendar[str(see_day)])
