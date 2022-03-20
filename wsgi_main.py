@@ -2359,7 +2359,9 @@ def stem(word):
 
 def thread_backup():
     while True:
+        print('sleeping!')
         time.sleep(local.DB_SLEEP_DELAY)
+        print('waking!')
         dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
         with db.user_cookies_lock:
             with db.opinions_database_lock:
@@ -2400,9 +2402,11 @@ SEARCH_INDEX = {}
 search_index_lock = threading.RLock()
 
 build_search_index()
+
 thread = threading.Thread(target=thread_backup, args=())
-thread.setDaemon(True)
+thread.daemon = True
 thread.start()
+print('thread started!')
 
 if __name__ == '__main__':
     main()
