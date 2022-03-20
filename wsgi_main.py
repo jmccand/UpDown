@@ -2342,8 +2342,6 @@ def search(input_text):
 def main():
     print('Student Change Web App... running...')
 
-    build_search_index()
-
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_cookies}')
         for cookie, user in db.user_cookies.items():
@@ -2372,6 +2370,8 @@ def main():
 
 SEARCH_INDEX = {}
 search_index_lock = threading.RLock()
+
+build_search_index()
 
 if __name__ == '__main__':
     main()
