@@ -2304,7 +2304,7 @@ def build_search_index():
     for opinion_ID in range(len(db.opinions_database)):
         opinion = db.opinions_database[str(opinion_ID)]
         search_index_add_opinion(opinion)
-        print(f'{SEARCH_INDEX}')
+    print(f'{SEARCH_INDEX}')
 
     search_index_lock.release()
 
