@@ -20,7 +20,6 @@ import os
 import updown
 import threading
 
-
 def application(environ, start_response):
     for key, item in environ.items():
         print(f'{key}       {item}')
@@ -2315,10 +2314,11 @@ def search_index_add_opinion(opinion):
     print(f'{opinion.text} -- {split_text}')
 
     for word in split_text:
-        if word in SEARCH_INDEX:
-            SEARCH_INDEX[word].append(opinion.ID)
+        sword = stem(word)
+        if sword in SEARCH_INDEX:
+            SEARCH_INDEX[sword].append(opinion.ID)
         else:
-            SEARCH_INDEX[word] = [opinion.ID]
+            SEARCH_INDEX[sword] = [opinion.ID]
     search_index_lock.release()
 
 def search(input_text):
@@ -2338,6 +2338,22 @@ def search(input_text):
     ordered_results = [x[0] for x in tuple_results]
     
     return ordered_results
+
+# poached from Lucene’s EnglishMinimalStemmer, Apache Software License v2
+def stem(word):
+    if word.endswith("'s"):
+        word = word[:-2]
+    if len(word) < 3 or word[-1] != 's':
+        return word
+    if word[-2] in ('u', 's'):
+        return word
+    if word[-2] == 'e':
+        if len(word) > 3 and word[-3] == 'i' and word[-4] not in ('a', 'e'):
+            word[-3] = 'y'
+            return word[:-2]
+        if word[-3] in ('i', 'a', 'o', 'e'):
+            return word
+    return word[:-1]
 
 def main():
     print('Student Change Web App... running...')
