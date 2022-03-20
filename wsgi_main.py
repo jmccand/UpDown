@@ -19,6 +19,8 @@ import traceback
 import os
 import updown
 import threading
+import time
+import shutil
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -2355,6 +2357,16 @@ def stem(word):
             return word
     return word[:-1]
 
+def thread_backup():
+    while True:
+        time.sleep(local.DB_SLEEP_DELAY)
+        dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+        with db.user_cookies_lock:
+            with db.opinions_database_lock:
+                with db.verification_links_lock:
+                    with db.opinions_calendar_lock:
+                        shutil.copytree(local.DIRECTORY_PATH, f'{local.BACKUP_DIRECTORY}/{dirname}')
+
 def main():
     print('Student Change Web App... running...')
 
@@ -2388,6 +2400,9 @@ SEARCH_INDEX = {}
 search_index_lock = threading.RLock()
 
 build_search_index()
+thread = threading.Thread(target=thread_backup, args=())
+thread.setDaemon(True)
+thread.start()
 
 if __name__ == '__main__':
     main()
