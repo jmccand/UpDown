@@ -2201,33 +2201,91 @@ article {
   position: absolute;
   top: 50px;
   width: 100%;
-  height: 91%;
+  height: 41%;
   z-index: 1;
   overflow: scroll;
 }
-td.up {
-  color: limegreen;
+div.stat {
+  position: absolute;
+  right: 0;
+  width: 40%;
+  text-align: right;
 }
-td.care {
-  color: black;
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  z-index: 1;
+  overflow: scroll;
 }
-</style>
-</head>
-<body>'''.encode('utf8'))
+div.result {
+  width: 99%;
+  height: 50px;
+  margin: 0.5%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+}
+</style>'''.encode('utf8'))
                 self.send_links_body()
-                self.wfile.write(f'<article>Committee page: {committee}<br /><table>'.encode('utf8'))
+                self.wfile.write(f'<article>'.encode('utf8'))
+                self.wfile.write(f'''Submitted to the {committee} committee on <span id='stat0'></span>.<br />
+<span id='stat1'></span>% care percent (<span id='stat2'></span>).<br />
+<span id='stat3'></span>% up percent (<span id='stat4'></span>).<br />
+Created on <span id='stat5'></span>.<br />
+Approved on <span id='stat6'></span>.<br />
+Scheduled on <span id='stat7'></span>.<br />
+Voted for on <span id='stat8'></span>.'''.encode('utf8'))
+                self.wfile.write('</article><footer>'.encode('utf8'))
+                
+                def to_date(dt):
+                    return datetime.date(dt.year, dt.month, dt.day)
+                json_stats = {}
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.committee_jurisdiction == committee:
+                        json_stats[opinion_ID] = []
                         up_votes, down_votes, abstains = opinion.count_votes()
                         up_percent = 'N/A'
                         if up_votes + down_votes != 0:
                             up_percent = up_votes / (up_votes + down_votes) * 100
                         care_percent = 'N/A'
                         if up_votes + down_votes + abstains != 0:
-                            care_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                        self.wfile.write(f'''<tr id='{opinion_ID}' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
-                self.wfile.write('</table></article>'.encode('utf8'))
-                self.wfile.write('''</body></html>'''.encode('utf8'))
+                            care_percent = (up_votes + down_votes) / (up_votes + down_votes + abstains) * 100
+                        if len(opinion.activity) >= 4:
+                            assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                            json_stats[opinion_ID].append(str(to_date(opinion.activity[3][0][2])))
+                        json_stats[opinion_ID].append(care_percent)
+                        json_stats[opinion_ID].append(f'{up_votes + down_votes} / {up_votes + down_votes + abstains}')
+                        json_stats[opinion_ID].append(up_percent)
+                        json_stats[opinion_ID].append(f'{up_votes} / {up_votes + down_votes}')
+                        if len(opinion.activity) >= 1:
+                            json_stats[opinion_ID].append(str(to_date(opinion.activity[0][1])))
+                        if len(opinion.activity) >= 2:
+                            assert opinion.approved in (True, False)
+                            json_stats[opinion_ID].append(str(to_date(opinion.activity[1][0][2])))
+                        if len(opinion.activity) >= 3:
+                            json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][3])))
+                            json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][2])))
+                        if len(opinion.activity) >= 5:
+                            json_stats[opinion_ID].append(str(to_date(opinion.activity[4][0][2])))
+                        self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
+<span class='left'>
+{opinion.text}
+</span>
+</div>'''.encode('utf8'))
+                self.wfile.write(f'''<script>
+const stats = {json.dumps(json_stats)};
+function updateStats(element) {{
+    const this_ID = element.id;
+    const these_stats = stats[this_ID];
+    for (let i = 0; i < these_stats.length; i++) {{
+        document.getElementById('stat' + i).innerHTML = these_stats[i];
+    }}
+}}
+</script>'''.encode('utf8'))
+                self.wfile.write('''</footer></body></html>'''.encode('utf8'))
                 
 class invalidCookie(ValueError):
     def __init__(self, message):
