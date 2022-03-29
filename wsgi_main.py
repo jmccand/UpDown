@@ -21,6 +21,7 @@ import updown
 import threading
 import time
 import shutil
+import user_agents
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -679,12 +680,7 @@ Thank you for verifying. Your votes are now counted.<br />
                             #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
                         #print('verify email done!')
                     else:
-                        self.start_response('200 OK', [])
-                        self.wfile.write('<!DOCTYPE HTML><html><body>'.encode('utf8'))
-                        self.wfile.write(f'''Thank you for opening the verification link. There's one more important notice before you can verify:<br />
-If you're on an Apple device (ie. an iPhone), you must open this link in Safari to download the app: <a href='{self.path}'>link</a>.<br />
-If you're on an Android device (ie. a Samsung phone), you must open this link in Chrome to download the app: <a href='{self.path}'>link</a>'''.encode('utf8'))
-                        self.wfile.write('</body></html>'.encode('utf8'))
+                        self.start_response('302 MOVED', [('Location', f'/verify_email?verification_id={link_uuid}')])
                 else:
                     self.start_response('200 OK', [])
                     self.wfile.write('<!DOCTYPE HTML><html><body>'.encode('utf8'))
