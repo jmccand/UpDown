@@ -40,6 +40,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         self.client_address = (environ['REMOTE_ADDR'],)
         self.query_string = environ['QUERY_STRING']
         self.my_cookies = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+        self.http_user_agent = environ['HTTP_USER_AGENT']
         print(self.my_cookies)
         self.wfile = io.BytesIO()
 
@@ -622,60 +623,71 @@ function checkEmail() {{
     def verify_email(self):
         url_arguments = urllib.parse.parse_qs(self.query_string)
         my_account = self.identify_user(True)
-        if 'verification_id' in url_arguments:
-            link_uuid = url_arguments['verification_id'][0]
-            if link_uuid in db.verification_links:
-                different_device = False
-                verified_account = db.user_cookies[db.verification_links[link_uuid]]
-                if my_account != db.user_cookies[db.verification_links[link_uuid]]:
-                   print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
-                   different_device = True
-                # clear votes for a different device
-                if different_device and not verified_account.verified_email:
-                    old_cookie_code = db.verification_links[link_uuid]
-                    new_uuid = uuid.uuid4().hex
-                    while new_uuid in db.user_cookies or new_uuid in db.verification_links or new_uuid == old_cookie_code:
+        if 'browser' in url_arguments:
+            url_browser = url_arguments['browser'][0]
+            request_ua = user_agents.parse(self.http_user_agent)
+            request_browser = request_ua.browser.family
+            if url_browser == request_browser and 'verification_id' in url_arguments:
+                link_uuid = url_arguments['verification_id'][0]
+                if link_uuid in db.verification_links:
+                    different_device = False
+                    verified_account = db.user_cookies[db.verification_links[link_uuid]]
+                    if my_account != db.user_cookies[db.verification_links[link_uuid]]:
+                       print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
+                       different_device = True
+                    # clear votes for a different device
+                    if different_device and not verified_account.verified_email:
+                        old_cookie_code = db.verification_links[link_uuid]
                         new_uuid = uuid.uuid4().hex
+                        while new_uuid in db.user_cookies or new_uuid in db.verification_links or new_uuid == old_cookie_code:
+                            new_uuid = uuid.uuid4().hex
+                        my_account = db.user_cookies[db.verification_links[link_uuid]]
+                        my_new_account = updown.User(my_account.email, new_uuid)
+                        def change_uuid_in_user_cookies():
+                            db.user_cookies[new_uuid] = my_new_account
+                            del db.user_cookies[old_cookie_code]
+                        self.run_and_sync(db.user_cookies_lock, change_uuid_in_user_cookies, db.user_cookies)
+                        def change_uuid_in_verification():
+                            db.verification_links[link_uuid] = new_uuid
+                        self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
+                        assert my_account.cookie_code != db.verification_links[link_uuid]
+                    # continue to send verification
                     my_account = db.user_cookies[db.verification_links[link_uuid]]
-                    my_new_account = updown.User(my_account.email, new_uuid)
-                    def change_uuid_in_user_cookies():
-                        db.user_cookies[new_uuid] = my_new_account
-                        del db.user_cookies[old_cookie_code]
-                    self.run_and_sync(db.user_cookies_lock, change_uuid_in_user_cookies, db.user_cookies)
-                    def change_uuid_in_verification():
-                        db.verification_links[link_uuid] = new_uuid
-                    self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
-                    assert my_account.cookie_code != db.verification_links[link_uuid]
-                # continue to send verification
-                my_account = db.user_cookies[db.verification_links[link_uuid]]
-                my_account.verified_email = True
+                    my_account.verified_email = True
 
-                # update the database
-                def update_user_cookies():
-                    db.user_cookies[my_account.cookie_code] = my_account
-                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+                    # update the database
+                    def update_user_cookies():
+                        db.user_cookies[my_account.cookie_code] = my_account
+                    self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
-                # send success page
-                self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/')])
-                self.wfile.write('''<!DOCTYPE HTML>
+                    # send success page
+                    self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/')])
+                    self.wfile.write('''<!DOCTYPE HTML>
 <html>
 <body>
 Thank you for verifying. Your votes are now counted.<br />
 <a href='/'>Return to homepage</a>
 </body>
 </html>'''.encode('utf8'))
-                if MyWSGIHandler.DEBUG < 2:
-                    print(f'{my_account.email} just verified their email!')
+                    if MyWSGIHandler.DEBUG < 2:
+                        print(f'{my_account.email} just verified their email!')
 
-                self.my_cookies['code'] = my_account.cookie_code
-                self.log_activity()
-                #else:
-                    #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
-                #print('verify email done!')
+                    self.my_cookies['code'] = my_account.cookie_code
+                    self.log_activity()
+                    #else:
+                        #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
+                    #print('verify email done!')
+                else:
+                    raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}, which is not in the verification database")
             else:
-                raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}, which is not in the verification database")
+                raise ValueError(f"ip {self.client_address[0]} -- verify email function got url_arguments {url_arguments} and user agent browser {request_browser}")
         else:
-            raise ValueError(f"ip {self.client_address[0]} -- verify email function got url_arguments {url_arguments}")
+            self.start_response('200 OK', [])
+            self.wfile.write('<!DOCTYPE HTML><html><body>'.encode('utf8'))
+            self.wfile.write(f'''Thank you for opening the verification link. There's one more important notice before you can verify:<br />
+If you're on an Apple device (ie. an iPhone), you must open this link in Safari to download the app: <a href='{self.path}'>link</a>.<br />
+If you're on an Android device (ie a Samsung phone), you must open this link in Chrome to download the app: <a href='{self.path}'>link</a>'''.encode('utf8'))
+            self.wfile.write('</body></html>'.encode('utf8'))
         
     def opinions_page(self):
         reset_cookie = False
