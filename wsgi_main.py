@@ -2104,6 +2104,7 @@ Bill or Resolution
         self.wfile.write('</div></footer>'.encode('utf8'))
         self.wfile.write(f'''<script>
 const stats = {json.dumps(json_stats)};
+let prev = null;
 function updateStats(element) {{
     const this_ID = element.id;
     const these_stats = stats[this_ID][1];
@@ -2113,7 +2114,12 @@ function updateStats(element) {{
     for (let i = these_stats.length; i < 6; i++) {{
         document.getElementById('stat' + i).innerHTML = '---';
     }}
-        document.getElementById('circle').style.top = stats[this_ID][0] + '%';
+    document.getElementById('circle').style.top = stats[this_ID][0] + '%';
+    if (prev != null) {{
+        prev.style.backgroundColor = '#cfe2f3ff';
+    }}
+    element.style.backgroundColor = 'yellow';
+    prev = element;
 }}
 </script>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
