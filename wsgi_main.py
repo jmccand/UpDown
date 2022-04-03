@@ -2115,6 +2115,11 @@ function updateStats(element) {{
         document.getElementById('stat' + i).innerHTML = '---';
     }}
     document.getElementById('circle').style.top = stats[this_ID][0] + '%';
+    if (prev != null) {{
+        prev.style.backgroundColor = '#cfe2f3ff';
+    }}
+    element.style.backgroundColor = 'yellow';
+    prev = element;
 }}
 </script>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
