@@ -22,6 +22,8 @@ import threading
 import time
 import shutil
 import user_agents
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -517,6 +519,39 @@ function checkEmail() {{
 
 </body>
 </html>'''.encode('utf8'))
+    def send_email(self, to_email, v_uuid):
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = "Add your votes to the count?"
+        msg['From'] = local.FROM_EMAIL
+        msg['To'] = to_email
+        text = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={v_uuid}'
+        html = f'''<html>
+<body>
+<p>
+Welcome to the Student Representation App for LHS!
+<br />
+<br />
+Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verify_email?verification_id={v_uuid}'>this link</a>.
+</p>
+</body>
+</html>'''
+
+        part1 = MIMEText(text, 'plain') 
+        part2 = MIMEText(html, 'html')
+
+        msg.attach(part1) 
+        msg.attach(part2)
+
+        try:
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+            server.ehlo()
+            server.login(local.EMAIL, local.PASSWORD)
+            server.sendmail(local.FROM_EMAIL, to_email, msg.as_string())
+            server.close()
+
+            print(f'Email sent! {msg.as_string()=}')
+        except:
+            print('Something went wrong...')
 
     def check_email(self):
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -540,25 +575,7 @@ function checkEmail() {{
 
                 if email_taken:
                     # send email
-                    email_address = user_email
-                    gmail_user = local.EMAIL
-                    gmail_password = local.PASSWORD
-                    sent_from = local.FROM_EMAIL
-                    to = email_address
-                    subject = 'Add your votes to the count?'
-                    body = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={existing_uuid}'
-                    email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
-                    try:
-                        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-                        server.ehlo()
-                        server.login(gmail_user, gmail_password)
-                        server.sendmail(sent_from, to, email_text)
-                        server.close()
-                        if MyWSGIHandler.DEBUG < 2:
-                            print(f'New user with email {email_address}!')
-                    except:
-                        raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
-
+                    self.send_email(user_email, existing_uuid)
                     self.start_response('302 MOVED', [('Location', f'/email_taken?email={user_email}')])
                     
                 else:
@@ -575,24 +592,7 @@ function checkEmail() {{
                     assert(link_uuid not in db.user_cookies and link_uuid not in db.verification_links)
 
                     # send email
-                    email_address = user_email
-                    gmail_user = local.EMAIL
-                    gmail_password = local.PASSWORD
-                    sent_from = local.FROM_EMAIL
-                    to = email_address
-                    subject = 'Add your votes to the count?'
-                    body = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={link_uuid}'
-                    email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
-                    try:
-                        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-                        server.ehlo()
-                        server.login(gmail_user, gmail_password)
-                        server.sendmail(sent_from, to, email_text)
-                        server.close()
-                        if MyWSGIHandler.DEBUG < 2:
-                            print(f'New user with email {email_address}!')
-                    except:
-                        raise RuntimeError(f'Something went wrong with sending an email to {email_address}.')
+                    self.send_email(user_email, link_uuid)
 
                     # change the databases
                     assert(my_uuid not in db.user_cookies and my_uuid not in db.verification_links)

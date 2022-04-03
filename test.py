@@ -1,24 +1,37 @@
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import smtplib
 import local
 
-from_gmail_user = local.FROM_EMAIL
-gmail_user = local.EMAIL
-gmail_password = local.PASSWORD
+msg = MIMEMultipart('alternative')
+msg['Subject'] = "Add your votes to the count?"
+msg['From'] = local.FROM_EMAIL
+msg['To'] = local.EMAIL
+text = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id=12345'
+html = f'''<html>
+<body>
+<p>
+Welcome to the Student Representation App for LHS!
+<br />
+<br />
+Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verify_email?verification_id=12345'>this link</a>.
+</p>
+</body>
+</html>'''
 
-sent_from = from_gmail_user
-to = gmail_user
-subject = 'Do you get this?'
-body = 'Testing 1 2 3 testing...'
+part1 = MIMEText(text, 'plain') 
+part2 = MIMEText(html, 'html')
 
-email_text = f'From: {sent_from}\r\nTo: {to}\r\nSubject: {subject}\r\n\r\n{body}'
+msg.attach(part1) 
+msg.attach(part2)
 
 try:
     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
     server.ehlo()
-    server.login(gmail_user, gmail_password)
-    server.sendmail(sent_from, to, email_text)
+    server.login(local.EMAIL, local.PASSWORD)
+    server.sendmail(local.FROM_EMAIL, local.EMAIL, msg.as_string())
     server.close()
 
-    print('Email sent!')
+    print(f'Email sent! {msg.as_string()=}')
 except:
     print('Something went wrong...')
