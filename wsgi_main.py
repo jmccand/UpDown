@@ -849,6 +849,15 @@ button#closepop {
   width: 30%;
   left: 35%;
 }
+article#banner {
+  position: absolute;
+  top: 0;
+  height: 30px;
+  width: 100%;
+  text-align: center;
+  background-color: lightBlue;
+  display: none;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -984,11 +993,12 @@ function checkVoteValidity(new_vote, old_vote) {
 </script>
 </article>''' % (list(db.opinions_calendar[str(see_day)]))).encode('utf8'))
         self.wfile.write('''<article id='popup'>
-<section id='popuptext'>text</section>
+<section id='popuptext'></section>
 <button id='closepop' onclick='closepop();'>
 OK
 </button>
 </article>
+<article id='banner'></article>
 <script>
 function openpop(text) {
     document.getElementById('popuptext').innerHTML = text;
@@ -996,6 +1006,13 @@ function openpop(text) {
 }
 function closepop() {
     document.getElementById('popup').style.display = 'none';
+}
+function banner(text) {
+    document.getElementById('banner').innerHTML = text;
+    document.getElementById('banner').style.display = 'table-cell';
+    setTimeout(function close() {
+document.getElementById('banner').style.display = 'none';
+}, 3000);
 }
 </script>'''.encode('utf8'))
         if 'prompt_add' in url_arguments and url_arguments['prompt_add'][0] == 'True':
@@ -1013,7 +1030,7 @@ function submit_opinion() {
     if (opinion_text != '' && opinion_text != null) {
         xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
         xhttp.send();
-        //alert('Your opinion was submitted. Thank you!');
+        banner('Your opinion was submitted! Thank you!');
     }
 }
 </script>
@@ -2013,7 +2030,7 @@ Bill or Resolution
 </div>
 </div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
-        self.wfile.write('''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
+        self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
         def to_date(dt):
             return datetime.date(dt.year, dt.month, dt.day)
@@ -2024,6 +2041,7 @@ Bill or Resolution
             search_results = search(url_arguments['words'][0])
         else:
             search_results = list(db.opinions_database.keys())
+            search_results.sort(key=lambda x: -int(x))
         if search_results == []:
             self.wfile.write('Sorry, there were no results. Try using different keywords.'.encode('utf8'))
         for opinion_ID in search_results:
