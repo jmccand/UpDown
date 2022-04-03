@@ -672,7 +672,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
 <html>
 <body>
 Thank you for verifying. Your votes are now counted.<br />
-<a href='/'>Return to homepage</a>
+<a href='/?prompt_add=True'>Return to homepage</a>
 </body>
 </html>'''.encode('utf8'))
                     if MyWSGIHandler.DEBUG < 2:
@@ -699,8 +699,8 @@ Thank you for verifying. Your votes are now counted.<br />
         
     def opinions_page(self):
         reset_cookie = False
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         if not 'code' in self.my_cookies:
-            url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'cookie_code' in url_arguments:
                 self.my_cookies['code'] = url_arguments['cookie_code'][0]
                 reset_cookie = True
@@ -844,18 +844,15 @@ section#popuptext {
 }
 button#closepop {
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
+  width: 30%;
+  left: 35%;
 }
 </style>
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
 
-        if len(my_account.activity) <= 2:
-            self.wfile.write('''<script>
-openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app to your homescreen! To add the app with an Apple device, open this page in safari, click on the icon in the top right with an arrow coming out of a box, and select "Add to Home Screen". On an Android device, tap the menu icon in the top right (the 3 dots) and select "Add to Home Screen".');
-</script>'''.encode('utf8'))
-        
         see_day = None
         today_date = datetime.date.today()
         if (today_date.weekday() + 1) % 7 < 3:
@@ -985,6 +982,26 @@ function checkVoteValidity(new_vote, old_vote) {
 }
 </script>
 </article>''' % (list(db.opinions_calendar[str(see_day)]))).encode('utf8'))
+        self.wfile.write('''<article id='popup'>
+<section id='popuptext'>text</section>
+<button id='closepop' onclick='closepop();'>
+OK
+</button>
+</article>
+<script>
+function openpop(text) {
+    document.getElementById('popuptext').innerHTML = text;
+    document.getElementById('popup').style.display = 'table-cell';
+}
+function closepop() {
+    document.getElementById('popup').style.display = 'none';
+}
+</script>'''.encode('utf8'))
+        if 'prompt_add' in url_arguments and url_arguments['prompt_add'][0] == 'True':
+            self.wfile.write('''<script>
+openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app to your homescreen! To add the app with an Apple device, open this page in safari, click on the icon in the top right with an arrow coming out of a box, and select "Add to Home Screen". On an Android device, tap the menu icon in the top right (the 3 dots) and select "Add to Home Screen".');
+</script>'''.encode('utf8'))
+                    
         self.wfile.write('''<footer>
 <!--<input id='opinion_text' type='text'/>-->
 <button class='submit' onclick='submit_opinion()'>Enter a new Opinion</button>
@@ -1000,20 +1017,7 @@ function submit_opinion() {
 }
 </script>
 </footer>
-<article id='popup'>
-<section id='popuptext'>text</section>
-<button id='closepop' onclick='closepop();'>
-OK
-</button>
-</article>
 <script>
-function openpop(text) {
-    document.getElementById('popuptext').innerHTML = text;
-    document.getElementById('popup').style.display = 'table-cell';
-}
-function closepop() {
-    document.getElementById('popup').style.display = 'none';
-}
 if ('serviceWorker' in navigator) {{
     window.addEventListener('load', function() {{
         navigator.serviceWorker.register('service-worker.js').then(function(registration) {{
