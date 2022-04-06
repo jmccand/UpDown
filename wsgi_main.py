@@ -712,7 +712,7 @@ Thank you for verifying. Your votes are now counted.<br />
             self.start_response('200 OK', [])
         day_of_the_week = datetime.date.today().weekday()
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-        self.wfile.write('''<link rel="manifest" href="/manifest.json">
+        self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
