@@ -88,6 +88,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/hamburger.png':
                     return self.load_image()
                 elif self.path == '/manifest.json':
+                    self.path_root = '/manifest.json'
                     return self.handle_manifest()
                 elif self.path == '/service-worker.js':
                     return self.load_file()
@@ -447,6 +448,7 @@ function close_menu() {
 }''' % (my_account.cookie_code)
         self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(manifest)))])
         self.wfile.write(manifest.encode('utf8'))
+        self.log_activity()
 
     def get_email(self):
         self.start_response('200 OK', [])
