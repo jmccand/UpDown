@@ -1214,7 +1214,7 @@ article {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<div id='back_to_top'><a href='/senate#top'>Back to the top</a></div>'''.encode('utf8'))
+        self.wfile.write('''<div id='back_to_top'><a href='/senate#TOC'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<article>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
 <ul>
