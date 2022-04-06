@@ -1532,8 +1532,17 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                     my_account.votes[opinion_ID].append((my_vote, datetime.datetime.now()))
                 else:
                     my_account.votes[opinion_ID] = [(my_vote, datetime.datetime.now())]
+                see_day = None
                 today_date = datetime.date.today()
-                for other_opinion_ID in db.opinions_calendar[str(today_date - datetime.timedelta((today_date.weekday() + 1) % 7 % 4))]:
+                if (today_date.weekday() + 1) % 7 < 3:
+                    see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
+                if (today_date.weekday() + 1) % 7 > 3:
+                    see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
+                else:
+                    see_day = today_date
+
+                #for other_opinion_ID in db.opinions_calendar[str(today_date - datetime.timedelta((today_date.weekday() + 1) % 7 % 4))]:
+                for other_opinion_ID in db.opinions_calendar[str(see_day)]:
                     if other_opinion_ID != opinion_ID and other_opinion_ID not in my_account.votes:
                         my_account.votes[other_opinion_ID] = [('abstain', datetime.datetime.now())]
 
