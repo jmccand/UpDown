@@ -2430,12 +2430,13 @@ def thread_backup():
         print('sleeping!')
         time.sleep(local.DB_SLEEP_DELAY)
         print('waking!')
-        dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+        dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S.new')
         with db.user_cookies_lock:
             with db.opinions_database_lock:
                 with db.verification_links_lock:
                     with db.opinions_calendar_lock:
                         shutil.copytree(local.DIRECTORY_PATH, f'{local.BACKUP_DIRECTORY}/{dirname}')
+        os.rename(f'{local.BACKUP_DIRECTORY}/{dirname}',f'{local.BACKUP_DIRECTORY}/{dirname[:-4]}')
 
 def main():
     print('Student Change Web App... running...')
