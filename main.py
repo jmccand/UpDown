@@ -576,7 +576,7 @@ A recap of the week is shown below:<br />
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
                 if str(opinion_ID) in my_account.votes:
-                    this_vote = user.votes[str(opinion_ID)][-1][0]
+                    this_vote = my_account.votes[str(opinion_ID)][-1][0]
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
@@ -598,13 +598,14 @@ function getTouches(evt) {{
 }}
 
 function handleTouchStart(evt) {{
+    console.log('touched!');
     const start = getTouches(evt)[0];
     xStart = start.clientX;
     yStart = start.clientY;
 }}
 
 function handleTouchMove(evt) {{
-    if (xDown == null || yDown == null) {{
+    if (xStart == null || yStart == null) {{
         return;
     }}
 
@@ -630,25 +631,25 @@ function handleTouchMove(evt) {{
             vote('down');
         }}
     }}
-    xDown = null;
-    yDown = null;
+    xStart = null;
+    yStart = null;
 }}
 function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
-    if (checkVoteValidity(my_vote, my_votes[current_index])) {{
+    if (checkVoteValidity(my_vote, votes[current_index])) {{
         xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
-        my_votes[current_index] = my_vote;
+        votes[current_index] = my_vote;
     }}
 }}
 function checkVoteValidity(new_vote, old_vote) {{
     let up_count = 0;
     let down_count = 0;
-    for (let index = 0; index < my_votes.length; index++) {{
-        if (my_votes[index] == 'up') {{
+    for (let index = 0; index < votes.length; index++) {{
+        if (votes[index] == 'up') {{
             up_count++;
         }}
-        else if (my_votes[index] == 'down') {{
+        else if (votes[index] == 'down') {{
             down_count++;
         }}
     }}
@@ -669,6 +670,8 @@ function checkVoteValidity(new_vote, old_vote) {{
     }}
     return valid;
 }}
+</script>
+</article>
 '''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
