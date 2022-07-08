@@ -128,7 +128,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 <title>UpDown</title>
 <style>
 body {
-  background-color: #1155ccff;
+  background-color: white;
   margin: 0;
   padding: 0;
 }
@@ -143,7 +143,6 @@ header {
   position: absolute;
   top: 0;
   left: 0;
-  width: 50px;
   height: 100%;
   z-index: 1;
 }
@@ -160,20 +159,11 @@ header {
 }
 #logo {
   position: absolute;
-  width: 50px;
   height: 100%;
   top: 0;
   right: 0;
   z-index: 1;
 }
-/*article {
-  position: absolute;
-  top: 9%;
-  width: 100%;
-  height: 90%;
-  z-index: 1;
-  overflow: scroll;
-}*/
 #menu {
   width: 0;
   height: 100%;
@@ -183,7 +173,6 @@ header {
   left: 0;
   overflow-x: hidden;
   background-color: #f1c232ff;
-  /*background-color: #1155ccff;*/
   transition: 0.5s;
 }
 #menu a {
@@ -552,77 +541,18 @@ article {
   overflow: scroll;
 }
 section {
-  width: 98%;
-  height: 50px;
-  margin: 1%;
-  position: relative;
-  background-color: #cfe2f3ff;
+  top: 20%;
+  width: 92%;
+  left: 2%;
+  padding: 2%;
+  height: 200px;
+  position: absolute;
+  background-color: white;
   z-index: 1;
   border-radius: 6px;
-}
-div#end_block {
-  width: 100%;
-  height: 55px;
-  z-index: 1;
-}
-div.unselected_up {
-  color: black;
-  width: 20%;
-  position: absolute;
-  right: 0;
-  top: 0;
-  text-align: center;
-  font-size: 22px;
-}
-div.unselected_down {
-  color: black;
-  width: 20%;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  text-align: center;
-  font-size: 22px;
-}
-div.selected_up {
-  color : green;
-  width: 20%;
-  position: absolute;
-  right: 0;
-  top: 0;
-  text-align: center;
-  font-size: 22px;
-}
-div.selected_down {
-  color : red;
-  width: 20%;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  text-align: center;
-  font-size: 22px;
-}
-span.left {
-  width: 75%;
-  height: 80%;
-  position: absolute;
-  left: 5%;
-  top: 10%;
-}
-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 55px;
-  z-index: 1; 
-}
-button.submit {
-  position: absolute;
-  left: 2.5%;
-  width: 95%;
-  height: 90%;
-  border-radius: 25px;
-  background-color: #f1c232ff;
-  z-index: 1;
+  border-color: black;
+  border-width: 2px;
+  border-style: solid;
 }
 </style>
 </head>
@@ -640,110 +570,106 @@ A recap of the week is shown below:<br />
             self.wfile.write('<article>'.encode('utf8'))
             randomized = list(db.opinions_calendar[str(datetime.date.today())])
             random.shuffle(randomized)
+            my_votes = []
             for opinion_ID in randomized:
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
-                opinion_ID = str(opinion.ID)
-                if my_account.email in local.ADMINS and my_account.verified_email:
-                    self.send_opinion(opinion_ID, 'vote')
+                if str(opinion_ID) in my_account.votes:
+                    this_vote = user.votes[str(opinion_ID)][-1][0]
+                    my_votes.append(this_vote)
                 else:
-                    self.send_opinion(opinion_ID, 'vote_admin')
-            self.wfile.write(str('''
-<div id='end_block'>
-</div>
-<script>
-const page_IDs = %s;
-function vote(element_ID) {
+                    my_votes.append('abstain')
+            self.wfile.write(f'''<section>{db.opinions_database[randomized[0]].text}</section>'''.encode('utf8'))
+            self.wfile.write(f'''<script>
+const page_IDs = {randomized};
+let votes = {my_votes};
+let current_index = 0;
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+
+var xStart = null;
+var yStart = null;
+
+function getTouches(evt) {{
+  return evt.touches ||
+         evt.originalEvent.touches;
+}}
+
+function handleTouchStart(evt) {{
+    const start = getTouches(evt)[0];
+    xStart = start.clientX;
+    yStart = start.clientY;
+}}
+
+function handleTouchMove(evt) {{
+    if (xDown == null || yDown == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        if (xDiff > 0) {{
+            change(1);
+        }}
+        else {{
+            change(-1);
+        }}
+    }}
+    else {{
+        if (yDiff > 0) {{
+            vote('up');
+        }}
+        else {{ 
+            vote('down');
+        }}
+    }}
+    xDown = null;
+    yDown = null;
+}}
+function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
-    var split_ID = element_ID.split(' ');
-    const opinion_ID = split_ID[0];
-    let old_vote = '';
-    if (document.getElementById(opinion_ID + ' up').className.startsWith('selected')) {
-        old_vote = 'up';
-    }
-    else if (document.getElementById(opinion_ID + ' down').className.startsWith('selected')) {
-        old_vote = 'down';
-    }
-    else {
-        old_vote = 'abstain';
-    }
-    const my_click = split_ID[1];
-    let my_vote = '';
-    if (my_click != old_vote) {
-        my_vote = my_click;
-    }
-    else {
-        my_vote = 'abstain';
-    }
-    
-    if (checkVoteValidity(my_vote, old_vote)) {
-        xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    if (checkVoteValidity(my_vote, my_votes[current_index])) {{
+        xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
-        if (my_vote == old_vote) {
-            document.getElementById(element_ID).className = 'unselected_' + my_vote;
-        }
-        else {
-            if (old_vote != 'abstain') {
-                let other_arrow = document.getElementById(opinion_ID + ' ' + old_vote);
-                other_arrow.className = 'unselected_' + old_vote;
-            }
-            if (my_vote != 'abstain') {
-                if (my_vote == 'up') {
-                    document.getElementById(element_ID).className = 'selected_up';
-                }
-                else {
-                    document.getElementById(element_ID).className = 'selected_down';
-                }
-            }
-        }
-    }
-}
-function checkVoteValidity(new_vote, old_vote) {
+        my_votes[current_index] = my_vote;
+    }}
+}}
+function checkVoteValidity(new_vote, old_vote) {{
     let up_count = 0;
     let down_count = 0;
-    for (let index = 0; index < page_IDs.length; index++) {
-        if (document.getElementById(page_IDs[index] + ' up').className.startsWith('selected')) {
+    for (let index = 0; index < my_votes.length; index++) {{
+        if (my_votes[index] == 'up') {{
             up_count++;
-        }
-        else if (document.getElementById(page_IDs[index] + ' down').className.startsWith('selected')) {
+        }}
+        else if (my_votes[index] == 'down') {{
             down_count++;
-        }
-    }
+        }}
+    }}
     let valid = true;
-    if (up_count == 5 && new_vote == 'up') {
+    if (up_count == 5 && new_vote == 'up') {{
         alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
-    }
-    else if (down_count == 5 && new_vote == 'down') {
+    }}
+    else if (down_count == 5 && new_vote == 'down') {{
         alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
-    }
-    if (old_vote == 'abstain') {
-        if (up_count + down_count == 8 && new_vote != 'abstain') {
+    }}
+    if (old_vote == 'abstain') {{
+        if (up_count + down_count == 8 && new_vote != 'abstain') {{
             alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
             valid = false;
-        }
-    }
+        }}
+    }}
     return valid;
-}
-</script>
-</article>''' % (list(db.opinions_calendar[str(datetime.date.today())]))).encode('utf8'))
-        self.wfile.write('''<footer>
-<!--<input id='opinion_text' type='text'/>-->
-<button class='submit' onclick='submit_opinion()'>Enter a new Opinion</button>
-<script>
-function submit_opinion() {
-    var xhttp = new XMLHttpRequest();
-    const opinion_text = prompt('Thank you for your input. Please enter your opinion below:');
-    if (opinion_text != '' && opinion_text != null) {
-        xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
-        xhttp.send();
-        //alert('Your opinion was submitted. Thank you!');
-    }
-}
-</script>
-</footer>'''.encode('utf8'))
+}}
+'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
