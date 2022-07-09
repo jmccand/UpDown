@@ -544,7 +544,7 @@ section {
   top: 20%;
   width: 96%;
   left: 2%;
-  padding: 2%;
+  padding: 15px;
   height: 200px;
   position: fixed;
   background-color: white;
