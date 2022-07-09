@@ -542,17 +542,18 @@ article {
 }
 section {
   top: 20%;
-  width: 92%;
+  width: 96%;
   left: 2%;
   padding: 2%;
   height: 200px;
-  position: absolute;
+  position: fixed;
   background-color: white;
   z-index: 1;
   border-radius: 6px;
   border-color: black;
   border-width: 2px;
   border-style: solid;
+  box-sizing: border-box;
 }
 </style>
 </head>
@@ -598,7 +599,6 @@ function getTouches(evt) {{
 }}
 
 function handleTouchStart(evt) {{
-    console.log('touched!');
     const start = getTouches(evt)[0];
     xStart = start.clientX;
     yStart = start.clientY;
