@@ -468,7 +468,8 @@ section {
   background-color: white;
   z-index: 1;
   border-radius: 6px;
-  border: 3px solid black;
+  border: 3px solid #595959;
+  color: black;
   box-sizing: border-box;
   font-size: 30px;
 }
@@ -487,7 +488,7 @@ footer {
   position: fixed;
 }
 #small_box {
-  border: 3px solid black;
+  border: 3px solid #595959;
   box-sizing: border-box;
   font-size: 40px;
   position: fixed;
