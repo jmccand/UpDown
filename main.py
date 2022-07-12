@@ -615,7 +615,7 @@ function vote(my_vote) {{
         else if (my_vote == 'down') {{
             opinions_box.style.borderColor = '#ff0000ff';
         }}
-        setTimeout(() => {{change(1); opinions_box.style.borderColor = '#595959';}}, 1000);
+        setTimeout(() => {{change(1)}}, 1000);
     }}
 }}
 function checkVoteValidity(new_vote, old_vote) {{
@@ -647,26 +647,28 @@ function checkVoteValidity(new_vote, old_vote) {{
     return valid;
 }}
 function change(i) {{
-    let opinions_box = document.getElementById('opinion_text');
+    let opinion_text = document.getElementById('opinion_text');
+    let opinions_box = document.getElementById('opinions_box');
     let small_box = document.getElementById('small_box');
     if (current_index + i < page_IDs.length && current_index + i >= 0) {{
         current_index += i;
-        opinions_box.innerHTML = opinion_texts[current_index];
+        opinion_text.innerHTML = opinion_texts[current_index];
         small_box.innerHTML = current_index + 1 + '/' + page_IDs.length;
         if (votes[current_index] == 'up') {{
-            small_box.style.backgroundColor = '#00ff00ff';
+            opinions_box.style.borderColor = '#00ff00ff';
         }}
         else if (votes[current_index] == 'down') {{
-            small_box.style.backgroundColor = '#ff0000ff';
+            opinions_box.style.borderColor = '#ff0000ff';
         }}
         else {{
-            small_box.style.backgroundColor = 'white';
+            opinions_box.style.borderColor = '#595959';
         }}
     }}
 }}
 </script>
 </article>
 '''.encode('utf8'))
+        print(my_votes)
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
