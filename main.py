@@ -572,18 +572,21 @@ A recap of the week is shown below:<br />
             randomized = list(db.opinions_calendar[str(datetime.date.today())])
             random.shuffle(randomized)
             my_votes = []
+            opinion_texts = []
             for opinion_ID in randomized:
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
+                opinion_texts.append(opinion.text)
                 if str(opinion_ID) in my_account.votes:
                     this_vote = my_account.votes[str(opinion_ID)][-1][0]
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
-            self.wfile.write(f'''<section>{db.opinions_database[randomized[0]].text}</section>'''.encode('utf8'))
+            self.wfile.write(f'''<section id='opinions_box'>{db.opinions_database[randomized[0]].text}</section>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
+const opinion_texts = {opinion_texts};
 let votes = {my_votes};
 let current_index = 0;
 
@@ -669,6 +672,13 @@ function checkVoteValidity(new_vote, old_vote) {{
         }}
     }}
     return valid;
+}}
+function change(i) {{
+    let opinions_box = document.getElementById('opinions_box');
+    if (current_index + i < page_IDs.length && current_index + i >= 0) {{
+        current_index += i;
+        opinions_box.innerHTML = opinion_texts[current_index];
+    }}
 }}
 </script>
 </article>
