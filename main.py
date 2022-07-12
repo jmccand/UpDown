@@ -530,10 +530,10 @@ A recap of the week is shown below:<br />
 <div id='small_box'>
 1/{len(randomized)}
 </div>
-<div class='arrow' style='left: 10px;'>
+<div class='arrow' style='left: 10px;' onclick='change(-current_index);'>
 \u21E4
 </div>
-<div class='arrow' style='right: 10px;'>
+<div class='arrow' style='right: 10px;' onclick='change(page_IDs.length - current_index - 1);'>
 \u21E5
 </div>
 </footer>'''.encode('utf8'))
