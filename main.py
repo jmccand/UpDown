@@ -555,6 +555,7 @@ let current_index = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('dblclick', handleDoubleClick, false);
 
 change(0);
 
@@ -602,6 +603,10 @@ function handleTouchMove(evt) {{
     xStart = null;
     yStart = null;
 }}
+function handleDoubleClick(evt) {{
+    console.log('double click!');
+    vote('abstain');
+}}
 function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
     if (checkVoteValidity(my_vote, votes[current_index])) {{
@@ -614,6 +619,9 @@ function vote(my_vote) {{
         }}
         else if (my_vote == 'down') {{
             opinions_box.style.borderColor = '#ff0000ff';
+        }}
+        else {{
+            opinions_box.style.borderColor = '#595959';
         }}
         setTimeout(() => {{change(1)}}, 1000);
     }}
@@ -668,7 +676,6 @@ function change(i) {{
 </script>
 </article>
 '''.encode('utf8'))
-        print(my_votes)
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
