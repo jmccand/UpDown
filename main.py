@@ -459,8 +459,8 @@ article {
   overflow: scroll;
 }
 section {
-  top: 25%;
-  bottom: 35%;
+  top: 27%;
+  bottom: 33%;
   width: 96%;
   left: 2%;
   padding: 15px;
@@ -471,6 +471,15 @@ section {
   border: 3px solid black;
   box-sizing: border-box;
   font-size: 30px;
+}
+section p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 footer {
   bottom: 0;
@@ -523,8 +532,8 @@ A recap of the week is shown below:<br />
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
-            self.wfile.write(f'''<section id='opinions_box'>
-{db.opinions_database[randomized[0]].text}
+            self.wfile.write(f'''<section>
+<p id='opinions_box'>{db.opinions_database[randomized[0]].text}</p>
 </section>
 <footer>
 <div id='small_box'>
