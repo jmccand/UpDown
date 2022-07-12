@@ -480,7 +480,7 @@ footer {
 #small_box {
   border: 3px solid black;
   box-sizing: border-box;
-  font-size: 30px;
+  font-size: 40px;
   position: fixed;
   text-align: center;
   left: 30%;
@@ -522,6 +522,7 @@ A recap of the week is shown below:<br />
 </section>
 <footer>
 <div id='small_box'>
+1/{len(randomized)}
 </div>
 </footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
@@ -615,9 +616,11 @@ function checkVoteValidity(new_vote, old_vote) {{
 }}
 function change(i) {{
     let opinions_box = document.getElementById('opinions_box');
+    let small_box = document.getElementById('small_box');
     if (current_index + i < page_IDs.length && current_index + i >= 0) {{
         current_index += i;
         opinions_box.innerHTML = opinion_texts[current_index];
+        small_box.innerHTML = current_index + 1 + '/' + page_IDs.length;
     }}
 }}
 </script>
