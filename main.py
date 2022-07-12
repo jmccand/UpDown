@@ -489,6 +489,12 @@ footer {
   bottom: 5px;
   background-color: white;
 }
+.arrow {
+  font-size: 45px;
+  position: fixed;
+  height: 55px;
+  bottom: 5px;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -523,6 +529,12 @@ A recap of the week is shown below:<br />
 <footer>
 <div id='small_box'>
 1/{len(randomized)}
+</div>
+<div class='arrow' style='left: 10px;'>
+\u21E4
+</div>
+<div class='arrow' style='right: 10px;'>
+\u21E5
 </div>
 </footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
