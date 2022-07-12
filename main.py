@@ -533,8 +533,8 @@ A recap of the week is shown below:<br />
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
-            self.wfile.write(f'''<section>
-<p id='opinions_box'>{db.opinions_database[randomized[0]].text}</p>
+            self.wfile.write(f'''<section id='opinions_box'>
+<p id='opinion_text'>{db.opinions_database[randomized[0]].text}</p>
 </section>
 <footer>
 <div id='small_box'>
@@ -555,6 +555,8 @@ let current_index = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
+
+change(0);
 
 var xStart = null;
 var yStart = null;
@@ -606,6 +608,14 @@ function vote(my_vote) {{
         xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
         votes[current_index] = my_vote;
+        let opinions_box = document.getElementById('opinions_box');
+        if (my_vote == 'up') {{
+            opinions_box.style.borderColor = '#00ff00ff';
+        }}
+        else if (my_vote == 'down') {{
+            opinions_box.style.borderColor = '#ff0000ff';
+        }}
+        setTimeout(() => {{change(1); opinions_box.style.borderColor = '#595959';}}, 1000);
     }}
 }}
 function checkVoteValidity(new_vote, old_vote) {{
@@ -637,12 +647,21 @@ function checkVoteValidity(new_vote, old_vote) {{
     return valid;
 }}
 function change(i) {{
-    let opinions_box = document.getElementById('opinions_box');
+    let opinions_box = document.getElementById('opinion_text');
     let small_box = document.getElementById('small_box');
     if (current_index + i < page_IDs.length && current_index + i >= 0) {{
         current_index += i;
         opinions_box.innerHTML = opinion_texts[current_index];
         small_box.innerHTML = current_index + 1 + '/' + page_IDs.length;
+        if (votes[current_index] == 'up') {{
+            small_box.style.backgroundColor = '#00ff00ff';
+        }}
+        else if (votes[current_index] == 'down') {{
+            small_box.style.backgroundColor = '#ff0000ff';
+        }}
+        else {{
+            small_box.style.backgroundColor = 'white';
+        }}
     }}
 }}
 </script>
