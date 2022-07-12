@@ -468,11 +468,26 @@ section {
   background-color: white;
   z-index: 1;
   border-radius: 6px;
-  border-color: black;
-  border-width: 2px;
-  border-style: solid;
+  border: 3px solid black;
   box-sizing: border-box;
   font-size: 30px;
+}
+footer {
+  bottom: 0;
+  height: 60px;
+  position: fixed;
+}
+#small_box {
+  border: 3px solid black;
+  box-sizing: border-box;
+  font-size: 30px;
+  position: fixed;
+  text-align: center;
+  left: 30%;
+  right: 30%;
+  height: 55px;
+  bottom: 5px;
+  background-color: white;
 }
 </style>
 </head>
@@ -504,7 +519,11 @@ A recap of the week is shown below:<br />
                     my_votes.append('abstain')
             self.wfile.write(f'''<section id='opinions_box'>
 {db.opinions_database[randomized[0]].text}
-</section>'''.encode('utf8'))
+</section>
+<footer>
+<div id='small_box'>
+</div>
+</footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
 const opinion_texts = {opinion_texts};
