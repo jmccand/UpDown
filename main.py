@@ -128,7 +128,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 <title>UpDown</title>
 <style>
 body {
-  background-color: white;
+  background-color: #6d9eebff;
   margin: 0;
   padding: 0;
 }
@@ -136,7 +136,7 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  height: 45px;
+  height: 60px;
   z-index: 2;
 }
 #hamburger {
@@ -153,8 +153,8 @@ header {
   width: 100%;
   height: 100%;
   text-align: center;
-  background-color: #f1c232ff;
-  font-size: 30px;
+  background-color: #ffef90ff;
+  font-size: 45px;
   font-family: 'Times New Roman';
 }
 #logo {
@@ -192,88 +192,6 @@ header {
 }
 </style>'''.encode('utf8'))
 
-    def send_links_head_senate(self):
-        self.wfile.write('''<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UpDown</title>
-<style>
-body {
-  background-color: #f3f1cfff;
-  margin: 0;
-  padding: 0;
-}
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 45px;
-  z-index: 2;
-}
-#hamburger {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50px;
-  height: 100%;
-  z-index: 1;
-}
-#title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  background-color: #ffef90ff;
-  color: #37443fff;
-  font-size: 30px;
-  font-family: 'Times New Roman';
-}
-#logo {
-  position: absolute;
-  width: 50px;
-  height: 100%;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-/*article {
-  position: absolute;
-  top: 9%;
-  width: 100%;
-  height: 90%;
-  z-index: 1;
-  overflow: scroll;
-}*/
-#menu {
-  width: 0;
-  height: 100%;
-  position: fixed;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  overflow-x: hidden;
-  background-color: #f1c232ff;
-  /*background-color: #1155ccff;*/
-  transition: 0.5s;
-}
-#menu a {
-  position: relative;
-  top: 20px;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-}
-#menu #x_menu {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50px;
-  height: 45px;
-  z-index: 1;
-}
-</style>'''.encode('utf8'))
-        
     def send_links_body(self):
         my_account = self.identify_user()
         title = ''
@@ -583,7 +501,9 @@ A recap of the week is shown below:<br />
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
-            self.wfile.write(f'''<section id='opinions_box'>{db.opinions_database[randomized[0]].text}</section>'''.encode('utf8'))
+            self.wfile.write(f'''<section id='opinions_box'>
+{db.opinions_database[randomized[0]].text}
+</section>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
 const opinion_texts = {opinion_texts};
@@ -1909,7 +1829,7 @@ def build_search_index():
         opinion = db.opinions_database[str(opinion_ID)]
         split_text = simplify_text(opinion.text)
             
-        print(f'{opinion.text} -- {split_text=}')
+        # print(f'{opinion.text} -- {split_text=}')
 
         for word in split_text:
             if word in SEARCH_INDEX:
@@ -1917,7 +1837,7 @@ def build_search_index():
             else:
                 SEARCH_INDEX[word] = [opinion_ID]
 
-        print(f'{SEARCH_INDEX}')
+        # print(f'{SEARCH_INDEX}')
 
 def search(input_text):
     split_text = simplify_text(input_text)
