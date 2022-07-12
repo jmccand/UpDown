@@ -452,18 +452,18 @@ Thank you for verifying. Your votes are now counted.<br />
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 50px;
+  top: 60px;
   width: 100%;
-  bottom: 0;
+  bottom: 60px;
   z-index: 1;
   overflow: scroll;
 }
 section {
-  top: 20%;
+  top: 25%;
+  bottom: 35%;
   width: 96%;
   left: 2%;
   padding: 15px;
-  height: 200px;
   position: fixed;
   background-color: white;
   z-index: 1;
@@ -472,6 +472,7 @@ section {
   border-width: 2px;
   border-style: solid;
   box-sizing: border-box;
+  font-size: 30px;
 }
 </style>
 </head>
