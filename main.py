@@ -136,7 +136,7 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  height: 60px;
+  height: 70px;
   z-index: 2;
 }
 #hamburger {
@@ -154,7 +154,7 @@ header {
   height: 100%;
   text-align: center;
   background-color: #ffef90ff;
-  font-size: 45px;
+  font-size: 50px;
   font-family: 'Times New Roman';
 }
 #logo {
@@ -452,7 +452,7 @@ Thank you for verifying. Your votes are now counted.<br />
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 60px;
+  top: 70px;
   width: 100%;
   bottom: 60px;
   z-index: 1;
@@ -484,25 +484,25 @@ section p {
 }
 footer {
   bottom: 0;
-  height: 60px;
+  height: 70px;
   position: fixed;
 }
 #small_box {
   border: 3px solid #595959;
   box-sizing: border-box;
-  font-size: 40px;
+  font-size: 45px;
   position: fixed;
   text-align: center;
   left: 30%;
   right: 30%;
-  height: 55px;
+  height: 65px;
   bottom: 5px;
   background-color: white;
 }
 .arrow {
-  font-size: 45px;
+  font-size: 55px;
   position: fixed;
-  height: 55px;
+  height: 65px;
   bottom: 5px;
 }
 </style>
