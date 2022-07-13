@@ -450,17 +450,27 @@ Thank you for verifying. Your votes are now counted.<br />
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
-article {
+article#opinion {
   position: absolute;
   top: 70px;
   width: 100%;
-  bottom: 60px;
+  bottom: 200px;
   z-index: 1;
   overflow: scroll;
 }
+article#ballot_label {
+  position: fixed;
+  bottom: 15%;
+  top: 75%;
+  font-size: 60px;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, 0);
+  text-align: center;
+}
 section {
-  top: 27%;
-  bottom: 33%;
+  top: 25%;
+  bottom: 35%;
   width: 96%;
   left: 2%;
   padding: 15px;
@@ -512,14 +522,14 @@ footer {
         self.send_links_body()
         if str(datetime.date.today()) not in db.opinions_calendar or db.opinions_calendar[str(datetime.date.today())] == set():
             if datetime.date.today().weekday() == 2:
-                self.wfile.write('''<article>
+                self.wfile.write('''<article id='opinion'>
 Middle Wednesday!<br />
 A recap of the week is shown below:<br />
 '''.encode('utf8'))
             else:
-                self.wfile.write('''<article>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
+                self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
-            self.wfile.write('<article>'.encode('utf8'))
+            self.wfile.write('''<article id='opinion'>'''.encode('utf8'))
             randomized = list(db.opinions_calendar[str(datetime.date.today())])
             random.shuffle(randomized)
             my_votes = []
@@ -537,6 +547,10 @@ A recap of the week is shown below:<br />
             self.wfile.write(f'''<section id='opinions_box'>
 <p id='opinion_text'>{db.opinions_database[randomized[0]].text}</p>
 </section>
+</article>
+<article id='ballot_label'>
+00:00:00
+</article>
 <footer>
 <div id='small_box'>
 1/{len(randomized)}
@@ -690,7 +704,6 @@ function change(i) {{
     }}
 }}
 </script>
-</article>
 '''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
