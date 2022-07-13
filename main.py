@@ -557,6 +557,7 @@ let current_index = 0;
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
 document.addEventListener('dblclick', handleDoubleClick, false);
+document.addEventListener('keydown', handleKeyDown, false);
 
 change(0);
 
@@ -654,6 +655,20 @@ function checkVoteValidity(new_vote, old_vote) {{
         }}
     }}
     return valid;
+}}
+function handleKeyDown(evt) {{
+    let key_pressed = event.key;
+    const keyDict = {{
+        'ArrowUp': [vote, 'up'],
+        'ArrowDown': [vote, 'down'],
+        ' ': [vote, 'abstain'],
+        'ArrowRight': [change, 1],
+        'ArrowLeft': [change, -1]
+    }};
+    if (keyDict[key_pressed] != null) {{
+        var func_arg_list = keyDict[key_pressed];
+        func_arg_list[0](func_arg_list[1]);
+    }}
 }}
 function change(i) {{
     let opinion_text = document.getElementById('opinion_text');
