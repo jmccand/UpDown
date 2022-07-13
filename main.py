@@ -472,6 +472,7 @@ section {
   color: black;
   box-sizing: border-box;
   font-size: 30px;
+  cursor: default;
 }
 section p {
   margin: 0;
