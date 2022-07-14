@@ -740,6 +740,15 @@ input {
   width: 97%;
   font-size: 20px;
 }
+article {
+  position: absolute;
+  top: 170px;
+  bottom: 0;
+  width: 100%;
+  font-size: 25px;
+  padding: 3%;
+  box-sizing: border-box;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -747,8 +756,11 @@ input {
         self.wfile.write('''<form>
 Enter your opinion below:<br />
 <input type='text' name='opinion'/>
-
 </form>
+<article>
+Similar opinions
+<span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
+</article>
 </body>
 </html>'''.encode('utf8'))
 
