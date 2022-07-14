@@ -56,9 +56,6 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/about_the_senate':
                     self.path_root = '/about_the_senate'
                     self.about_the_senate_page()
-                elif self.path == '/current_issues':
-                    self.path_root = '/current_issues'
-                    self.current_issues_page()
                 elif self.path == '/meet_the_senators':
                     self.path_root = '/meet_the_senators'
                     self.meet_the_senators_page()
