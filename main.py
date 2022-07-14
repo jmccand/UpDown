@@ -558,7 +558,7 @@ A recap of the week is shown below:<br />
 </section>
 </article>
 <article id='ballot_label'>
-00:00:00
+<!--00:00:00-->
 </article>
 <footer>
 <div id='small_box'>
