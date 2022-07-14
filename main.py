@@ -145,6 +145,7 @@ header {
   left: 0;
   height: 100%;
   z-index: 1;
+  border-right: 2px solid black;
 }
 #title {
   position: absolute;
@@ -156,6 +157,7 @@ header {
   background-color: #ffef90ff;
   font-size: 50px;
   font-family: 'Times New Roman';
+  border-bottom: 2px solid black;
 }
 #logo {
   position: absolute;
@@ -163,6 +165,7 @@ header {
   top: 0;
   right: 0;
   z-index: 1;
+  border-left: 2px solid black;
 }
 #menu {
   width: 0;
