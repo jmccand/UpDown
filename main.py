@@ -725,15 +725,30 @@ function change(i) {{
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
-article {
+form {
+  position: absolute;
+  top: 70px;
+  bottom: 0;
+  width: 100%;
+  font-size: 25px;
+  padding: 3%;
+  box-sizing: border-box;
+}
+input {
+  position: relative;
+  top: 15px;
+  width: 97%;
+  font-size: 20px;
 }
 </style>
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<article>
-Enter your opinion below (aim for 1 sentence):
-</article>
+        self.wfile.write('''<form>
+Enter your opinion below:<br />
+<input type='text' name='opinion'/>
+
+</form>
 </body>
 </html>'''.encode('utf8'))
 
