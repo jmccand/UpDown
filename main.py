@@ -62,8 +62,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/meet_the_senators':
                     self.path_root = '/meet_the_senators'
                     self.meet_the_senators_page()
-                elif self.path.startswith('/submit_opinion'):
-                    self.path_root = '/submit_opinion'
+                elif self.path.startswith('/handle_submit_opinion'):
+                    self.path_root = '/handle_submit_opinion'
                     self.submit_opinion()
                 elif self.path.startswith('/vote'):
                     self.path_root = '/vote'
@@ -104,6 +104,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/view_committee'):
                     self.path_root = '/view_committee'
                     self.view_committee_page()
+                elif self.path == '/submit_opinions':
+                    self.path_root = '/submit_opinions'
+                    self.submit_opinions_page()
             except ValueError as error:
                 print(str(error))
                 
@@ -200,6 +203,8 @@ header {
         title = ''
         if self.path_root == '/':
             title = 'Vote!'
+        elif self.path_root == '/submit_opinions':
+            title = 'Submit'
         elif self.path_root == '/track_opinions':
             title = 'Track!'
         elif self.path_root == '/senate':
@@ -222,6 +227,7 @@ header {
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
+<a href='/submit_opinions'>Submit an Opinion</a>
 <a href='/track_opinions'>Track an Opinion</a>
 <a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
         if my_account.email in local.MODERATORS and my_account.verified_email:
@@ -710,6 +716,26 @@ function change(i) {{
 '''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
+
+    def submit_opinions_page(self):
+        print('submit opinions page')
+        my_account = self.identify_user()
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('''<style>
+article {
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write('''<article>
+Enter your opinion below (aim for 1 sentence):
+</article>
+</body>
+</html>'''.encode('utf8'))
 
     def approve_opinions_page(self):
         my_account = self.identify_user()
