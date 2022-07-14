@@ -755,12 +755,31 @@ article {
         self.send_links_body()
         self.wfile.write('''<form>
 Enter your opinion below:<br />
-<input type='text' name='opinion'/>
+<input type='text' id='opinion' name='opinion'/>
 </form>
 <article>
 Similar opinions
 <span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
 </article>
+<script>
+let search_results = [];
+setInterval(updateSearch, 1000);
+function updateSearch() {
+    let current_opinion = document.getElementById('opinion').value;
+    if (current_opinion != '') {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
+        xhttp.send();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var response = JSON.parse(this.responseText);
+                search_results = response;
+                console.log(response);
+            }
+        };
+    }
+}
+</script>
 </body>
 </html>'''.encode('utf8'))
 
@@ -1930,7 +1949,9 @@ td.care {
         url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         if 'text' in url_arguments:
             opinions = search(url_arguments['text'][0])
-            opinions_text = [db.opinions_database[opinion_ID].text for opinion_ID in opinions]
+            opinions_text = [db.opinions_database[str(opinion_ID)].text for opinion_ID in opinions]
+            self.send_response(200)
+            self.end_headers()
             self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
 
 
