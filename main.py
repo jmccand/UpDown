@@ -107,6 +107,9 @@ class MyHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/submit_opinions':
                     self.path_root = '/submit_opinions'
                     self.submit_opinions_page()
+                elif self.path.startswith('/submit_opinion_search'):
+                    self.path_root = '/submit_opinion_search'
+                    self.submit_opinion_search()
             except ValueError as error:
                 print(str(error))
                 
@@ -1924,6 +1927,14 @@ td.care {
             else:
                 self.wfile.write(f'''<span class='left'>{opinion.text}</span><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div>'''.encode('utf8'))
         self.wfile.write('</section>'.encode('utf8'))
+
+    def submit_opinion_search(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        if 'text' in url_arguments:
+            opinions = search(url_arguments['text'][0])
+            opinions_text = [db.opinions_database[opinion_ID].text for opinion_ID in opinions]
+            self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
 
 
 class ReuseHTTPServer(ThreadingHTTPServer):
