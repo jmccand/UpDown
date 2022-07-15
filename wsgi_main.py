@@ -969,8 +969,7 @@ self.addEventListener('fetch', function(event) {{
     def submit_opinions_page(self):
         print('submit opinions page')
         my_account = self.identify_user()
-        self.send_response(200)
-        self.end_headers()
+        self.start_response('200 OK', [])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
@@ -2327,8 +2326,7 @@ function updateStats(element) {{
         if 'text' in url_arguments:
             opinions = search(url_arguments['text'][0])
             opinions_text = [db.opinions_database[str(opinion_ID)].text for opinion_ID in opinions]
-            self.send_response(200)
-            self.end_headers()
+            self.start_response('200 OK', [])
             self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
             
                 
