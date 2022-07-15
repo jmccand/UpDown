@@ -656,7 +656,6 @@ section {
   padding: 15px;
   position: fixed;
   background-color: white;
-  z-index: 1;
   border-radius: 6px;
   border: 3px solid #595959;
   color: black;
@@ -720,7 +719,7 @@ A recap of the week is shown below:<br />
                 self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
             self.wfile.write('''<article id='opinion'>'''.encode('utf8'))
-            randomized = list(db.opinions_calendar[str(datetime.date.today())])
+            randomized = list(db.opinions_calendar[str(see_day)])
             random.shuffle(randomized)
             my_votes = []
             opinion_texts = []
@@ -923,21 +922,7 @@ document.getElementById('banner').style.display = 'none';
 openpop('Welcome to UpDown! Now that you are logged in, feel free to add the app to your homescreen! To add the app with an Apple device, open this page in safari, click on the icon in the top right with an arrow coming out of a box, and select "Add to Home Screen". On an Android device, tap the menu icon in the top right (the 3 dots) and select "Add to Home Screen".');
 </script>'''.encode('utf8'))
                     
-        self.wfile.write('''<footer>
-<!--<input id='opinion_text' type='text'/>-->
-<button class='submit' onclick='submit_opinion()'>Enter a new Opinion</button>
-<script>
-function submit_opinion() {
-    var xhttp = new XMLHttpRequest();
-    const opinion_text = prompt('Thank you for your input. Please enter your opinion below:');
-    if (opinion_text != '' && opinion_text != null) {
-        xhttp.open('GET', '/submit_opinion?opinion_text=' + opinion_text, true);
-        xhttp.send();
-        banner('Your opinion was submitted! Thank you!');
-    }
-}
-</script>
-</footer>
+        self.wfile.write(f'''</footer>
 <script>
 if ('serviceWorker' in navigator) {{
     window.addEventListener('load', function() {{
