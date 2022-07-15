@@ -35,7 +35,7 @@ def application(environ, start_response):
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 0
+    DEBUG = 5
 
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -101,14 +101,11 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/about_the_senate':
                     self.path_root = '/about_the_senate'
                     self.about_the_senate_page()
-                elif self.path == '/current_issues':
-                    self.path_root = '/current_issues'
-                    self.current_issues_page()
                 elif self.path == '/meet_the_senators':
                     self.path_root = '/meet_the_senators'
                     self.meet_the_senators_page()
-                elif self.path.startswith('/submit_opinion'):
-                    self.path_root = '/submit_opinion'
+                elif self.path.startswith('/handle_submit_opinion'):
+                    self.path_root = '/handle_submit_opinion'
                     self.submit_opinion()
                 elif self.path.startswith('/vote'):
                     self.path_root = '/vote'
@@ -149,6 +146,12 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/view_committee'):
                     self.path_root = '/view_committee'
                     self.view_committee_page()
+                elif self.path == '/submit_opinions':
+                    self.path_root = '/submit_opinions'
+                    self.submit_opinions_page()
+                elif self.path.startswith('/submit_opinion_search'):
+                    self.path_root = '/submit_opinion_search'
+                    self.submit_opinion_search()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
