@@ -966,6 +966,72 @@ self.addEventListener('fetch', function(event) {{
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
 
+    def submit_opinions_page(self):
+        print('submit opinions page')
+        my_account = self.identify_user()
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('''<style>
+form {
+  position: absolute;
+  top: 70px;
+  bottom: 0;
+  width: 100%;
+  font-size: 25px;
+  padding: 3%;
+  box-sizing: border-box;
+}
+input {
+  position: relative;
+  top: 15px;
+  width: 97%;
+  font-size: 20px;
+}
+article {
+  position: absolute;
+  top: 170px;
+  bottom: 0;
+  width: 100%;
+  font-size: 25px;
+  padding: 3%;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write('''<form>
+Enter your opinion below:<br />
+<input type='text' id='opinion' name='opinion'/>
+</form>
+<article>
+Similar opinions
+<span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
+</article>
+<script>
+let search_results = [];
+setInterval(updateSearch, 1000);
+function updateSearch() {
+    let current_opinion = document.getElementById('opinion').value;
+    if (current_opinion != '') {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
+        xhttp.send();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var response = JSON.parse(this.responseText);
+                search_results = response;
+                console.log(response);
+            }
+        };
+    }
+}
+</script>
+</body>
+</html>'''.encode('utf8'))
+
     def approve_opinions_page(self):
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
