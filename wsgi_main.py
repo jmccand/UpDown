@@ -178,7 +178,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 <title>UpDown</title>
 <style>
 body {
-  background-color: #1155ccff;
+  background-color: #6d9eebff;
   margin: 0;
   padding: 0;
 }
@@ -186,16 +186,16 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  height: 45px;
+  height: 70px;
   z-index: 2;
 }
 #hamburger {
   position: absolute;
   top: 0;
   left: 0;
-  width: 50px;
   height: 100%;
   z-index: 1;
+  border-right: 2px solid black;
 }
 #title {
   position: absolute;
@@ -204,27 +204,19 @@ header {
   width: 100%;
   height: 100%;
   text-align: center;
-  background-color: #f1c232ff;
-  font-size: 30px;
-  //font-family: 'Times New Roman';
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  background-color: #ffef90ff;
+  font-size: 50px;
+  font-family: 'Times New Roman';
+  border-bottom: 2px solid black;
 }
 #logo {
   position: absolute;
-  width: 50px;
   height: 100%;
   top: 0;
   right: 0;
   z-index: 1;
+  border-left: 2px solid black;
 }
-/*article {
-  position: absolute;
-  top: 9%;
-  width: 100%;
-  height: 90%;
-  z-index: 1;
-  overflow: scroll;
-}*/
 #menu {
   width: 0;
   height: 100%;
@@ -234,7 +226,6 @@ header {
   left: 0;
   overflow-x: hidden;
   background-color: #f1c232ff;
-  /*background-color: #1155ccff;*/
   transition: 0.5s;
 }
 #menu a {
@@ -254,95 +245,13 @@ header {
 }
 </style>'''.encode('utf8'))
 
-    def send_links_head_senate(self):
-        self.wfile.write('''<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UpDown</title>
-<style>
-body {
-  background-color: #f3f1cfff;
-  margin: 0;
-  padding: 0;
-}
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 45px;
-  z-index: 2;
-}
-#hamburger {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50px;
-  height: 100%;
-  z-index: 1;
-}
-#title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  background-color: #ffef90ff;
-  color: #37443fff;
-  font-size: 30px;
-  font-family: 'Times New Roman';
-}
-#logo {
-  position: absolute;
-  width: 50px;
-  height: 100%;
-  top: 0;
-  right: 0;
-  z-index: 1;
-}
-/*article {
-  position: absolute;
-  top: 9%;
-  width: 100%;
-  height: 90%;
-  z-index: 1;
-  overflow: scroll;
-}*/
-#menu {
-  width: 0;
-  height: 100%;
-  position: fixed;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  overflow-x: hidden;
-  background-color: #f1c232ff;
-  /*background-color: #1155ccff;*/
-  transition: 0.5s;
-}
-#menu a {
-  position: relative;
-  top: 20px;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-}
-#menu #x_menu {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50px;
-  height: 45px;
-  z-index: 1;
-}
-</style>'''.encode('utf8'))
-        
     def send_links_body(self):
-        my_account = self.identify_user(True)
+        my_account = self.identify_user()
         title = ''
         if self.path_root == '/':
             title = 'Vote!'
-        elif self.path_root == '/get_email':
-            title = 'Welcome!'
+        elif self.path_root == '/submit_opinions':
+            title = 'Submit'
         elif self.path_root == '/track_opinions':
             title = 'Track!'
         elif self.path_root == '/senate':
@@ -354,7 +263,7 @@ header {
         elif self.path_root == '/forward_opinions':
             title = 'Forward'
         elif self.path_root == '/view_committee':
-            url_arguments = urllib.parse.parse_qs(self.query_string)
+            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             title = url_arguments['committee'][0]
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
@@ -365,17 +274,17 @@ header {
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
         self.wfile.write('''<a href='/'>Voice Your Opinions</a>
+<a href='/submit_opinions'>Submit an Opinion</a>
 <a href='/track_opinions'>Track an Opinion</a>
-<a href='/senate'>Student-Faculty Senate</a>'''.encode('utf8'))
-        if my_account != None:
-            if my_account.email in local.MODERATORS and my_account.verified_email:
-                self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-            if my_account.email in local.ADMINS and my_account.verified_email:
-                self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
-                self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
-            for committee, members in local.COMMITTEE_MEMBERS.items():
-                if my_account.email in members and my_account.verified_email:
-                    self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+<a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+        if my_account.email in local.MODERATORS and my_account.verified_email:
+            self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
+            self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
+        for committee, members in local.COMMITTEE_MEMBERS.items():
+            if my_account.email in members and my_account.verified_email:
+                self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
