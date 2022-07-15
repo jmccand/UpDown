@@ -2321,6 +2321,17 @@ function updateStats(element) {{
 </script>'''.encode('utf8'))
                 self.wfile.write('''</footer></body></html>'''.encode('utf8'))
                 
+    def submit_opinion_search(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        if 'text' in url_arguments:
+            opinions = search(url_arguments['text'][0])
+            opinions_text = [db.opinions_database[str(opinion_ID)].text for opinion_ID in opinions]
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
+            
+                
 class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
