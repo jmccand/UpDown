@@ -630,147 +630,71 @@ Thank you for verifying. Your votes are now counted.<br />
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
-article {
+article#opinion {
   position: absolute;
-  top: 50px;
+  top: 70px;
   width: 100%;
-  bottom: 0;
+  bottom: 200px;
   z-index: 1;
   overflow: scroll;
 }
+article#ballot_label {
+  position: fixed;
+  bottom: 15%;
+  top: 75%;
+  font-size: 60px;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, 0);
+  text-align: center;
+}
 section {
+  top: 25%;
+  bottom: 35%;
   width: 96%;
-  margin: 1%;
-  padding: 1%;
-  position: relative;
-  background-color: #cfe2f3ff;
+  left: 2%;
+  padding: 15px;
+  position: fixed;
+  background-color: white;
   z-index: 1;
   border-radius: 6px;
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-  display: flex;
-  flex-direction: column;
-  min-height: 50px;
-}
-@media screen and (max-width: 600px) {
-section {
-  width: 94%;
-  margin: 1%;
-  padding: 2%;
-  position: relative;
-  background-color: #cfe2f3ff;
-  z-index: 1;
-  border-radius: 6px;
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-  display: flex;
-  flex-direction: column;
-  min-height: 50px;
-}
-}
-div#end_block {
-  width: 100%;
-  height: 55px;
-  z-index: 1;
-}
-div.left {
-  width: 94%;
-}
-div.right {
-  position: absolute;
-  right: 1%;
-  width: 5%;
-  height: 100%;
-  top: 0;
-}
-@media screen and (max-width: 600px) {
-div.left {
-  width: 85%;
-}
-div.right {
-  position: absolute;
-  right: 4%;
-  width: 11%;
-  height: 100%;
-  top: 0;
-}
-}
-div.unselected_up {
+  border: 3px solid #595959;
   color: black;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  text-align: center;
-  font-size: 22px;
+  box-sizing: border-box;
+  font-size: 30px;
+  cursor: default;
 }
-div.unselected_down {
-  color: black;
-  width: 100%;
+section p {
+  margin: 0;
   position: absolute;
-  bottom: 0;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  font-size: 22px;
-}
-div.selected_up {
-  color : green;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  text-align: center;
-  font-size: 22px;
-}
-div.selected_down {
-  color : red;
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  text-align: center;
-  font-size: 22px;
 }
 footer {
-  position: fixed;
   bottom: 0;
-  width: 100%;
-  height: 55px;
-  z-index: 1; 
+  height: 70px;
+  position: fixed;
 }
-button.submit {
-  position: absolute;
-  left: 2.5%;
-  width: 95%;
-  height: 90%;
-  border-radius: 25px;
-  background-color: #f1c232ff;
-  z-index: 1;
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-  font-weight: bold;
-}
-article#popup {
-  position: absolute;
-  top: 4%;
-  left: 4%;
-  width: 92%;
-  height: 92%;
-  background-color: #cfe2f3ff;
-  border-radius: 6px;
-  z-index: 4;
-  display: none;
-}
-section#popuptext {
-
-}
-button#closepop {
-  position: absolute;
-  bottom: 10px;
-  width: 30%;
-  left: 35%;
-}
-article#banner {
-  position: absolute;
-  top: 0;
-  height: 30px;
-  width: 100%;
+#small_box {
+  border: 3px solid #595959;
+  box-sizing: border-box;
+  font-size: 45px;
+  position: fixed;
   text-align: center;
-  background-color: lightBlue;
-  display: none;
+  left: 30%;
+  right: 30%;
+  height: 65px;
+  bottom: 5px;
+  background-color: white;
+}
+.arrow {
+  font-size: 55px;
+  position: fixed;
+  height: 65px;
+  bottom: 5px;
 }
 </style>
 </head>
@@ -787,127 +711,190 @@ article#banner {
             see_day = today_date
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
-            self.wfile.write('''<article>Sorry, nothing to vote on today.<br />See you soon!<br />'''.encode('utf8'))
+            if datetime.date.today().weekday() == 2:
+                self.wfile.write('''<article id='opinion'>
+Middle Wednesday!<br />
+A recap of the week is shown below:<br />
+'''.encode('utf8'))
+            else:
+                self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
-            self.wfile.write('<article>'.encode('utf8'))
-            randomized = list(db.opinions_calendar[str(see_day)])
+            self.wfile.write('''<article id='opinion'>'''.encode('utf8'))
+            randomized = list(db.opinions_calendar[str(datetime.date.today())])
             random.shuffle(randomized)
+            my_votes = []
+            opinion_texts = []
             for opinion_ID in randomized:
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
-                opinion_ID = str(opinion.ID)
-                if my_account.email in local.ADMINS and my_account.verified_email:
-                    up_votes, down_votes, abstains = opinion.count_votes()
-                    self.wfile.write('<section>'.encode('utf8'))
-                    if opinion_ID in my_account.votes:
-                        my_vote = my_account.votes[opinion_ID]
-                        if my_vote[-1][0] == 'up':
-                            #arrow up = &#9650
-                            #arrow down = &#9660
-                            #thumbs up = &#128077;
-                            #thumbs down = &#128078;
-                            self.wfile.write(f'''<div class='left'>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</div><div class='right'><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></div>'''.encode('utf8'))
-                        elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<div class='left'>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</div><div class='right'><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></div>'''.encode('utf8'))
-                        else:
-                            self.wfile.write(f'''<div class='left'>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</div><div class='right'><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></div>'''.encode('utf8'))
-                    else:
-                        self.wfile.write(f'''<div class='left'>{up_votes+down_votes}&emsp;&emsp;{opinion.text}</div><div class='right'><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;{up_votes}</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;{down_votes}</div></div>'''.encode('utf8'))
-                    self.wfile.write('</section>'.encode('utf8'))
+                opinion_texts.append(opinion.text)
+                if str(opinion_ID) in my_account.votes:
+                    this_vote = my_account.votes[str(opinion_ID)][-1][0]
+                    my_votes.append(this_vote)
                 else:
-                    self.wfile.write('<section>'.encode('utf8'))
-                    if opinion_ID in my_account.votes:
-                        my_vote = my_account.votes[opinion_ID]
-                        if my_vote[-1][0] == 'up':
-                            self.wfile.write(f'''<div class='left'>{opinion.text}</div><div class='right'><div class='selected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></div>'''.encode('utf8'))
-                        elif my_vote[-1][0] == 'down':
-                            self.wfile.write(f'''<div class='left'>{opinion.text}</div><div class='right'><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='selected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></div>'''.encode('utf8'))
-                        else:
-                            self.wfile.write(f'''<div class='left'>{opinion.text}</div><div class='right'><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></div>'''.encode('utf8'))
-                    else:
-                        self.wfile.write(f'''<div class='left'>{opinion.text}</div><div class='right'><div class='unselected_up' id='{opinion_ID} up' onclick='vote(this.id)'>&#9650;</div><div class='unselected_down' id='{opinion_ID} down' onclick='vote(this.id)'>&#9660;</div></div>'''.encode('utf8'))
-                    self.wfile.write('</section>'.encode('utf8'))
-            self.wfile.write(str('''
-<div id='end_block'>
+                    my_votes.append('abstain')
+            self.wfile.write(f'''<section id='opinions_box'>
+<p id='opinion_text'>{db.opinions_database[randomized[0]].text}</p>
+</section>
+</article>
+<article id='ballot_label'>
+<!--00:00:00-->
+</article>
+<footer>
+<div id='small_box'>
+1/{len(randomized)}
 </div>
-<script>
-const page_IDs = %s;
-function vote(element_ID) {
+<div class='arrow' style='left: 10px;' onclick='change(-current_index);'>
+\u21E4
+</div>
+<div class='arrow' style='right: 10px;' onclick='change(page_IDs.length - current_index - 1);'>
+\u21E5
+</div>
+</footer>'''.encode('utf8'))
+            self.wfile.write(f'''<script>
+const page_IDs = {randomized};
+const opinion_texts = {opinion_texts};
+let votes = {my_votes};
+let current_index = 0;
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('dblclick', handleDoubleClick, false);
+document.addEventListener('keydown', handleKeyDown, false);
+
+change(0);
+
+var xStart = null;
+var yStart = null;
+
+function getTouches(evt) {{
+  return evt.touches ||
+         evt.originalEvent.touches;
+}}
+
+function handleTouchStart(evt) {{
+    const start = getTouches(evt)[0];
+    xStart = start.clientX;
+    yStart = start.clientY;
+}}
+
+function handleTouchMove(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        if (xDiff > 0) {{
+            change(1);
+        }}
+        else {{
+            change(-1);
+        }}
+    }}
+    else {{
+        if (yDiff > 0) {{
+            vote('up');
+        }}
+        else {{ 
+            vote('down');
+        }}
+    }}
+    xStart = null;
+    yStart = null;
+}}
+function handleDoubleClick(evt) {{
+    console.log('double click!');
+    vote('abstain');
+}}
+function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
-    var split_ID = element_ID.split(' ');
-    const opinion_ID = split_ID[0];
-    let old_vote = '';
-    if (document.getElementById(opinion_ID + ' up').className.startsWith('selected')) {
-        old_vote = 'up';
-    }
-    else if (document.getElementById(opinion_ID + ' down').className.startsWith('selected')) {
-        old_vote = 'down';
-    }
-    else {
-        old_vote = 'abstain';
-    }
-    const my_click = split_ID[1];
-    let my_vote = '';
-    if (my_click != old_vote) {
-        my_vote = my_click;
-    }
-    else {
-        my_vote = 'abstain';
-    }
-    
-    if (checkVoteValidity(my_vote, old_vote)) {
-        xhttp.open('GET', '/vote?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    if (checkVoteValidity(my_vote, votes[current_index])) {{
+        xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
-        if (my_vote == old_vote) {
-            document.getElementById(element_ID).className = 'unselected_' + my_vote;
-        }
-        else {
-            if (old_vote != 'abstain') {
-                let other_arrow = document.getElementById(opinion_ID + ' ' + old_vote);
-                other_arrow.className = 'unselected_' + old_vote;
-            }
-            if (my_vote != 'abstain') {
-                if (my_vote == 'up') {
-                    document.getElementById(element_ID).className = 'selected_up';
-                }
-                else {
-                    document.getElementById(element_ID).className = 'selected_down';
-                }
-            }
-        }
-    }
-}
-function checkVoteValidity(new_vote, old_vote) {
+        votes[current_index] = my_vote;
+        let opinions_box = document.getElementById('opinions_box');
+        if (my_vote == 'up') {{
+            opinions_box.style.borderColor = '#00ff00ff';
+        }}
+        else if (my_vote == 'down') {{
+            opinions_box.style.borderColor = '#ff0000ff';
+        }}
+        else {{
+            opinions_box.style.borderColor = '#595959';
+        }}
+        setTimeout(() => {{change(1)}}, 1000);
+    }}
+}}
+function checkVoteValidity(new_vote, old_vote) {{
     let up_count = 0;
     let down_count = 0;
-    for (let index = 0; index < page_IDs.length; index++) {
-        if (document.getElementById(page_IDs[index] + ' up').className.startsWith('selected')) {
+    for (let index = 0; index < votes.length; index++) {{
+        if (votes[index] == 'up') {{
             up_count++;
-        }
-        else if (document.getElementById(page_IDs[index] + ' down').className.startsWith('selected')) {
+        }}
+        else if (votes[index] == 'down') {{
             down_count++;
-        }
-    }
+        }}
+    }}
     let valid = true;
-    if (up_count == 5 && new_vote == 'up') {
-        openpop('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+    if (up_count == 5 && new_vote == 'up') {{
+        alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
-    }
-    else if (down_count == 5 && new_vote == 'down') {
-        openpop('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+    }}
+    else if (down_count == 5 && new_vote == 'down') {{
+        alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
         valid = false;
-    }
-    if (old_vote == 'abstain') {
-        if (up_count + down_count == 8 && new_vote != 'abstain') {
-            openpop('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+    }}
+    if (old_vote == 'abstain') {{
+        if (up_count + down_count == 8 && new_vote != 'abstain') {{
+            alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
             valid = false;
-        }
-    }
+        }}
+    }}
     return valid;
-}
+}}
+function handleKeyDown(evt) {{
+    let key_pressed = event.key;
+    const keyDict = {{
+        'ArrowUp': [vote, 'up'],
+        'ArrowDown': [vote, 'down'],
+        ' ': [vote, 'abstain'],
+        'ArrowRight': [change, 1],
+        'ArrowLeft': [change, -1]
+    }};
+    if (keyDict[key_pressed] != null) {{
+        var func_arg_list = keyDict[key_pressed];
+        func_arg_list[0](func_arg_list[1]);
+    }}
+}}
+function change(i) {{
+    let opinion_text = document.getElementById('opinion_text');
+    let opinions_box = document.getElementById('opinions_box');
+    let small_box = document.getElementById('small_box');
+    if (current_index + i < page_IDs.length && current_index + i >= 0) {{
+        current_index += i;
+        opinion_text.innerHTML = opinion_texts[current_index];
+        small_box.innerHTML = current_index + 1 + '/' + page_IDs.length;
+        if (votes[current_index] == 'up') {{
+            opinions_box.style.borderColor = '#00ff00ff';
+        }}
+        else if (votes[current_index] == 'down') {{
+            opinions_box.style.borderColor = '#ff0000ff';
+        }}
+        else {{
+            opinions_box.style.borderColor = '#595959';
+        }}
+    }}
+}}
 </script>
-</article>''' % (list(db.opinions_calendar[str(see_day)]))).encode('utf8'))
+'''.encode('utf8'))
         self.wfile.write('''<article id='popup'>
 <section id='popuptext'></section>
 <button id='closepop' onclick='closepop();'>
