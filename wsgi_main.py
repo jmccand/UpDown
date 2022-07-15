@@ -2325,6 +2325,7 @@ def simplify_text(text):
         split_text = split_text[:-1]
     for index in range(len(split_text)):
         split_text[index] = split_text[index].lower()
+        split_text[index] = stem(split_text[index])
     return split_text
 
 def build_search_index():
@@ -2343,11 +2344,10 @@ def search_index_add_opinion(opinion):
     print(f'{opinion.text} -- {split_text}')
 
     for word in split_text:
-        sword = stem(word)
-        if sword in SEARCH_INDEX:
-            SEARCH_INDEX[sword].append(opinion.ID)
+        if word in SEARCH_INDEX:
+            SEARCH_INDEX[word].append(opinion.ID)
         else:
-            SEARCH_INDEX[sword] = [opinion.ID]
+            SEARCH_INDEX[word] = [opinion.ID]
     search_index_lock.release()
 
 def search(input_text):
