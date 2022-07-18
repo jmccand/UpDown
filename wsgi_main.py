@@ -1005,9 +1005,9 @@ section {
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<form>
+        self.wfile.write('''<form method='GET' action='/handle_submit_opinion'>
 Enter your opinion below:<br />
-<input type='text' id='opinion' name='opinion'/>
+<input type='text' id='opinion' name='opinion_text'/>
 </form>
 <div id='similar_message'>
 Similar opinions
@@ -1017,7 +1017,6 @@ Similar opinions
 Similar opinions will display here.
 </article>
 <script>
-let search_results = [];
 setInterval(updateSearch, 1000);
 function updateSearch() {
     let current_opinion = document.getElementById('opinion').value;
