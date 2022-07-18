@@ -973,9 +973,18 @@ input {
   width: 97%;
   font-size: 20px;
 }
-article {
+div#similar_message {
   position: absolute;
   top: 170px;
+  height: 45px;
+  font-size: 25px;
+  width: 100%;
+  padding: 3%;
+  box-sizing: border-box;
+}
+article {
+  position: absolute;
+  top: 225px;
   bottom: 0;
   width: 100%;
   font-size: 25px;
@@ -999,8 +1008,10 @@ section {
 Enter your opinion below:<br />
 <input type='text' id='opinion' name='opinion'/>
 </form>
+<div id='similar_message'>
 Similar opinions
 <span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
+</div>
 <article id='results'>
 Enter your opinion above.
 </article>
