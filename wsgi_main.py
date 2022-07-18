@@ -951,6 +951,9 @@ self.addEventListener('fetch', function(event) {{
     def submit_opinions_page(self):
         print('submit opinions page')
         my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        if 'opinion_text' in url_arguments:
+            self.submit_opinion(False)
         self.start_response('200 OK', [])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
@@ -1002,7 +1005,7 @@ section {
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<form method='GET' action='/handle_submit_opinion'>
+        self.wfile.write('''<form method='GET' action='/submit_opinions'>
 Enter your opinion below:<br />
 <input type='text' id='opinion' name='opinion_text'/>
 </form>
@@ -1484,7 +1487,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         self.wfile.write('</article></body></html>'.encode('utf8'))
         self.log_activity()
         
-    def submit_opinion(self):
+    def submit_opinion(self, start_response=True):
         url_arguments = urllib.parse.parse_qs(self.query_string)
         my_account = self.identify_user()
         if 'opinion_text' in url_arguments and not my_account == False:
@@ -1495,7 +1498,8 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                 db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
             self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             search_index_add_opinion(db.opinions_database[str(opinion_ID)])
-            self.start_response('200 OK', [])
+            if start_response:
+                self.start_response('200 OK', [])
             self.log_activity([opinion_ID])
         else:
             raise ValueError(f'ip {self.client_address[0]} -- submit opinion function got url arguments {url_arguments}')
