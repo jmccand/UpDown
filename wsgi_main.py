@@ -993,7 +993,6 @@ article {
 }
 section {
   width: 99%;
-  height: 50px;
   margin: 0.5%;
   padding: 2%;
   position: relative;
@@ -1015,7 +1014,7 @@ Similar opinions
 <span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
 </div>
 <article id='results'>
-Enter your opinion above.
+Similar opinions will display here.
 </article>
 <script>
 let search_results = [];
@@ -1024,7 +1023,7 @@ function updateSearch() {
     let current_opinion = document.getElementById('opinion').value;
     let results = document.getElementById('results');
     if (current_opinion == '') {
-        results.innerHTML = 'Enter your opinion above.';
+        results.innerHTML = 'Similar opinions will display here.';
     }
     else {
         var xhttp = new XMLHttpRequest();
