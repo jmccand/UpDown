@@ -999,9 +999,9 @@ section {
 Enter your opinion below:<br />
 <input type='text' id='opinion' name='opinion'/>
 </form>
-<article>
 Similar opinions
 <span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
+<article id='results'>
 </article>
 <script>
 let search_results = [];
@@ -1015,8 +1015,12 @@ function updateSearch() {
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var response = JSON.parse(this.responseText);
-                search_results = response;
-                console.log(response);
+                let search_results = response;
+                let results = document.getElementById('results');
+                results.innerHTML = '';
+                for (var index = 0; index < search_results.length; index++) {
+                    results.innerHTML += '<section>' + search_results[index] + '</section>';
+                } 
             }
         };
     }
@@ -2316,7 +2320,7 @@ function updateStats(element) {{
                 
     def submit_opinion_search(self):
         my_account = self.identify_user()
-        url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'text' in url_arguments:
             opinions = search(url_arguments['text'][0])
             opinions_text = [db.opinions_database[str(opinion_ID)].text for opinion_ID in opinions]
