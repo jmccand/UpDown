@@ -104,9 +104,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/meet_the_senators':
                     self.path_root = '/meet_the_senators'
                     self.meet_the_senators_page()
-                elif self.path.startswith('/handle_submit_opinion'):
-                    self.path_root = '/handle_submit_opinion'
-                    self.submit_opinion()
                 elif self.path.startswith('/vote'):
                     self.path_root = '/vote'
                     self.vote()
@@ -263,7 +260,7 @@ header {
         elif self.path_root == '/forward_opinions':
             title = 'Forward'
         elif self.path_root == '/view_committee':
-            url_arguments = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            url_arguments = urllib.parse.parse_qs(self.query_string)
             title = url_arguments['committee'][0]
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
