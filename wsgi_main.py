@@ -995,10 +995,12 @@ section {
   width: 99%;
   height: 50px;
   margin: 0.5%;
+  padding: 2%;
   position: relative;
   background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
+  box-sizing: border-box;
 }
 </style>
 </head>
@@ -1036,8 +1038,8 @@ function updateSearch() {
                     results.innerHTML = 'No similar opinions.';
                 }
                 else {
+                    results.innerHTML = '';
                     for (var index = 0; index < search_results.length; index++) {
-                        results.innerHTML = '';
                         results.innerHTML += '<section>' + search_results[index] + '</section>';
                     }
                 }
