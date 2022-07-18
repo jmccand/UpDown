@@ -982,6 +982,15 @@ article {
   padding: 3%;
   box-sizing: border-box;
 }
+section {
+  width: 99%;
+  height: 50px;
+  margin: 0.5%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
