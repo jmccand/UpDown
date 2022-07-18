@@ -1002,13 +1002,18 @@ Enter your opinion below:<br />
 Similar opinions
 <span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
 <article id='results'>
+Enter your opinion above.
 </article>
 <script>
 let search_results = [];
 setInterval(updateSearch, 1000);
 function updateSearch() {
     let current_opinion = document.getElementById('opinion').value;
-    if (current_opinion != '') {
+    let results = document.getElementById('results');
+    if (current_opinion == '') {
+        results.innerHTML = 'Enter your opinion above.';
+    }
+    else {
         var xhttp = new XMLHttpRequest();
         xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
         xhttp.send();
@@ -1016,11 +1021,15 @@ function updateSearch() {
             if (this.readyState == 4 && this.status == 200) {
                 var response = JSON.parse(this.responseText);
                 let search_results = response;
-                let results = document.getElementById('results');
-                results.innerHTML = '';
-                for (var index = 0; index < search_results.length; index++) {
-                    results.innerHTML += '<section>' + search_results[index] + '</section>';
-                } 
+                if (search_results.length == 0) {
+                    results.innerHTML = 'No similar opinions.';
+                }
+                else {
+                    for (var index = 0; index < search_results.length; index++) {
+                        results.innerHTML = '';
+                        results.innerHTML += '<section>' + search_results[index] + '</section>';
+                    }
+                }
             }
         };
     }
