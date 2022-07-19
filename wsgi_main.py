@@ -993,9 +993,10 @@ article {
   box-sizing: border-box;
 }
 section {
-  width: 99%;
-  margin: 0.5%;
-  padding: 2%;
+  width: 98%;
+  margin: 1%;
+  margin-bottom: 4%;
+  padding: 3%;
   position: relative;
   background-color: #cfe2f3ff;
   z-index: 1;
