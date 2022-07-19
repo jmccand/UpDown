@@ -2135,60 +2135,67 @@ div#label {
         if search_results == []:
             self.wfile.write('Sorry, there were no results. Try using different keywords.'.encode('utf8'))
         for opinion_ID in search_results:
-            json_stats[opinion_ID] = [None] * 5
-            # stage, date, care, up, message
+            json_stats[opinion_ID] = [None] * 6
+            # label, stage, date, care, up, message
             opinion = db.opinions_database[str(opinion_ID)]
             # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-            json_stats[opinion_ID][0] = len(opinion.activity) - 1
-            if json_stats[opinion_ID][0] >= 2:
+            json_stats[opinion_ID][1] = len(opinion.activity) - 1
+            if json_stats[opinion_ID][1] >= 2:
                 if datetime.date.today() >= opinion.activity[2][0][2]:
-                    json_stats[opinion_ID][0] += 1
+                    json_stats[opinion_ID][1] += 1
             if len(opinion.activity) == 1:
-                json_stats[opinion_ID][1] = str(to_date(opinion.activity[0][1]))
-                json_stats[opinion_ID][4] = 'onto approval'
+                json_stats[opinion_ID][2] = str(to_date(opinion.activity[0][1]))
+                json_stats[opinion_ID][5] = 'onto approval'
+                json_stats[opinion_ID][0] = 'created'
             elif len(opinion.activity) == 2:
-                json_stats[opinion_ID][1] = str(to_date(opinion.activity[1][0][2]))
+                json_stats[opinion_ID][2] = str(to_date(opinion.activity[1][0][2]))
                 assert opinion.approved in (True, False)
                 if opinion.approved:
-                    json_stats[opinion_ID][4] = 'onto scheduling'
+                    json_stats[opinion_ID][5] = 'onto scheduling'
                 else:
-                    json_stats[opinion_ID][4] = 'rejected'
+                    json_stats[opinion_ID][5] = 'rejected'
+                json_stats[opinion_ID][0] = 'approved'
             elif len(opinion.activity) == 3:
                 #assert len(opinion.activity[2]) == 4
                 if datetime.date.today() < opinion.activity[2][0][2]:
-                    json_stats[opinion_ID][4] = 'onto voting'
+                    json_stats[opinion_ID][5] = 'onto voting'
+                    json_stats[opinion_ID][0] = 'scheduled'
                 elif datetime.date.today() > opinion.activity[2][0][2]:
-                    json_stats[opinion_ID][4] = 'onto forwarding'
+                    json_stats[opinion_ID][5] = 'onto forwarding' 
+                    json_stats[opinion_ID][0] = 'voted on'
                 else:
-                    json_stats[opinion_ID][4] = 'currently voting'
+                    json_stats[opinion_ID][5] = 'currently voting'
+                    json_stats[opinion_ID][0] = 'voting'
                 if datetime.date.today() >= opinion.activity[2][0][2]:
-                    json_stats[opinion_ID][1] = str(to_date(opinion.activity[2][0][2]))
+                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][2]))
                 else:
-                    json_stats[opinion_ID][1] = str(to_date(opinion.activity[2][0][3]))
+                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][3]))
             elif len(opinion.activity) == 4:
                 #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                 assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
                 if opinion.activity[3][0][1] != 'no':
-                    json_stats[opinion_ID][4] = f'onto {opinion.activity[3][0][1]}'
+                    json_stats[opinion_ID][5] = f'onto {opinion.activity[3][0][1]}'
                 else:
-                    json_stats[opinion_ID][4] = 'unforwarded'
-                json_stats[opinion_ID][1] = str(to_date(opinion.activity[3][0][2]))
-            elif len(opinion.activity) == 5:
-                #assert len(opinion.activity[4]) == 3
-                json_stats[opinion_ID][4] = 'onto drafting'
-                json_stats[opinion_ID][1] = str(to_date(opinion.activity[4][0][2]))
+                    json_stats[opinion_ID][5] = 'unforwarded'
+                json_stats[opinion_ID][0] = 'forwarded'
+                json_stats[opinion_ID][2] = str(to_date(opinion.activity[3][0][2]))
+            # elif len(opinion.activity) == 5:
+            #     #assert len(opinion.activity[4]) == 3
+            #     json_stats[opinion_ID][5] = 'onto drafting'
+            #     json_stats[opinion_ID][0] = ''
+            #     json_stats[opinion_ID][2] = str(to_date(opinion.activity[4][0][2]))
             # care and up percent
-            json_stats[opinion_ID][2] = '--'
             json_stats[opinion_ID][3] = '--'
-            if json_stats[opinion_ID][0] > 2:
+            json_stats[opinion_ID][4] = '--'
+            if json_stats[opinion_ID][1] > 2:
                 up, down, abstain = opinion.count_votes()
                 if up + down + abstain > 0:
                     care_per = (up + down) / (up + down + abstain)
-                    json_stats[opinion_ID][2] = care_per
+                    json_stats[opinion_ID][3] = care_per
                 if up + down > 0:
                     up_per = up / (up + down)
-                    json_stats[opinion_ID][3] = up_per
+                    json_stats[opinion_ID][4] = up_per
             self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
 {opinion.text}
 </div>'''.encode('utf8'))
@@ -2198,6 +2205,11 @@ const stats = {json.dumps(json_stats)};
 var prev = null;
 function updateStats(element) {{
     const this_ID = element.id;
+    document.getElementById('label') = stats[this_ID][0];
+    document.getElementById('row1') = stats[this_ID][0] + ' on ' + stats[this_ID][2];
+    document.getElementById('care_per') = stats[this_ID][3] + '%';
+    document.getElementById('up_per') = stats[this_ID][4] + '%';
+    document.getElementById('row4') = stats[this_ID][5];
     if (prev != null) {{
         prev.style.backgroundColor = '#cfe2f3ff';
     }}
