@@ -2111,18 +2111,18 @@ table#stats {
   border-collapse: collapse;
 }
 div#line {
-  width: 20px;
+  width: 30px;
   height: 4px;
   border: 2px solid black;
   position: absolute;
-  left: 15px;
+  left: 6%;
   background-color: green;
   box-sizing: border-box;
 }
 div#label {
-  font-size: 25px;
+  font-size: 20px;
   position: absolute;
-  left: 15%;
+  left: 17%;
 }
 td.care {
   border-right: 2px solid black;
@@ -2240,6 +2240,8 @@ function updateStats(element) {{
     document.getElementById('care_per').innerHTML = stats[this_ID][3] + '%';
     document.getElementById('up_per').innerHTML = stats[this_ID][4] + '%';
     document.getElementById('row4').innerHTML = stats[this_ID][5];
+    document.getElementById('line').style.top = 22 + 64 * stats[this_ID][1] / 6 + '%';
+    document.getElementById('label').style.top = 18 + 64 * stats[this_ID][1] / 6 + '%';
     if (prev != null) {{
         prev.style.backgroundColor = '#cfe2f3ff';
     }}
