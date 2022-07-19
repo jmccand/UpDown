@@ -2202,10 +2202,10 @@ div#label {
             if json_stats[opinion_ID][1] > 2:
                 up, down, abstain = opinion.count_votes()
                 if up + down + abstain > 0:
-                    care_per = (up + down) / (up + down + abstain)
+                    care_per = (up + down) / (up + down + abstain) * 100
                     json_stats[opinion_ID][3] = care_per
                 if up + down > 0:
-                    up_per = up / (up + down)
+                    up_per = up / (up + down) * 100
                     json_stats[opinion_ID][4] = up_per
             self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
 {opinion.text}
