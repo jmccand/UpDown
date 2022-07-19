@@ -704,6 +704,7 @@ div#banner {
   background-color: lightBlue;
   box-sizing: border-box;
   z-index: 1;
+  display: none;
 }
 </style>
 </head>
@@ -906,7 +907,6 @@ function change(i) {{
 '''.encode('utf8'))
             self.wfile.write('''<div id='banner'></div>
 <script>
-banner('test');
 function banner(text) {
     document.getElementById('banner').innerHTML = text;
     document.getElementById('banner').style.display = 'table-cell';
