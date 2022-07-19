@@ -2216,11 +2216,11 @@ const stats = {json.dumps(json_stats)};
 var prev = null;
 function updateStats(element) {{
     const this_ID = element.id;
-    document.getElementById('label') = stats[this_ID][0];
-    document.getElementById('row1') = stats[this_ID][0] + ' on ' + stats[this_ID][2];
-    document.getElementById('care_per') = stats[this_ID][3] + '%';
-    document.getElementById('up_per') = stats[this_ID][4] + '%';
-    document.getElementById('row4') = stats[this_ID][5];
+    document.getElementById('label').innerHTML = stats[this_ID][0];
+    document.getElementById('row1').innerHTML = stats[this_ID][0] + ' on ' + stats[this_ID][2];
+    document.getElementById('care_per').innerHTML = stats[this_ID][3] + '%';
+    document.getElementById('up_per').innerHTML = stats[this_ID][4] + '%';
+    document.getElementById('row4').innerHTML = stats[this_ID][5];
     if (prev != null) {{
         prev.style.backgroundColor = '#cfe2f3ff';
     }}
