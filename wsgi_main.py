@@ -2225,6 +2225,7 @@ td.up {
         self.wfile.write(f'''<script>
 const stats = {json.dumps(json_stats)};
 var prev = null;
+updateStats(document.getElementById({search_results[0]}));
 function updateStats(element) {{
     const this_ID = element.id;
     document.getElementById('label').innerHTML = stats[this_ID][0];
