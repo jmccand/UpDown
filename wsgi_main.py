@@ -2102,11 +2102,11 @@ img#timeline {
 }
 table#stats {
   width: 60%;
-  right: 0;
+  right: 2%;
   position: absolute;
   height: 80%;
   top: 10%;
-  font-size: 30px;
+  font-size: 40px;
   text-align: center;
   border-collapse: collapse;
 }
@@ -2126,9 +2126,16 @@ div#label {
 }
 td.care {
   border-right: 2px solid black;
+  width: 50%;
 }
 td.up {
   border-left: 2px solid black;
+}
+td#row1 {
+  font-size: 20px;
+}
+td#row4 {
+  font-size: 25px;
 }
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
@@ -2138,7 +2145,7 @@ td.up {
         self.wfile.write('''<table id='stats'>
 <tr><td id='row1' colspan='2'></td></tr>
 <tr><td id='care_per' class='care'></td><td id='up_per' class='up'></td></tr>
-<tr><td class='care'>care</td><td class='up'>up</td></tr>
+<tr><td class='care'>care</td><td class='up'>agree</td></tr>
 <tr><td id='row4' colspan='2'></td></tr>
 </table>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
@@ -2208,8 +2215,8 @@ td.up {
             #     json_stats[opinion_ID][0] = ''
             #     json_stats[opinion_ID][2] = str(to_date(opinion.activity[4][0][2]))
             # care and up percent
-            json_stats[opinion_ID][3] = '--'
-            json_stats[opinion_ID][4] = '--'
+            json_stats[opinion_ID][3] = '---'
+            json_stats[opinion_ID][4] = '---'
             if json_stats[opinion_ID][1] > 2:
                 up, down, abstain = opinion.count_votes()
                 if up + down + abstain > 0:
