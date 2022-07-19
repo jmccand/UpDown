@@ -87,6 +87,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                     return self.load_image()
                 elif self.path == '/hamburger.png':
                     return self.load_image()
+                elif self.path == '/timeline.png':
+                    return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
                     return self.handle_manifest()
@@ -1885,41 +1887,11 @@ function update_unselected(element) {{
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 50px;
+  top: 70px;
   width: 100%;
-  height: 41%;
+  bottom: 50%;
   z-index: 1;
   overflow: scroll;
-}
-div#timeline_line {
-  position: absolute;
-  height: 100%;
-  width: 10px;
-  left: 20px;
-  background-color: gray;
-}
-div#timeline {
-  position: absolute;
-  right: 0;
-  left: 50px;
-  height: 100%;
-}
-div.element {
-  position: absolute;
-  right: 20px;
-  left: 0;
-  height: 8%;
-}
-div.label {
-  position: absolute;
-  left: 0;
-  width: 60%;
-}
-div.stat {
-  position: absolute;
-  right: 0;
-  width: 40%;
-  text-align: right;
 }
 footer {
   position: fixed;
@@ -1953,84 +1925,26 @@ div.result {
   z-index: 1;
   border-radius: 6px;
 }
-span.left {
-  height: 80%;
-  top: 10%;
+img#timeline {
+  height: 90%;
   position: absolute;
-  left: 5px;
-  right: 100px;
+  left: 8%;
+  top: 5%;
 }
-span.status {
-  width: 100px;
-  height: 100%;
-  position: absolute;
-  right: 0;
-}
-div#circle {
+div#line {
   width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  height: 4px;
+  border: 2px solid black;
   position: absolute;
   left: 15px;
   background-color: green;
+  box-sizing: border-box;
 }
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article>'.encode('utf8'))
-        self.wfile.write('''<div id='timeline_line'>
-</div>
-<div id='circle'>
-</div>
-<div id='timeline'>
-<div class='element' style='top: 0;'>
-<div class='label'>
-Creation
-</div>
-<div id='stat0' class='stat'>
----
-</div>
-</div>
-<div class='element' style='top: 16.6%;'>
-<div class='label'>
-Approval
-</div>
-<div id='stat1' class='stat'>
----
-</div>
-</div>
-<div class='element' style='top: 33.2%;'>
-<div class='label'>
-Scheduling
-</div>
-<div id='stat2' class='stat'>
----
-</div>
-</div>
-<div class='element' style='top: 49.8%;'>
-<div class='label'>
-Voting
-</div>
-<div id='stat3' class='stat'>
----
-</div>
-</div>
-<div class='element' style='top: 66.4%;'>
-<div class='label'>
-Senate
-</div>
-<div id='stat4' class='stat'>
----
-</div>
-</div>
-<div class='element' style='top: 83%;'>
-<div class='label'>
-Bill or Resolution
-</div>
-<div id='stat5' class='stat'>
----
-</div>
-</div>'''.encode('utf8'))
+        self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
