@@ -711,7 +711,7 @@ div#banner {
         today_date = datetime.date.today()
         if (today_date.weekday() + 1) % 7 < 3:
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-        if (today_date.weekday() + 1) % 7 > 3:
+        elif (today_date.weekday() + 1) % 7 > 3:
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
         else:
             see_day = today_date
