@@ -692,6 +692,16 @@ footer {
   height: 65px;
   bottom: 5px;
 }
+div#banner {
+  top: 70;
+  position: absolute;
+  font-size: 25px;
+  padding: 2%;
+  width: 98%;
+  box-sizing: border-box;
+  background-color: lightBlue;
+  z-index: 1;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -891,21 +901,9 @@ function change(i) {{
 }}
 </script>
 '''.encode('utf8'))
-        self.wfile.write('''<article id='popup'>
-<section id='popuptext'></section>
-<button id='closepop' onclick='closepop();'>
-OK
-</button>
-</article>
-<article id='banner'></article>
+            self.wfile.write('''<div id='banner'></div>
 <script>
-function openpop(text) {
-    document.getElementById('popuptext').innerHTML = text;
-    document.getElementById('popup').style.display = 'table-cell';
-}
-function closepop() {
-    document.getElementById('popup').style.display = 'none';
-}
+banner('test');
 function banner(text) {
     document.getElementById('banner').innerHTML = text;
     document.getElementById('banner').style.display = 'table-cell';
