@@ -1624,7 +1624,7 @@ td {
 <tr>'''.encode('utf8'))
             today_date = datetime.date.today()
             for day_of_week in range(7):
-                self.wfile.write(f'<td>{calendar.day_name[(day_of_week + 6) % 7]}</td>'.encode('utf8'))
+                self.wfile.write(f'<td>{calendar.day_name[(day_of_week + 6) % 7][:3]}</td>'.encode('utf8'))
             self.wfile.write('</tr><tr>'.encode('utf8'))
             first_day = calendar.monthrange(today_date.year, today_date.month)[0]
             month_days = calendar.monthrange(today_date.year, today_date.month)[1]
