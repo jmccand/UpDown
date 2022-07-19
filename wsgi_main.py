@@ -693,13 +693,16 @@ footer {
   bottom: 5px;
 }
 div#banner {
-  top: 70;
+  top: 70px;
   position: absolute;
+  left: 2%;
   font-size: 25px;
   padding: 2%;
-  width: 98%;
-  box-sizing: border-box;
+  width: 96%;
+  border-radius: 3px;
+  border: 2px solid black;
   background-color: lightBlue;
+  box-sizing: border-box;
   z-index: 1;
 }
 </style>
