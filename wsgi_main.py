@@ -1019,33 +1019,37 @@ Similar opinions
 Similar opinions will display here.
 </article>
 <script>
+var old_opinion;
 setInterval(updateSearch, 1000);
 function updateSearch() {
     let current_opinion = document.getElementById('opinion').value;
-    let results = document.getElementById('results');
-    if (current_opinion == '') {
-        results.innerHTML = 'Similar opinions will display here.';
-    }
-    else {
-        var xhttp = new XMLHttpRequest();
-        xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
-        xhttp.send();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var response = JSON.parse(this.responseText);
-                let search_results = response;
-                if (search_results.length == 0) {
-                    results.innerHTML = 'No similar opinions.';
-                }
-                else {
-                    results.innerHTML = '';
-                    for (var index = 0; index < search_results.length; index++) {
-                        results.innerHTML += '<section>' + search_results[index] + '</section>';
+    if (current_opinion != old_opinion) {
+        let results = document.getElementById('results');
+        if (current_opinion == '') {
+            results.innerHTML = 'Similar opinions will display here.';
+        }
+        else {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
+            xhttp.send();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var response = JSON.parse(this.responseText);
+                    let search_results = response;
+                    if (search_results.length == 0) {
+                        results.innerHTML = 'No similar opinions.';
+                    }
+                    else {
+                        results.innerHTML = '';
+                        for (var index = 0; index < search_results.length; index++) {
+                            results.innerHTML += '<section>' + search_results[index] + '</section>';
+                        }
                     }
                 }
-            }
-        };
+            };
+        }
     }
+    old_opinion = current_opinion;
 }
 </script>
 </body>
