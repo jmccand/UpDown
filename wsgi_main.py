@@ -1878,7 +1878,7 @@ function update_unselected(element) {{
         else:
             raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
 
-    def track_opinions_page(self):
+    def old_track_opinions_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
         self.start_response('200 OK', [])
@@ -1940,11 +1940,16 @@ div#line {
   background-color: green;
   box-sizing: border-box;
 }
+div#label {
+  font-size: 25px;
+  position: absolute;
+  left: 15%;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article>'.encode('utf8'))
-        self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div>'''.encode('utf8'))
+        self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div><div id='label'></div>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
@@ -2031,6 +2036,168 @@ function updateStats(element) {{
         document.getElementById('stat' + i).innerHTML = '---';
     }}
     document.getElementById('circle').style.top = stats[this_ID][0] + '%';
+    if (prev != null) {{
+        prev.style.backgroundColor = '#cfe2f3ff';
+    }}
+    element.style.backgroundColor = 'yellow';
+    prev = element;
+}}
+</script>'''.encode('utf8'))
+        self.wfile.write('''</body></html>'''.encode('utf8'))
+
+        self.log_activity()
+        
+    def track_opinions_page(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        self.start_response('200 OK', [])
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 50%;
+  z-index: 1;
+  overflow: scroll;
+}
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  z-index: 1;
+}
+#search_bar {
+  position: absolute;
+  top: 0;
+  left: 1%;
+  width: 98%;
+  height: 26px;
+  padding: 2px;
+  border: 0;
+}
+div#results {
+  position: absolute;
+  bottom: 0;
+  top: 32px;
+  width: 100%;
+  overflow: scroll;
+}
+div.result {
+  width: 99%;
+  height: 50px;
+  margin: 0.5%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+}
+img#timeline {
+  height: 90%;
+  position: absolute;
+  left: 8%;
+  top: 5%;
+}
+div#line {
+  width: 20px;
+  height: 4px;
+  border: 2px solid black;
+  position: absolute;
+  left: 15px;
+  background-color: green;
+  box-sizing: border-box;
+}
+div#label {
+  font-size: 25px;
+  position: absolute;
+  left: 15%;
+}
+</style>'''.encode('utf8'))
+        self.wfile.write('</head><body>'.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write('<article>'.encode('utf8'))
+        self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div><div id='label'></div>'''.encode('utf8'))
+        self.wfile.write('</article>'.encode('utf8'))
+        self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
+
+        def to_date(dt):
+            return datetime.date(dt.year, dt.month, dt.day)
+
+        json_stats = {}
+        search_results = []
+        if 'words' in url_arguments:
+            search_results = search(url_arguments['words'][0])
+        else:
+            search_results = list(db.opinions_database.keys())
+            search_results.sort(key=lambda x: -int(x))
+        if search_results == []:
+            self.wfile.write('Sorry, there were no results. Try using different keywords.'.encode('utf8'))
+        for opinion_ID in search_results:
+            json_stats[opinion_ID] = [None] * 5
+            # stage, date, care, up, message
+            opinion = db.opinions_database[str(opinion_ID)]
+            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
+            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
+            json_stats[opinion_ID][0] = len(opinion.activity) - 1
+            if json_stats[opinion_ID][0] >= 2:
+                if datetime.date.today() >= opinion.activity[2][0][2]:
+                    json_stats[opinion_ID][0] += 1
+            if len(opinion.activity) == 1:
+                json_stats[opinion_ID][1] = str(to_date(opinion.activity[0][1]))
+                json_stats[opinion_ID][4] = 'onto approval'
+            elif len(opinion.activity) == 2:
+                json_stats[opinion_ID][1] = str(to_date(opinion.activity[1][0][2]))
+                assert opinion.approved in (True, False)
+                if opinion.approved:
+                    json_stats[opinion_ID][4] = 'onto scheduling'
+                else:
+                    json_stats[opinion_ID][4] = 'rejected'
+            elif len(opinion.activity) == 3:
+                #assert len(opinion.activity[2]) == 4
+                if datetime.date.today() < opinion.activity[2][0][2]:
+                    json_stats[opinion_ID][4] = 'onto voting'
+                elif datetime.date.today() > opinion.activity[2][0][2]:
+                    json_stats[opinion_ID][4] = 'onto forwarding'
+                else:
+                    json_stats[opinion_ID][4] = 'currently voting'
+                if datetime.date.today() >= opinion.activity[2][0][2]:
+                    json_stats[opinion_ID][1] = str(to_date(opinion.activity[2][0][2]))
+                else:
+                    json_stats[opinion_ID][1] = str(to_date(opinion.activity[2][0][3]))
+            elif len(opinion.activity) == 4:
+                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
+                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                if opinion.activity[3][0][1] != 'no':
+                    json_stats[opinion_ID][4] = f'onto {opinion.activity[3][0][1]}'
+                else:
+                    json_stats[opinion_ID][4] = 'unforwarded'
+                json_stats[opinion_ID][1] = str(to_date(opinion.activity[3][0][2]))
+            elif len(opinion.activity) == 5:
+                #assert len(opinion.activity[4]) == 3
+                json_stats[opinion_ID][4] = 'onto drafting'
+                json_stats[opinion_ID][1] = str(to_date(opinion.activity[4][0][2]))
+            # care and up percent
+            json_stats[opinion_ID][2] = '--'
+            json_stats[opinion_ID][3] = '--'
+            if json_stats[opinion_ID][0] > 2:
+                up, down, abstain = opinion.count_votes()
+                if up + down + abstain > 0:
+                    care_per = (up + down) / (up + down + abstain)
+                    json_stats[opinion_ID][2] = care_per
+                if up + down > 0:
+                    up_per = up / (up + down)
+                    json_stats[opinion_ID][3] = up_per
+            self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
+{opinion.text}
+</div>'''.encode('utf8'))
+        self.wfile.write('</div></footer>'.encode('utf8'))
+        self.wfile.write(f'''<script>
+const stats = {json.dumps(json_stats)};
+var prev = null;
+function updateStats(element) {{
+    const this_ID = element.id;
     if (prev != null) {{
         prev.style.backgroundColor = '#cfe2f3ff';
     }}
