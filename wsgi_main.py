@@ -2106,9 +2106,9 @@ table#stats {
   position: absolute;
   height: 80%;
   top: 10%;
-  border: 2px solid black;
   font-size: 30px;
   text-align: center;
+  border-collapse: collapse;
 }
 div#line {
   width: 20px;
@@ -2124,12 +2124,23 @@ div#label {
   position: absolute;
   left: 15%;
 }
+td.care {
+  border-right: 2px solid black;
+}
+td.up {
+  border-left: 2px solid black;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write('<article>'.encode('utf8'))
         self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div><div id='label'></div>'''.encode('utf8'))
-        self.wfile.write('''<table id='stats'><tr><td id='row1' colspan='2'></td></tr><tr><td id='care_per'></td><td id='up_per'></td></tr><tr><td>care</td><td>up</td></tr><tr><td id='row4' colspan='2'></td></tr></table>'''.encode('utf8'))
+        self.wfile.write('''<table id='stats'>
+<tr><td id='row1' colspan='2'></td></tr>
+<tr><td id='care_per' class='care'></td><td id='up_per' class='up'></td></tr>
+<tr><td class='care'>care</td><td class='up'>up</td></tr>
+<tr><td id='row4' colspan='2'></td></tr>
+</table>'''.encode('utf8'))
         self.wfile.write('</article>'.encode('utf8'))
         self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
 
