@@ -635,10 +635,135 @@ Thank you for verifying. Your votes are now counted.<br />
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
             if datetime.date.today().weekday() == 2:
-                self.wfile.write('''<article id='opinion'>
-Middle Wednesday!<br />
-A recap of the week is shown below:<br />
+                self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+                self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
+<link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
+                self.send_links_head()
+                self.wfile.write('''<style>
+article#opinion {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 0;
+  z-index: 1;
+  overflow: scroll;
+}
+article#cover {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 0;
+  z-index: 1;
+}
+article#cover div {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  margin-right: -50%;
+  transform: translate(-50%, 0);
+  text-align: center;
+  padding: 0;
+  font-size: 40px;
+}
+section {
+  top: 25%;
+  bottom: 35%;
+  width: 96%;
+  left: 2%;
+  padding: 15px;
+  position: fixed;
+  background-color: white;
+  border-radius: 6px;
+  border: 3px solid #595959;
+  color: black;
+  box-sizing: border-box;
+  font-size: 30px;
+  cursor: default;
+}
+article h1 {
+  font-size: 50px;
+}
+section p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+                self.send_links_body()
+                
+                self.wfile.write('''<article id='cover'>
+<div>
+Middle Wednesday:<br />
+Ballot Recap<br />
+</div>
 </article>'''.encode('utf8'))
+                self.wfile.write(f'''<script>
+let current_index = 0;
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('keydown', handleKeyDown, false);
+
+var xStart = null;
+var yStart = null;
+
+function getTouches(evt) {{
+  return evt.touches ||
+         evt.originalEvent.touches;
+}}
+
+function handleTouchStart(evt) {{
+    const start = getTouches(evt)[0];
+    xStart = start.clientX;
+    yStart = start.clientY;
+}}
+
+function handleTouchMove(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        if (xDiff > 0) {{
+            change(1);
+        }}
+        else {{
+            change(-1);
+        }}
+    }}
+    else {{
+        return;
+    }}
+    xStart = null;
+    yStart = null;
+}}
+function handleKeyDown(evt) {{
+    let key_pressed = event.key;
+    const keyDict = {{
+        'ArrowRight': [change, 1],
+        'ArrowLeft': [change, -1]
+    }};
+    if (keyDict[key_pressed] != null) {{
+        var func_arg_list = keyDict[key_pressed];
+        func_arg_list[0](func_arg_list[1]);
+    }}
+}}
+function change(i) {{
+}}
+</script>
+'''.encode('utf8'))
             else:
                 self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
@@ -821,7 +946,6 @@ function handleTouchMove(evt) {{
     yStart = null;
 }}
 function handleDoubleClick(evt) {{
-    console.log('double click!');
     vote('abstain');
 }}
 function vote(my_vote) {{
