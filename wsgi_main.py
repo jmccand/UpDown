@@ -716,6 +716,23 @@ section p {
 </article>
 <footer>
 </footer>'''.encode('utf8'))
+            see_old_days = []
+            check_day = see_day
+            if check_day.weekday() not in (3, 6):
+                check_day = check_day - datetime.timedelta(days=3)
+            while len(see_old_days) < 2 and check_day > local.LAUNCH_DATE:
+                # check_day.weekday is either 3 or 6
+                assert check_day.weekday() in (3, 6)
+                if db.opinions_calendar.get(str(check_day), set()) != set():
+                    see_old_days.append(check_day)
+                if check_day.weekday() == 3:
+                    check_day = check_day - datetime.timedelta(days=4)
+                else:
+                    check_day = check_day - datetime.timedelta(days=3)
+            # reorder so most recent is last
+            see_old_days = see_old_days[::-1]
+            print(f'{see_old_days=}')
+                    
             self.wfile.write(f'''<script>
 let current_index = 0;
 
