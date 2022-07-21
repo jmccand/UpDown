@@ -634,12 +634,11 @@ Thank you for verifying. Your votes are now counted.<br />
             see_day = today_date
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
-            if datetime.date.today().weekday() == 2:
-                self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-                self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
-                self.send_links_head()
-                self.wfile.write('''<style>
+            self.send_links_head()
+            self.wfile.write('''<style>
 article#opinion {
   position: absolute;
   top: 70px;
@@ -702,15 +701,14 @@ section p {
 </style>
 </head>
 <body>'''.encode('utf8'))
-                self.send_links_body()
-                
-                self.wfile.write('''<article id='cover'>
-<div>
-Middle Wednesday:<br />
-Ballot Recap<br />
-</div>
-</article>
-<article id='opinion'>
+            self.send_links_body()
+            self.wfile.write('''<article id='cover'><div>'''.encode('utf8'))
+            if datetime.date.today().weekday() == 2:
+                self.wfile.write('''Middle Wednesday:<br />Ballot Recap'''.encode('utf8'))
+            else:
+                self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
+            self.wfile.write('''</div></article>'''.encode('utf8'))
+            self.wfile.write('''<article id='opinion'>
 <div>
 </div>
 <section>
@@ -718,7 +716,7 @@ Ballot Recap<br />
 </article>
 <footer>
 </footer>'''.encode('utf8'))
-                self.wfile.write(f'''<script>
+            self.wfile.write(f'''<script>
 let current_index = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
@@ -779,8 +777,6 @@ function change(i) {{
 }}
 </script>
 '''.encode('utf8'))
-            else:
-                self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
         else:
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
