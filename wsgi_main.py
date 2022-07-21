@@ -644,16 +644,23 @@ article#opinion {
   position: absolute;
   top: 70px;
   width: 100%;
-  bottom: 0;
+  bottom: 30%;
   z-index: 1;
   overflow: scroll;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  height: 30%;
+  width: 100%;
+  z-index: 1;
 }
 article#cover {
   position: absolute;
   top: 70px;
   width: 100%;
   bottom: 0;
-  z-index: 1;
+  z-index: 2;
 }
 article#cover div {
   position: absolute;
@@ -680,7 +687,7 @@ section {
   font-size: 30px;
   cursor: default;
 }
-article h1 {
+article#opinion div {
   font-size: 50px;
 }
 section p {
@@ -702,7 +709,15 @@ section p {
 Middle Wednesday:<br />
 Ballot Recap<br />
 </div>
-</article>'''.encode('utf8'))
+</article>
+<article id='opinion'>
+<div>
+</div>
+<section>
+</section>
+</article>
+<footer>
+</footer>'''.encode('utf8'))
                 self.wfile.write(f'''<script>
 let current_index = 0;
 
