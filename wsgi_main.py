@@ -1187,16 +1187,18 @@ function vote(element_ID) {{
         self.wfile.write('''<style>
 article {
   position: absolute;
-  top: 80px;
+  top: 105px;
   bottom: 0;
   width: 100%;
   z-index: 1;
   overflow: scroll;
   background-color: #cfe2f3ff;
+  padding: 2%;
+  box-sizing: border-box;
 }
 #back_to_top {
   position: absolute;
-  top: 50px;
+  top: 75px;
   width: 100%;
   border: 2px solid black;
   background-color: lightGray;
