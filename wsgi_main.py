@@ -623,12 +623,30 @@ Thank you for verifying. Your votes are now counted.<br />
             self.start_response('200 OK', [('Set-Cookie', f'code={url_arguments["cookie_code"][0]}; path=/')])
         else:
             self.start_response('200 OK', [])
-        day_of_the_week = datetime.date.today().weekday()
-        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-        self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
+        
+        see_day = None
+        today_date = datetime.date.today()
+        if (today_date.weekday() + 1) % 7 < 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
+        elif (today_date.weekday() + 1) % 7 > 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
+        else:
+            see_day = today_date
+        print(f'day of the week that opinions page is viewing: {see_day}')
+        if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
+            if datetime.date.today().weekday() == 2:
+                self.wfile.write('''<article id='opinion'>
+Middle Wednesday!<br />
+A recap of the week is shown below:<br />
+</article>'''.encode('utf8'))
+            else:
+                self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
+        else:
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
-        self.send_links_head()
-        self.wfile.write('''<style>
+            self.send_links_head()
+            self.wfile.write('''<style>
 article#opinion {
   position: absolute;
   top: 70px;
@@ -711,26 +729,7 @@ div#banner {
 </style>
 </head>
 <body>'''.encode('utf8'))
-        self.send_links_body()
-
-        see_day = None
-        today_date = datetime.date.today()
-        if (today_date.weekday() + 1) % 7 < 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-        elif (today_date.weekday() + 1) % 7 > 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
-        else:
-            see_day = today_date
-        print(f'day of the week that opinions page is viewing: {see_day}')
-        if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
-            if datetime.date.today().weekday() == 2:
-                self.wfile.write('''<article id='opinion'>
-Middle Wednesday!<br />
-A recap of the week is shown below:<br />
-'''.encode('utf8'))
-            else:
-                self.wfile.write('''<article id='opinion'>Sorry, today's off.<br />See you soon!<br />'''.encode('utf8'))
-        else:
+            self.send_links_body()
             self.wfile.write('''<article id='opinion'>'''.encode('utf8'))
             randomized = list(db.opinions_calendar[str(see_day)])
             random.shuffle(randomized)
