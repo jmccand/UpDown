@@ -735,7 +735,7 @@ section p {
             highlights = []
 
             for day in see_old_days:
-                highlights.append(f'{day} - {day + datetime.timedelta(days=3)}')
+                highlights.append(tuple(f'{day} - {day + datetime.timedelta(days=3)}'))
                 this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
                 max_care = max(this_list, key=lambda x: x.care_agree_percent()[0])
                 max_agree = max(this_list, key=lambda x: x.care_agree_percent()[1])
@@ -746,6 +746,9 @@ section p {
                 for opinion in this_list:
                     if opinion.text not in (max_care.text, max_agree.text, max_overall.text):
                         highlights.append(('OTHER', opinion.text) + opinion.care_agree_percent())
+
+            # javascript doesn't have tuples
+            highlights = [list(x) for x in highlights]
                         
             self.wfile.write(f'''<script>
 let highlights = {highlights}
@@ -806,6 +809,19 @@ function handleKeyDown(evt) {{
     }}
 }}
 function change(i) {{
+    let newIndex = current_index + i;
+    if (newIndex < 0) {{
+        newIndex = 0;
+    }}
+    else if (newIndex >= highlights.length) {{
+        newIndex = highlights.length - 1;
+    }}
+    if (highlights[newIndex].length == 1) {{
+        cover(highlights[newIndex][0]);
+    }}
+    else {{
+        highlight(highlights[newIndex]);
+    }}
 }}
 </script>
 '''.encode('utf8'))
