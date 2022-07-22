@@ -186,7 +186,7 @@ header {
   top: 0;
   width: 100%;
   height: 70px;
-  z-index: 2;
+  z-index: 3;
 }
 #hamburger {
   position: absolute;
@@ -667,6 +667,7 @@ article#cover {
   width: 100%;
   bottom: 0;
   background-color: #6d9eebff;
+  z-index: 2;
 }
 article#cover div {
   position: absolute;
