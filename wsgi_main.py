@@ -771,6 +771,7 @@ section p {
             self.wfile.write(f'''<script>
 let highlights = {highlights}
 let current_index = 0;
+let timeElapsed = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
@@ -778,6 +779,8 @@ document.addEventListener('keydown', handleKeyDown, false);
 
 var xStart = null;
 var yStart = null;
+
+setInterval(increaseTimeElapsed, 200, 200);
 
 function getTouches(evt) {{
   return evt.touches ||
@@ -826,6 +829,19 @@ function handleKeyDown(evt) {{
         func_arg_list[0](func_arg_list[1]);
     }}
 }}
+function increaseTimeElapsed(time) {{
+    timeElapsed += time;
+    if (highlights[current_index].length == 1) {{
+        if (timeElapsed > 3000) {{
+            change(1);
+        }}
+    }}
+    else {{
+        if (timeElapsed > 4500) {{
+            change(1);
+        }}
+    }}
+}}
 function change(i) {{
     let newIndex = current_index + i;
     if (newIndex < 0) {{
@@ -841,6 +857,7 @@ function change(i) {{
         highlight(highlights[newIndex]);
     }}
     current_index = newIndex;
+    timeElapsed = 0;
 }}
 function cover(text) {{
     document.getElementById('cover_div').innerHTML = text;
