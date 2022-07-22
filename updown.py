@@ -38,3 +38,13 @@ class Opinion:
                     else:
                         raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
         return up_votes, down_votes, abstains
+
+    def care_agree_percent(self):
+        up, down, abstain = self.count_votes()
+        care = 0
+        agree = 0
+        if up + down + abstain > 0:
+            care = (up + down) / (up + down + abstain)
+            if up + down > 0:
+                agree = up / (up + down)
+        return care, agree
