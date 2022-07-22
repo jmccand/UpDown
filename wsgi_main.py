@@ -735,11 +735,18 @@ section p {
             highlights = []
 
             for day in see_old_days:
+                highlights.append(f'{day} - {day + datetime.timedelta(days=3)}')
                 this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
                 max_care = max(this_list, key=lambda x: x.care_agree_percent()[0])
                 max_agree = max(this_list, key=lambda x: x.care_agree_percent()[1])
                 max_overall = max(this_list, key=lambda x: x.care_agree_percent()[0] * x.care_agree_percent()[1])
-                    
+                highlights.append(('MAX CARE', max_care.text) + max_care.care_agree_percent())
+                highlights.append(('MAX AGREE', max_agree.text) + max_agree.care_agree_percent())
+                highlights.append(('MAX OVERALL', max_overall.text) + max_overall.care_agree_percent())
+                for opinion in this_list:
+                    if opinion.text not in (max_care.text, max_agree.text, max_overall.text):
+                        highlights.append(('OTHER', opinion.text) + opinion.care_agree_percent())
+                        
             self.wfile.write(f'''<script>
 let highlights = {highlights}
 let current_index = 0;
