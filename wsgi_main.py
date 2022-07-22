@@ -652,11 +652,21 @@ footer {
   width: 100%;
   z-index: 1;
 }
+footer table {
+  position: absolute;
+  text-align: center;
+  font-size: 30px;
+  width: 50%;
+  left: 25%;
+  top: 20%;
+  border-collapse: collapse;
+}
 article#cover {
   position: absolute;
   top: 70px;
   width: 100%;
   bottom: 0;
+  background-color: #6d9eebff;
 }
 article#cover div {
   position: absolute;
@@ -700,19 +710,28 @@ section p {
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write('''<article id='opinion'>
-<div>
+<div id='highlight_title'>
 </div>
-<section>
+<section id='opinion_text'>
 </section>
 </article>
 <footer>
+<table>
+<tr><td id='care_per'>---%</td><td id='agree_per'>---%</td></tr>
+<tr><td>care</td><td>agree</td></tr>
+</table>
 </footer>'''.encode('utf8'))
-            self.wfile.write('''<article id='cover'><div>'''.encode('utf8'))
+
+            highlights = []
+
+            self.wfile.write('''<article id='cover'><div id='cover_div'>'''.encode('utf8'))
 
             if datetime.date.today().weekday() == 2:
                 self.wfile.write('''Middle Wednesday:<br />Ballot Recap'''.encode('utf8'))
+                highlights.append(('Middle Wednesday:<br />Ballot Recap',))
             else:
                 self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
+                highlights.append(('Off Day:<br />Ballot Recap',))
             self.wfile.write('''</div></article>'''.encode('utf8'))
             
             see_old_days = []
@@ -732,10 +751,8 @@ section p {
             see_old_days = see_old_days[::-1]
             print(f'{see_old_days=}')
 
-            highlights = []
-
             for day in see_old_days:
-                highlights.append(tuple(f'{day} - {day + datetime.timedelta(days=3)}'))
+                highlights.append((f'{day} - {day + datetime.timedelta(days=3)}',))
                 this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
                 max_care = max(this_list, key=lambda x: x.care_agree_percent()[0])
                 max_agree = max(this_list, key=lambda x: x.care_agree_percent()[1])
@@ -822,6 +839,18 @@ function change(i) {{
     else {{
         highlight(highlights[newIndex]);
     }}
+    current_index = newIndex;
+}}
+function cover(text) {{
+    document.getElementById('cover_div').innerHTML = text;
+    document.getElementById('cover').style.display = 'initial';
+}}
+function highlight(info) {{
+    document.getElementById('highlight_title').innerHTML = info[0];
+    document.getElementById('opinion_text').innerHTML = info[1];
+    document.getElementById('care_per').innerHTML = info[2];
+    document.getElementById('agree_per').innerHTML = info[3];
+    document.getElementById('cover').style.display = 'none';
 }}
 </script>
 '''.encode('utf8'))
