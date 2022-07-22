@@ -731,8 +731,17 @@ section p {
             # reorder so most recent is last
             see_old_days = see_old_days[::-1]
             print(f'{see_old_days=}')
+
+            highlights = []
+
+            for day in see_old_days:
+                this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
+                max_care = max(this_list, key=lambda x: x.care_agree_percent()[0])
+                max_agree = max(this_list, key=lambda x: x.care_agree_percent()[1])
+                max_overall = max(this_list, key=lambda x: x.care_agree_percent()[0] * x.care_agree_percent()[1])
                     
             self.wfile.write(f'''<script>
+let highlights = {highlights}
 let current_index = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
