@@ -240,7 +240,6 @@ header {
   right: 0;
   width: 50px;
   height: 45px;
-  z-index: 1;
 }
 </style>'''.encode('utf8'))
 
@@ -644,7 +643,6 @@ article#opinion {
   top: 70px;
   width: 100%;
   bottom: 30%;
-  z-index: 1;
   overflow: scroll;
 }
 footer {
@@ -659,7 +657,6 @@ article#cover {
   top: 70px;
   width: 100%;
   bottom: 0;
-  z-index: 2;
 }
 article#cover div {
   position: absolute;
@@ -702,12 +699,6 @@ section p {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<article id='cover'><div>'''.encode('utf8'))
-            if datetime.date.today().weekday() == 2:
-                self.wfile.write('''Middle Wednesday:<br />Ballot Recap'''.encode('utf8'))
-            else:
-                self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
-            self.wfile.write('''</div></article>'''.encode('utf8'))
             self.wfile.write('''<article id='opinion'>
 <div>
 </div>
@@ -716,6 +707,14 @@ section p {
 </article>
 <footer>
 </footer>'''.encode('utf8'))
+            self.wfile.write('''<article id='cover'><div>'''.encode('utf8'))
+
+            if datetime.date.today().weekday() == 2:
+                self.wfile.write('''Middle Wednesday:<br />Ballot Recap'''.encode('utf8'))
+            else:
+                self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
+            self.wfile.write('''</div></article>'''.encode('utf8'))
+            
             see_old_days = []
             check_day = see_day
             if check_day.weekday() not in (3, 6):
