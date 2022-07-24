@@ -864,8 +864,8 @@ function cover(text) {{
 }}
 function highlight(info) {{
     document.getElementById('opinion_text').innerHTML = info[0];
-    document.getElementById('care_per').innerHTML = info[1];
-    document.getElementById('agree_per').innerHTML = info[2];
+    document.getElementById('care_per').innerHTML = info[1] + '%';
+    document.getElementById('agree_per').innerHTML = info[2] + '%';
     document.getElementById('cover').style.display = 'none';
 }}
 </script>
