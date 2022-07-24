@@ -1342,15 +1342,15 @@ var old_opinion;
 setInterval(updateSearch, 1000);
 function vote(element_ID) {{
     var xhttp = new XMLHttpRequest();
-    var split_ID = element_ID.split(' ');
-    const opinion_ID = split_ID[0];
+    const opinion_ID = opinionList[current_index][0];
 
     const my_vote = split_ID[1];
 
     xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
 
-    document.getElementById(opinion_ID).style = 'display: none';
+    current_index++;
+    document.getElementById('opinion').value = opinionList[current_index][1];
 }}
 function updateSearch() {{
     let current_opinion = document.getElementById('opinion').value;
