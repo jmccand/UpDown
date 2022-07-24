@@ -1339,6 +1339,7 @@ footer {
 const opinionList = {unapproved_list};
 let current_index = 0;
 var old_opinion;
+updateSearch();
 setInterval(updateSearch, 1000);
 function vote(element_ID) {{
     var xhttp = new XMLHttpRequest();
