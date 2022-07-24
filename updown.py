@@ -44,7 +44,7 @@ class Opinion:
         care = 0
         agree = 0
         if up + down + abstain > 0:
-            care = (up + down) / (up + down + abstain)
+            care = (up + down) / (up + down + abstain) * 100
             if up + down > 0:
-                agree = up / (up + down)
+                agree = up / (up + down) * 100
         return care, agree
