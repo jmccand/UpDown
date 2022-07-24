@@ -1337,18 +1337,9 @@ footer {
 </footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 const opinionList = {unapproved_list};
-let selected = null;
+let current_index = 0;
 var old_opinion;
 setInterval(updateSearch, 1000);
-if (opinionList.length > 0) {{
-  selected = opinionList[0];
-  document.getElementById(selected).className = 'selected';
-}}
-function select(element) {{
-    document.getElementById(selected).className = 'unselected';
-    element.className = 'selected';
-    selected = element.id;
-}}
 function vote(element_ID) {{
     var xhttp = new XMLHttpRequest();
     var split_ID = element_ID.split(' ');
