@@ -713,7 +713,9 @@ section p {
             self.wfile.write('''<article id='opinion'>
 <div id='highlight_title'>
 </div>
-<section id='opinion_text'>
+<section>
+<p id='opinion_text'>
+</p>
 </section>
 </article>
 <footer>
@@ -753,7 +755,10 @@ section p {
             print(f'{see_old_days=}')
 
             for day in see_old_days:
-                highlights.append((f'{day} - {day + datetime.timedelta(days=3)}',))
+                def day_to_nice_string(d):
+                    return d.strftime('%A %m/%d')
+                end_date = day + datetime.timedelta(days=3)
+                highlights.append((f'{day_to_nice_string(day)} - {day_to_nice_string(end_date)}',))
                 this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
                 this_list.sort(key=lambda x: -1 * x.care_agree_percent()[0] * x.care_agree_percent()[1])
                 for opinion in this_list:
