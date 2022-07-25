@@ -115,8 +115,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/approve_opinions':
                     self.path_root = '/approve_opinions'
                     self.approve_opinions_page()
-                elif self.path.startswith('/approve'):
-                    self.path_root = '/approve'
+                elif self.path.startswith('/vote_approve'):
+                    self.path_root = '/vote_approve'
                     self.approve()
                 elif self.path == '/senate':
                     self.path_root = '/senate'
@@ -151,6 +151,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/submit_opinion_search'):
                     self.path_root = '/submit_opinion_search'
                     self.submit_opinion_search()
+                elif self.path.startswith('/approve_opinion_search'):
+                    self.path_root = '/approve_opinion_search'
+                    self.approve_opinion_search()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -1406,7 +1409,7 @@ function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
     const opinion_ID = opinionList[current_index][0];
 
-    xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    xhttp.open('GET', '/vote_approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
 
     current_index++;
@@ -1421,7 +1424,7 @@ function updateSearch() {{
         }}
         else {{
             var xhttp = new XMLHttpRequest();
-            xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
+            xhttp.open('GET', '/approve_opinion_search?text=' + current_opinion + '&opinion_ID=' + opinionList[current_index][0]);
             xhttp.send();
             xhttp.onreadystatechange = function() {{
                 if (this.readyState == 4 && this.status == 200) {{
@@ -2586,10 +2589,10 @@ function updateStats(element) {{
             target_ID = url_arguments['opinion_ID'][0]
             opinions = search(url_arguments['text'][0])
             opinions_simplified = [db.opinions_database[str(opinion_ID)] for opinion_ID in opinions]
-            opinions_simplified = filter(lambda x: x.ID != target_ID, opinions_simplified)
+            opinions_simplified = filter(lambda x: str(x.ID) != target_ID, opinions_simplified)
             opinions_simplified = [x.text for x in opinions_simplified]
             self.start_response('200 OK', [])
-            self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
+            self.wfile.write(json.dumps(opinions_simplified[:5]).encode('utf8'))
             
                 
 class invalidCookie(ValueError):
