@@ -1289,17 +1289,20 @@ article {
   position: absolute;
   top: 70px;
   width: 100%;
-  bottom: 60%;
+  bottom: 50%;
   z-index: 1;
   overflow: scroll;
 }
 textarea {
   position: absolute;
-  height: 90%;
-  width: 80%;
-  top: 5%;
-  left: 10%;
+  height: 50%;
+  width: 90%;
+  top: 15%;
+  left: 5%;
   text-align: center;
+  font-size: 20px;
+  border: 2px solid black;
+  box-sizing: border-box;
 }
 section {
   width: 98%;
@@ -1316,7 +1319,7 @@ footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 60%;
+  height: 50%;
   z-index: 1;
 }
 </style>
@@ -1393,7 +1396,6 @@ function vote(my_vote) {{
 
     current_index++;
     document.getElementById('opinion').value = opinionList[current_index][1];
-    console.log('voted ' + my_vote);
 }}
 function updateSearch() {{
     let current_opinion = document.getElementById('opinion').value;
