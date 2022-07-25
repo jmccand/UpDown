@@ -1341,17 +1341,59 @@ let current_index = 0;
 var old_opinion;
 updateSearch();
 setInterval(updateSearch, 1000);
-function vote(element_ID) {{
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+
+var xStart = null;
+var yStart = null;
+
+function getTouches(evt) {{
+  return evt.touches ||
+         evt.originalEvent.touches;
+}}
+
+function handleTouchStart(evt) {{
+    const start = getTouches(evt)[0];
+    xStart = start.clientX;
+    yStart = start.clientY;
+}}
+
+function handleTouchMove(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        return;
+    }}
+    else {{
+        if (yDiff > 0) {{
+            vote('yes');
+        }}
+        else {{ 
+            vote('no');
+        }}
+    }}
+    xStart = null;
+    yStart = null;
+}}
+function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
     const opinion_ID = opinionList[current_index][0];
-
-    const my_vote = split_ID[1];
 
     xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
 
     current_index++;
     document.getElementById('opinion').value = opinionList[current_index][1];
+    console.log('voted ' + my_vote);
 }}
 function updateSearch() {{
     let current_opinion = document.getElementById('opinion').value;
