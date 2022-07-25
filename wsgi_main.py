@@ -1318,9 +1318,16 @@ section {
   border-radius: 6px;
   box-sizing: border-box;
 }
+button#lock {
+  position: absolute;
+  top: 35%;
+  height: 5%;
+  width: 90%;
+  left: 5%;
+}
 div#similar_message {
   position: absolute;
-  top: 40%;
+  top: 45%;
   font-size: 25px;
   padding: 0;
   left: 50%;
@@ -1331,7 +1338,7 @@ footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 55%;
+  height: 50%;
   z-index: 1;
   padding: 3%;
   box-sizing: border-box;
@@ -1350,6 +1357,9 @@ footer {
 {unapproved_list[0][1]}
 </textarea>
 </article>
+<button id='lock'>
+CLICK TO APPROVE
+</button>
 <div id='similar_message'>
 Similar opinions
 <span style='font-size: 16px; width: 100%; text-align: center'>* reject identical ones *</span>
