@@ -2579,6 +2579,18 @@ function updateStats(element) {{
             self.start_response('200 OK', [])
             self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
             
+    def approve_opinion_search(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        if 'text' in url_arguments and 'opinion_ID' in url_arguments:
+            target_ID = url_arguments['opinion_ID'][0]
+            opinions = search(url_arguments['text'][0])
+            opinions_simplified = [db.opinions_database[str(opinion_ID)] for opinion_ID in opinions]
+            opinions_simplified = filter(lambda x: x.ID != target_ID, opinions_simplified)
+            opinions_simplified = [x.text for x in opinions_simplified]
+            self.start_response('200 OK', [])
+            self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
+            
                 
 class invalidCookie(ValueError):
     def __init__(self, message):
