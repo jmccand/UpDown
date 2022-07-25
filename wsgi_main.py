@@ -1315,12 +1315,23 @@ section {
   border-radius: 6px;
   box-sizing: border-box;
 }
+div#similar_message {
+  position: absolute;
+  top: 40%;
+  font-size: 25px;
+  padding: 0;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
 footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 50%;
+  height: 55%;
   z-index: 1;
+  padding: 3%;
+  box-sizing: border-box;
 }
 </style>
 </head>
@@ -1336,6 +1347,10 @@ footer {
 {unapproved_list[0][1]}
 </textarea>
 </article>
+<div id='similar_message'>
+Similar opinions
+<span style='font-size: 16px; width: 100%; text-align: center'>* reject identical ones *</span>
+</div>
 <footer id='results'>
 </footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
