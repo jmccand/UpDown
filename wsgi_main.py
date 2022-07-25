@@ -1289,15 +1289,15 @@ article {
   position: absolute;
   top: 70px;
   width: 100%;
-  bottom: 50%;
+  bottom: 65%;
   z-index: 1;
   overflow: scroll;
 }
 textarea {
   position: absolute;
-  height: 50%;
+  height: 66%;
   width: 90%;
-  top: 15%;
+  top: 17%;
   left: 5%;
   text-align: center;
   font-size: 20px;
