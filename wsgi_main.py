@@ -115,8 +115,11 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/approve_opinions':
                     self.path_root = '/approve_opinions'
                     self.approve_opinions_page()
-                elif self.path.startswith('/vote_approve'):
-                    self.path_root = '/vote_approve'
+                elif self.path.startswith('/approve_opinion_search'):
+                    self.path_root = '/approve_opinion_search'
+                    self.approve_opinion_search()
+                elif self.path.startswith('/approve'):
+                    self.path_root = '/approve'
                     self.approve()
                 elif self.path == '/senate':
                     self.path_root = '/senate'
@@ -151,9 +154,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/submit_opinion_search'):
                     self.path_root = '/submit_opinion_search'
                     self.submit_opinion_search()
-                elif self.path.startswith('/approve_opinion_search'):
-                    self.path_root = '/approve_opinion_search'
-                    self.approve_opinion_search()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -1318,27 +1318,33 @@ section {
   border-radius: 6px;
   box-sizing: border-box;
 }
-button#lock {
+div#lock {
   position: absolute;
   top: 35%;
-  height: 5%;
+  height: 8%;
+  padding: 1%;
+  box-sizing: border-box;
   width: 90%;
   left: 5%;
+  border: 2px solid black;
+  border-radius: 6px;
+  text-align: center;
+  background-color: lightBlue;
 }
 div#similar_message {
   position: absolute;
-  top: 45%;
+  top: 48%;
   font-size: 25px;
   padding: 0;
   left: 50%;
   margin-right: -50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
 }
 footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 50%;
+  height: 47%;
   z-index: 1;
   padding: 3%;
   box-sizing: border-box;
@@ -1357,9 +1363,10 @@ footer {
 {unapproved_list[0][1]}
 </textarea>
 </article>
-<button id='lock'>
-CLICK TO APPROVE
-</button>
+<div id='lock'>
+APPROVAL LOCK<br />
+START SWIPE HERE TO APPROVE
+</div>
 <div id='similar_message'>
 Similar opinions
 <span style='font-size: 16px; width: 100%; text-align: center'>* reject identical ones *</span>
@@ -1370,6 +1377,8 @@ Similar opinions
 const opinionList = {unapproved_list};
 let current_index = 0;
 var old_opinion;
+let unlocked = false;
+
 updateSearch();
 setInterval(updateSearch, 1000);
 
@@ -1388,6 +1397,13 @@ function handleTouchStart(evt) {{
     const start = getTouches(evt)[0];
     xStart = start.clientX;
     yStart = start.clientY;
+    let lock_p = document.getElementById('lock').getBoundingClientRect();
+    if (xStart > lock_p.left && xStart < lock_p.right) {{
+        if (yStart > lock_p.top && yStart < lock_p.bottom) {{
+            unlocked = true;
+            console.log('unlocked');
+        }}
+    }}
 }}
 
 function handleTouchMove(evt) {{
@@ -1405,21 +1421,25 @@ function handleTouchMove(evt) {{
         return;
     }}
     else {{
-        if (yDiff > 0) {{
-            vote('yes');
-        }}
-        else {{ 
-            vote('no');
+        if (unlocked) {{
+            if (yDiff > 0) {{
+                vote('yes');
+            }}
+            else {{ 
+                vote('no');
+            }}
         }}
     }}
     xStart = null;
     yStart = null;
+    unlocked = false;
+    console.log('voted!');
 }}
 function vote(my_vote) {{
     var xhttp = new XMLHttpRequest();
     const opinion_ID = opinionList[current_index][0];
 
-    xhttp.open('GET', '/vote_approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+    xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
     xhttp.send();
 
     current_index++;
