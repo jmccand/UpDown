@@ -1899,7 +1899,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
     def schedule_opinions_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
-        see_month = url_arguments.get('month', [f'{datetime.date.today().year}-{datetime.date.today().month}'])[0]
+        see_month_str = url_arguments.get('month', [f'{datetime.date.today().year}-{datetime.date.today().month}'])[0]
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -1936,7 +1936,7 @@ td {
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write(f'''<form method='GET' action='/schedule_opinions'>
-<input type='month' name='month' value='{see_month}'/>
+<input type='month' name='month' value='{see_month_str}'/>
 <input type='submit'/>
 </form>'''.encode('utf8'))
             self.wfile.write('''<article>
@@ -1944,8 +1944,32 @@ td {
 <tr>'''.encode('utf8'))
             for day_of_week in range(7):
                 self.wfile.write(f'<td>{calendar.day_name[(day_of_week + 6) % 7][:3]}</td>'.encode('utf8'))
-            today_date = datetime.date.today()
-            this_sun = today_date 
+
+            see_month = datetime.datetime.strptime(see_month_str, '%Y-%m')
+            month_first = datetime.date(year=see_month.year, month=see_month.month, day=1)
+            month_last_day_num = calendar.monthrange(see_month.year, see_month.month)[1]
+            month_last = datetime.date(year=see_month.year, month=see_month.month, day=month_last_day_num)
+            cal_first = month_first - datetime.timedelta(days=(month_first.weekday() + 1) % 7)
+            see_sun = cal_first
+            while see_sun <= month_last:
+                self.wfile.write('''<tr><td colspan='3'>'''.encode('utf8'))
+                day_nums = []
+                for day_num in range(3):
+                    day_nums.append((see_sun + datetime.timedelta(days=day_num)).day)
+                self.wfile.write(str(day_nums)[1:-1].encode('utf8'))
+                self.wfile.write('</td>'.encode('utf8'))
+                self.wfile.write(f'''<td>{(see_sun + datetime.timedelta(days=3)).day}</td>'''.encode('utf8'))
+                self.wfile.write('''<td colspan='3'>'''.encode('utf8'))
+                day_nums = []
+                for day_num in range(4, 7):
+                    day_nums.append((see_sun + datetime.timedelta(days=day_num)).day)
+                self.wfile.write(str(day_nums)[1:-1].encode('utf8'))
+                self.wfile.write('</td>'.encode('utf8'))
+                self.wfile.write('</tr>'.encode('utf8'))
+                see_sun += datetime.timedelta(days=7)
+                
+            # today_date = datetime.date.today()
+            # this_sun = today_date 
             
             # self.wfile.write('</tr><tr>'.encode('utf8'))
             # first_day = calendar.monthrange(today_date.year, today_date.month)[0]
