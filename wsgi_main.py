@@ -1913,12 +1913,12 @@ article {
   overflow: scroll;
 }
 table {
-  border-collapse : collapse;
 }
 td {
   border-color : black;
   border-style : solid;
   border-width : 2px;
+  border-radius: 6px;
   padding : 5px;
   width : 80px;
 }
