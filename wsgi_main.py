@@ -1904,9 +1904,16 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             self.send_links_head()
             self.wfile.write('''
 <style>
-article {
+form {
   position: absolute;
   top: 70px;
+  width: 100%;
+  text-align: center;
+  height: 50px;
+}
+article {
+  position: absolute;
+  top: 120px;
   width: 100%;
   bottom: 0;
   z-index: 1;
@@ -1926,37 +1933,44 @@ td {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<article>CALENDAR:
+            self.wfile.write('''<form method='GET' action='/schedule_opinions'>
+<input type='month' name='month'/>
+<input type='submit'/>
+</form>'''.encode('utf8'))
+            self.wfile.write('''<article>
 <table>
 <tr>'''.encode('utf8'))
-            today_date = datetime.date.today()
             for day_of_week in range(7):
                 self.wfile.write(f'<td>{calendar.day_name[(day_of_week + 6) % 7][:3]}</td>'.encode('utf8'))
-            self.wfile.write('</tr><tr>'.encode('utf8'))
-            first_day = calendar.monthrange(today_date.year, today_date.month)[0]
-            month_days = calendar.monthrange(today_date.year, today_date.month)[1]
-            self.wfile.write(f'''<td colspan='{(first_day + 1) % 7}'></td>'''.encode('utf8'))
-            for day_number in range(1, month_days + 1):
-                this_date = datetime.date(today_date.year, today_date.month, day_number)
-                already_selected = 0
-                if str(this_date) in db.opinions_calendar:
-                    already_selected = len(db.opinions_calendar[str(this_date)])
-                if (this_date.weekday() + 1) % 7 == 0 and not day_number == 1:
-                    self.wfile.write('</tr>'.encode('utf8'))
-                    if not day_number == month_days:
-                        self.wfile.write('<tr>'.encode('utf8'))
-                if day_number == 1:
-                    self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date - datetime.timedelta((this_date.weekday() + 1) % 7 % 4)}"' colspan='{3 - ((this_date.weekday() + 1) % 7) % 4}'>{day_number}-{first_day}<br />{already_selected}/10</td>'''.encode('utf8'))
-                if ((this_date.weekday() + 1) % 7) % 4 == 0:
-                    if day_number + 3 > month_days:
-                        self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='{month_days - day_number}'>{day_number}-{month_days}<br />{already_selected}/10</td>'''.encode('utf8'))
-                    else:
-                        self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='3'>{day_number}, {day_number + 1}, {day_number + 2}<br />{already_selected}/10</td>'''.encode('utf8'))
-                elif this_date.weekday() == 2:
-                    self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"'>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))                        
-            for day in range(35 - month_days - (first_day + 1) % 7):
-                self.wfile.write('<td></td>'.encode('utf8'))
-            self.wfile.write('</tr>'.encode('utf8'))
+            today_date = datetime.date.today()
+            this_sun = today_date 
+            
+            # self.wfile.write('</tr><tr>'.encode('utf8'))
+            # first_day = calendar.monthrange(today_date.year, today_date.month)[0]
+            # month_days = calendar.monthrange(today_date.year, today_date.month)[1]
+            # self.wfile.write(f'''<td colspan='{(first_day + 1) % 7}'></td>'''.encode('utf8'))
+            # for day_number in range(1, month_days + 1):
+            #     this_date = datetime.date(today_date.year, today_date.month, day_number)
+            #     already_selected = 0
+            #     if str(this_date) in db.opinions_calendar:
+            #         already_selected = len(db.opinions_calendar[str(this_date)])
+            #     if (this_date.weekday() + 1) % 7 == 0 and not day_number == 1:
+            #         self.wfile.write('</tr>'.encode('utf8'))
+            #         if not day_number == month_days:
+            #             self.wfile.write('<tr>'.encode('utf8'))
+            #     if day_number == 1:
+            #         self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date - datetime.timedelta((this_date.weekday() + 1) % 7 % 4)}"' colspan='{3 - ((this_date.weekday() + 1) % 7) % 4}'>{day_number}-{first_day}<br />{already_selected}/10</td>'''.encode('utf8'))
+            #     if ((this_date.weekday() + 1) % 7) % 4 == 0:
+            #         if day_number + 3 > month_days:
+            #             self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='{month_days - day_number}'>{day_number}-{month_days}<br />{already_selected}/10</td>'''.encode('utf8'))
+            #         else:
+            #             self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"' colspan='3'>{day_number}, {day_number + 1}, {day_number + 2}<br />{already_selected}/10</td>'''.encode('utf8'))
+            #     elif this_date.weekday() == 2:
+            #         self.wfile.write(f'''<td onclick='document.location.href="/schedule_date?date={this_date}"'>{day_number}<br />{already_selected}/10</td>'''.encode('utf8'))                        
+            # for day in range(35 - month_days - (first_day + 1) % 7):
+            #     self.wfile.write('<td></td>'.encode('utf8'))
+            # self.wfile.write('</tr>'.encode('utf8'))
+            
             self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write('</body></html>'.encode('utf8'))
 
