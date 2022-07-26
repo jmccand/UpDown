@@ -1898,6 +1898,8 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
     def schedule_opinions_page(self):
         my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        see_month = url_arguments.get('month', [f'{datetime.date.today().year}-{datetime.date.today().month}'])[0]
         if my_account.email in local.ADMINS and my_account.verified_email:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -1933,8 +1935,8 @@ td {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<form method='GET' action='/schedule_opinions'>
-<input type='month' name='month'/>
+            self.wfile.write(f'''<form method='GET' action='/schedule_opinions'>
+<input type='month' name='month' value='{see_month}'/>
 <input type='submit'/>
 </form>'''.encode('utf8'))
             self.wfile.write('''<article>
