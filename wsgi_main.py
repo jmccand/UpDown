@@ -1906,9 +1906,9 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 <style>
 article {
   position: absolute;
-  top: 50px;
+  top: 70px;
   width: 100%;
-  height: 91%;
+  bottom: 0;
   z-index: 1;
   overflow: scroll;
 }
@@ -1935,8 +1935,7 @@ td {
             self.wfile.write('</tr><tr>'.encode('utf8'))
             first_day = calendar.monthrange(today_date.year, today_date.month)[0]
             month_days = calendar.monthrange(today_date.year, today_date.month)[1]
-            for day in range((first_day + 1) % 7):
-                self.wfile.write('<td></td>'.encode('utf8'))
+            self.wfile.write(f'''<td colspan='{(first_day + 1) % 7}'></td>'''.encode('utf8'))
             for day_number in range(1, month_days + 1):
                 this_date = datetime.date(today_date.year, today_date.month, day_number)
                 already_selected = 0
