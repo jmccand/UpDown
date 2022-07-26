@@ -1911,17 +1911,31 @@ form {
   top: 70px;
   width: 100%;
   text-align: center;
-  height: 50px;
+  height: 130px;
+}
+input {
+  position: relative;
+  top: 35px;
+  width: 40%;
+  height: 40px;
 }
 article {
   position: absolute;
-  top: 120px;
+  top: 200px;
   width: 100%;
   bottom: 0;
   z-index: 1;
   overflow: scroll;
 }
 table {
+  position: absolute;
+  left: 2%;
+  width: 96%;
+  padding: 3%;
+  box-sizing: border-box;
+  border: 1px solid black;
+  border-radius: 12px;
+  background-color: gray;
 }
 td {
   border-color : black;
@@ -1930,6 +1944,7 @@ td {
   border-radius: 6px;
   padding : 5px;
   width : 80px;
+  background-color: lightGray;
 }
 </style>
 </head>
@@ -1943,7 +1958,7 @@ td {
 <table>
 <tr>'''.encode('utf8'))
             for day_of_week in range(7):
-                self.wfile.write(f'<td>{calendar.day_name[(day_of_week + 6) % 7][:3]}</td>'.encode('utf8'))
+                self.wfile.write(f'''<td style='background-color: lightBlue; text-align: center'>{calendar.day_name[(day_of_week + 6) % 7][:3]}</td>'''.encode('utf8'))
 
             see_month = datetime.datetime.strptime(see_month_str, '%Y-%m')
             month_first = datetime.date(year=see_month.year, month=see_month.month, day=1)
