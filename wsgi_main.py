@@ -1952,19 +1952,28 @@ td {
             cal_first = month_first - datetime.timedelta(days=(month_first.weekday() + 1) % 7)
             see_sun = cal_first
             while see_sun <= month_last:
+                # 3 first
                 self.wfile.write('''<tr><td colspan='3'>'''.encode('utf8'))
                 day_nums = []
+                already_selected = len(db.opinions_calendar.get(str(see_sun), set()))
                 for day_num in range(3):
                     day_nums.append((see_sun + datetime.timedelta(days=day_num)).day)
                 self.wfile.write(str(day_nums)[1:-1].encode('utf8'))
-                self.wfile.write('</td>'.encode('utf8'))
-                self.wfile.write(f'''<td>{(see_sun + datetime.timedelta(days=3)).day}</td>'''.encode('utf8'))
+                self.wfile.write(f'''<br />{already_selected}/10</td>'''.encode('utf8'))
+
+                # wed middle
+                already_selected = len(db.opinions_calendar.get(str(see_sun + datetime.timedelta(days=3)), set()))
+                self.wfile.write(f'''<td>{(see_sun + datetime.timedelta(days=3)).day}<br />{already_selected}/10</td>'''.encode('utf8'))
+
+                # 3 last
+                see_thurs = see_sun + datetime.timedelta(days=4)
                 self.wfile.write('''<td colspan='3'>'''.encode('utf8'))
                 day_nums = []
-                for day_num in range(4, 7):
-                    day_nums.append((see_sun + datetime.timedelta(days=day_num)).day)
+                already_selected = len(db.opinions_calendar.get(str(see_thurs), set()))
+                for day_num in range(3):
+                    day_nums.append((see_thurs + datetime.timedelta(days=day_num)).day)
                 self.wfile.write(str(day_nums)[1:-1].encode('utf8'))
-                self.wfile.write('</td>'.encode('utf8'))
+                self.wfile.write(f'''<br />{already_selected}/10</td>'''.encode('utf8'))
                 self.wfile.write('</tr>'.encode('utf8'))
                 see_sun += datetime.timedelta(days=7)
                 
