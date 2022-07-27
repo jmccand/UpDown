@@ -1946,10 +1946,71 @@ td {
   width : 80px;
   background-color: lightGray;
 }
+div#popup {
+  position: absolute;
+  top: 100px;
+  bottom: 30px;
+  width: 90%;
+  left: 5%;
+  background-color: lightGray;
+  border: 3px solid black;
+  border-radius: 15px;
+  z-index: 2;
+}
+div#count {
+  position: absolute;
+  top: 0;
+  width: 70%;
+  left: 15%;
+  height: 30px;
+  font-size: 25px;
+  text-align: center;
+  border: 2px solid black;
+  border-top: 0;
+}
+div#x {
+  position: absolute;
+  padding: 3px;
+  top: 12px;
+  right: 12px;
+  border: 1px dotted black;
+}
+div#selected {
+  position: absolute;
+  top: 30px;
+  bottom: 50%;
+  width: 100%;
+}
+input#search_bar {
+  position: absolute;
+  top: 50%;
+  height: 35px;
+  width: 90%;
+  left: 5%;
+  box-sizing: border-box;
+}
+div#results {
+  position: absolute;
+  top: 56%;
+  bottom: 0;
+  width: 100%;
 </style>
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
+            self.wfile.write('''<div id='popup'>
+<div id='count'>
+9/10 selected
+</div>
+<div id='x'>
+X
+</div>
+<div id='selected'>
+</div>
+<input id='search_bar' type='text' name='text' placeholder='search...'/>
+<div id='results'>
+</div>
+</div>'''.encode('utf8'))
             self.wfile.write(f'''<form method='GET' action='/schedule_opinions'>
 <input type='month' name='month' value='{see_month_str}'/>
 <input type='submit'/>
