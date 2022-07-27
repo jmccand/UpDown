@@ -1968,7 +1968,7 @@ td {
             see_sun = cal_first
             while see_sun <= month_last:
                 # 3 first
-                self.wfile.write('''<tr><td colspan='3'>'''.encode('utf8'))
+                self.wfile.write(f'''<tr><td colspan='3' onclick='schedule("{see_sun}")'>'''.encode('utf8'))
                 day_nums = []
                 already_selected = len(db.opinions_calendar.get(str(see_sun), set()))
                 for day_num in range(3):
@@ -1978,11 +1978,11 @@ td {
 
                 # wed middle
                 already_selected = len(db.opinions_calendar.get(str(see_sun + datetime.timedelta(days=3)), set()))
-                self.wfile.write(f'''<td>{(see_sun + datetime.timedelta(days=3)).day}<br />{already_selected}/10</td>'''.encode('utf8'))
+                self.wfile.write(f'''<td onclick='schedule("{see_sun + datetime.timedelta(days=3)}")'>{(see_sun + datetime.timedelta(days=3)).day}<br />{already_selected}/10</td>'''.encode('utf8'))
 
                 # 3 last
                 see_thurs = see_sun + datetime.timedelta(days=4)
-                self.wfile.write('''<td colspan='3'>'''.encode('utf8'))
+                self.wfile.write(f'''<td colspan='3' onclick='schedule("{see_thurs}")'>'''.encode('utf8'))
                 day_nums = []
                 already_selected = len(db.opinions_calendar.get(str(see_thurs), set()))
                 for day_num in range(3):
@@ -2022,6 +2022,11 @@ td {
             # self.wfile.write('</tr>'.encode('utf8'))
             
             self.wfile.write('</table></article>'.encode('utf8'))
+            self.wfile.write('''<script>
+function schedule(d_str) {
+    
+}
+</script>'''.encode('utf8'))
             self.wfile.write('</body></html>'.encode('utf8'))
 
             self.log_activity()
