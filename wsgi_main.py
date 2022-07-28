@@ -230,7 +230,7 @@ header {
   top: 0;
   left: 0;
   overflow-x: hidden;
-  background-color: #f1c232ff;
+  background-color: #ffef90ff;
   transition: 0.5s;
 }
 #menu a {
@@ -244,8 +244,8 @@ header {
   position: absolute;
   top: 0;
   right: 0;
-  width: 50px;
-  height: 45px;
+  height: 70px;
+  z-index: 2;
 }
 </style>'''.encode('utf8'))
 
@@ -292,7 +292,7 @@ header {
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
-    document.getElementById('menu').style.width = '200px';
+    document.getElementById('menu').style.width = '225px';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
