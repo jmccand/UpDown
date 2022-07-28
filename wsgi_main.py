@@ -2030,7 +2030,7 @@ X
             see_sun = cal_first
             while see_sun <= month_last:
                 # 3 first
-                self.wfile.write(f'''<tr><td colspan='3' onclick='schedule("{see_sun}")'>'''.encode('utf8'))
+                self.wfile.write(f'''<tr><td colspan='3' onclick='open_pop("{see_sun}")'>'''.encode('utf8'))
                 day_nums = []
                 already_selected = len(db.opinions_calendar.get(str(see_sun), set()))
                 for day_num in range(3):
@@ -2040,11 +2040,11 @@ X
 
                 # wed middle
                 already_selected = len(db.opinions_calendar.get(str(see_sun + datetime.timedelta(days=3)), set()))
-                self.wfile.write(f'''<td onclick='schedule("{see_sun + datetime.timedelta(days=3)}")'>{(see_sun + datetime.timedelta(days=3)).day}<br />{already_selected}/10</td>'''.encode('utf8'))
+                self.wfile.write(f'''<td onclick='open_pop("{see_sun + datetime.timedelta(days=3)}")'>{(see_sun + datetime.timedelta(days=3)).day}<br />{already_selected}/10</td>'''.encode('utf8'))
 
                 # 3 last
                 see_thurs = see_sun + datetime.timedelta(days=4)
-                self.wfile.write(f'''<td colspan='3' onclick='schedule("{see_thurs}")'>'''.encode('utf8'))
+                self.wfile.write(f'''<td colspan='3' onclick='open_pop("{see_thurs}")'>'''.encode('utf8'))
                 day_nums = []
                 already_selected = len(db.opinions_calendar.get(str(see_thurs), set()))
                 for day_num in range(3):
@@ -2085,10 +2085,29 @@ X
             
             self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write('''<script>
-function schedule(d_str) {
-    document.getElementById('popup').style.display = 'initial';
-    
-}
+function open_pop(d_str) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/schedule_date?date=' + d_str);
+    xhttp.send();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var response = JSON.parse(this.responseText);
+            let scheduled = response[0];
+            let unscheduled = response[1];
+            let scheduled_cont = document.getElementById('selected');
+            let unscheduled_cont = document.getElementById('results');
+            scheduled_cont.innerHTML = '';
+            for (var index = 0; index < scheduled.length; index++) {
+                scheduled_cont.innerHTML += '<section onclick="unselect(this)" id="' + scheduled[index][0] + '">' + scheduled[index][1] + '</section>';
+            }
+            unscheduled_cont.innerHTML = '';
+            for (var index = 0; index < unscheduled.length; index++) {
+                unscheduled_cont.innerHTML += '<section onclick="select(this)" id="' + unscheduled[index][0] + '">' + unscheduled[index][1] + '</section>';
+            }
+            document.getElementById('popup').style.display = 'initial';
+       };
+    }
+ }
 function close_pop() {
     document.getElementById('popup').style.display = 'none';
 }
