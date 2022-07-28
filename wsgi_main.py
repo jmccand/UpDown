@@ -684,6 +684,7 @@ article#cover div {
   text-align: center;
   padding: 0;
   font-size: 40px;
+  font-family: Georgia;
 }
 section {
   top: 25%;
@@ -711,6 +712,7 @@ section p {
   margin-right: -50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  font-family: Verdana;
 }
 </style>
 </head>
@@ -726,8 +728,8 @@ section p {
 </article>
 <footer>
 <table>
-<tr><td id='care_per'>---%</td><td id='agree_per'>---%</td></tr>
-<tr><td>care</td><td>agree</td></tr>
+<tr style='font-family: Garamond'><td id='care_per'>---%</td><td id='agree_per'>---%</td></tr>
+<tr style='font-family: "Times New Roman"'><td>care</td><td>agree</td></tr>
 </table>
 </footer>'''.encode('utf8'))
 
