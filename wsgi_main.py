@@ -1956,6 +1956,7 @@ div#popup {
   border: 3px solid black;
   border-radius: 15px;
   z-index: 2;
+  display: none;
 }
 div#count {
   position: absolute;
@@ -2002,7 +2003,7 @@ div#results {
 <div id='count'>
 9/10 selected
 </div>
-<div id='x'>
+<div id='x' onclick='close_pop()'>
 X
 </div>
 <div id='selected'>
@@ -2085,7 +2086,11 @@ X
             self.wfile.write('</table></article>'.encode('utf8'))
             self.wfile.write('''<script>
 function schedule(d_str) {
+    document.getElementById('popup').style.display = 'initial';
     
+}
+function close_pop() {
+    document.getElementById('popup').style.display = 'none';
 }
 </script>'''.encode('utf8'))
             self.wfile.write('</body></html>'.encode('utf8'))
