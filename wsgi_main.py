@@ -1985,17 +1985,9 @@ div#selected {
   bottom: 50%;
   width: 100%;
 }
-input#search_bar {
-  position: absolute;
-  top: 50%;
-  height: 35px;
-  width: 90%;
-  left: 5%;
-  box-sizing: border-box;
-}
 div#results {
   position: absolute;
-  top: 56%;
+  top: 50%;
   bottom: 0;
   width: 100%;
 </style>
@@ -2011,7 +2003,6 @@ X
 </div>
 <div id='selected'>
 </div>
-<input id='search_bar' type='text' name='text' placeholder='search...'/>
 <div id='results'>
 </div>
 </div>'''.encode('utf8'))
