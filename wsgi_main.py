@@ -1955,7 +1955,7 @@ div#popup {
   bottom: 30px;
   width: 90%;
   left: 5%;
-  background-color: lightGray;
+  background-color: grey;
   border: 3px solid black;
   border-radius: 15px;
   z-index: 2;
@@ -1971,6 +1971,7 @@ div#count {
   text-align: center;
   border: 2px solid black;
   border-top: 0;
+  background-color: #ffef90ff;
 }
 div#x {
   position: absolute;
@@ -1981,15 +1982,42 @@ div#x {
 }
 div#selected {
   position: absolute;
-  top: 30px;
+  top: 50px;
   bottom: 50%;
-  width: 100%;
+  width: 96%;
+  left: 2%;
+  overflow: scroll;
+}
+#selected section {
+  width: 98%;
+  margin: 1%;
+  margin-bottom: 4%;
+  padding: 3%;
+  position: relative;
+  background-color: #ffef90ff;
+  z-index: 1;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 div#results {
   position: absolute;
   top: 50%;
   bottom: 0;
-  width: 100%;
+  width: 96%;
+  left: 2%;
+  overflow: scroll;
+}
+#results section {
+  width: 98%;
+  margin: 1%;
+  margin-bottom: 4%;
+  padding: 3%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
