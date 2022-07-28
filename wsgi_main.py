@@ -154,6 +154,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/submit_opinion_search'):
                     self.path_root = '/submit_opinion_search'
                     self.submit_opinion_search()
+                elif self.path.startswith('/already_scheduled'):
+                    self.path_root = '/already_scheduled'
+                    self.already_scheduled()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -2087,7 +2090,7 @@ X
             self.wfile.write('''<script>
 function open_pop(d_str) {
     var xhttp = new XMLHttpRequest();
-    xhttp.open('GET', '/schedule_date?date=' + d_str);
+    xhttp.open('GET', '/already_scheduled?date=' + d_str);
     xhttp.send();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -2781,6 +2784,26 @@ function updateStats(element) {{
             opinions_simplified = [x.text for x in opinions_simplified]
             self.start_response('200 OK', [])
             self.wfile.write(json.dumps(opinions_simplified[:5]).encode('utf8'))
+
+    def already_scheduled(self):
+        my_account = self.identify_user()
+        if my_account.email in local.ADMINS and my_account.verified_email:
+            url_arguments = urllib.parse.parse_qs(self.query_string)
+            if 'date' in url_arguments:
+                see_date = url_arguments['date'][0]
+                selected = db.opinions_calendar.get(see_date, set())
+                selected = [(x, db.opinions_database[x].text) for x in selected]
+                unselected = []
+                for opinion_ID, opinion in db.opinions_database.items():
+                    if opinion.approved == True and not opinion.scheduled:
+                        unselected.append((opinion_ID, opinion.text))
+                unselected.sort(key=lambda x: int(x[0]))
+                selected = list(selected)
+                unselected = [list(x) for x in unselected]
+                response = [selected, unselected[:20]]
+                self.start_response('200 OK', [])
+                self.wfile.write(json.dumps(response).encode('utf8'))
+                
             
                 
 class invalidCookie(ValueError):
