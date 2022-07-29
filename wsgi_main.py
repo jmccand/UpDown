@@ -235,10 +235,14 @@ header {
 }
 #menu a {
   position: relative;
-  top: 20px;
+  top: 70px;
   display: block;
   white-space: nowrap;
   overflow: hidden;
+  padding: 10px;
+  color: black;
+  font-size: 20px;
+  text-decoration: none;
 }
 #menu #x_menu {
   position: absolute;
@@ -292,7 +296,7 @@ header {
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
-    document.getElementById('menu').style.width = '225px';
+    document.getElementById('menu').style.width = '250px';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
