@@ -24,7 +24,6 @@ import shutil
 import user_agents
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import jwt
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -639,17 +638,11 @@ Thank you for verifying. Your votes are now counted.<br />
                 self.my_cookies['code'] = url_arguments['cookie_code'][0]
                 reset_cookie = True
         my_account = self.identify_user()
-        with open(local.PATH_TO_RSA_PUB, 'r') as public:
-            with open(local.PATH_TO_RSA_PRIV, 'r') as private:
-                private_key = private.read()
-                public_key = public.read()
-                encoded = jwt.encode({"some": "payload"}, private_key, algorithm="RS256")
-                # decoded = jwt.decode(encoded, public_key, algorithms=["RS256"])
-
+        
         if reset_cookie:
             self.start_response('200 OK', [('Set-Cookie', f'code={url_arguments["cookie_code"][0]}; path=/')])
         else:
-            self.start_response('200 OK', [('Authorization', f'Bearer {encoded}')])
+            self.start_response('200 OK', [])
         
         see_day = None
         today_date = datetime.date.today()
