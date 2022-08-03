@@ -32,7 +32,7 @@ def application(environ, start_response):
     handler_object = MyWSGIHandler(environ, start_response)
     handler_object.do_GET()
     if 'AUTH_TYPE' in environ:
-        print(f'{environ[AUTH_TYPE]=}')
+        print(f'{environ["AUTH_TYPE"]}')
         
     return [handler_object.wfile.getvalue()]
     
@@ -257,25 +257,28 @@ header {
 </style>'''.encode('utf8'))
 
     def send_links_body(self):
-        my_account = self.identify_user()
+        my_account = self.identify_user(nocookie=True)
         title = ''
-        if self.path_root == '/':
-            title = 'Vote!'
-        elif self.path_root == '/submit_opinions':
-            title = 'Submit'
-        elif self.path_root == '/track_opinions':
-            title = 'Track!'
-        elif self.path_root == '/senate':
-            title = 'Senate'
-        elif self.path_root == '/approve_opinions':
-            title = 'Approve'
-        elif self.path_root == '/schedule_opinions':
-            title = 'Schedule'
-        elif self.path_root == '/forward_opinions':
-            title = 'Forward'
-        elif self.path_root == '/view_committee':
-            url_arguments = urllib.parse.parse_qs(self.query_string)
-            title = url_arguments['committee'][0]
+        if my_account == None:
+            title = 'Welcome'
+        else:
+            if self.path_root == '/':
+                title = 'Vote!'
+            elif self.path_root == '/submit_opinions':
+                title = 'Submit'
+            elif self.path_root == '/track_opinions':
+                title = 'Track!'
+            elif self.path_root == '/senate':
+                title = 'Senate'
+            elif self.path_root == '/approve_opinions':
+                title = 'Approve'
+            elif self.path_root == '/schedule_opinions':
+                title = 'Schedule'
+            elif self.path_root == '/forward_opinions':
+                title = 'Forward'
+            elif self.path_root == '/view_committee':
+                url_arguments = urllib.parse.parse_qs(self.query_string)
+                title = url_arguments['committee'][0]
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
 <span id='title'>
@@ -284,18 +287,19 @@ header {
 <img id='logo' src='favicon.ico'/>'''.encode('utf8'))
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
-        self.wfile.write('''<a href='/'>Voice Your Opinions</a>
+        if my_account != None:
+            self.wfile.write('''<a href='/'>Voice Your Opinions</a>
 <a href='/submit_opinions'>Submit an Opinion</a>
 <a href='/track_opinions'>Track an Opinion</a>
 <a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
-        if my_account.email in local.MODERATORS and my_account.verified_email:
-            self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
-        if my_account.email in local.ADMINS and my_account.verified_email:
-            self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
-            self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
-        for committee, members in local.COMMITTEE_MEMBERS.items():
-            if my_account.email in members and my_account.verified_email:
-                self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+            if my_account.email in local.MODERATORS and my_account.verified_email:
+                self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+            if my_account.email in local.ADMINS and my_account.verified_email:
+                self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
+                self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
+            for committee, members in local.COMMITTEE_MEMBERS.items():
+                if my_account.email in members and my_account.verified_email:
+                    self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
@@ -374,6 +378,7 @@ function close_menu() {
         self.log_activity()
 
     def get_email(self):
+        print('GET EMAIL LOADED')
         self.start_response('200 OK', [])
         self.wfile.write('<html><head>'.encode('utf8'))
         self.send_links_head()
@@ -445,6 +450,7 @@ function checkEmail() {{
 
 </body>
 </html>'''.encode('utf8'))
+        
     def send_email(self, to_email, v_uuid):
         msg = MIMEMultipart('alternative')
         msg['Subject'] = "Add your votes to the count?"
@@ -475,7 +481,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             server.sendmail(local.FROM_EMAIL, to_email, msg.as_string())
             server.close()
 
-            print(f'Email sent! {msg.as_string()=}')
+            print(f'Email sent! {msg.as_string()}')
         except:
             print('Something went wrong...')
 
@@ -530,7 +536,8 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                     self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                     #redirect to homepage so they can vote
-                    self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={my_uuid}; path=/')])
+                    expiration = datetime.date.today() + datetime.timedelta(days=10)
+                    self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={my_uuid}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                     self.my_cookies['code'] = my_uuid
                     self.log_activity()
             else:
@@ -561,7 +568,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 ANDROID = ('Android',)
                 CHROME = 'Chrome Mobile iOS'
                 print(f'request browser: {request_browser} and request device: {request_device}')
-                if (request_browser == SAFARI and request_device in APPLE) or (request_browser == CHROME and request_device in ANDROID) or request_browser not in (SAFARI, CHROME) or request_device not in APPLE + ANDROID:
+                if True or (request_browser == SAFARI and request_device in APPLE) or (request_browser == CHROME and request_device in ANDROID) or request_browser not in (SAFARI, CHROME) or request_device not in APPLE + ANDROID:
                     different_device = False
                     verified_account = db.user_cookies[db.verification_links[link_uuid]]
                     if my_account != db.user_cookies[db.verification_links[link_uuid]]:
@@ -593,7 +600,8 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                     self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
 
                     # send success page
-                    self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/')])
+                    expiration = datetime.date.today() + datetime.timedelta(days=10)
+                    self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                     self.wfile.write('''<!DOCTYPE HTML>
 <html>
 <body>
@@ -774,7 +782,7 @@ section p {
                     check_day = check_day - datetime.timedelta(days=3)
             # reorder so most recent is last
             see_old_days = see_old_days[::-1]
-            print(f'{see_old_days=}')
+            print(f'{see_old_days}')
 
             for day in see_old_days:
                 def day_to_nice_string(d):
