@@ -159,6 +159,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/already_scheduled'):
                     self.path_root = '/already_scheduled'
                     self.already_scheduled()
+                # just for testing; remove from final version
+                elif self.path == '/get_email':
+                    self.get_email()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -377,50 +380,77 @@ function close_menu() {
         self.log_activity()
 
     def get_email(self):
-        print('GET EMAIL LOADED')
         self.start_response('200 OK', [])
         self.wfile.write('<html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
+form#email_form {
+  position: absolute;
+  top: 100px;
+  width: 92%;
+  left: 4%;
+  bottom: 55%;
+  border: 4px solid black;
+  border-radius: 12px;
+  background-color: white;
+  box-sizing: border-box;
+  padding: 5%;
+  font-size: 25px;
+  text-align: center;
+}
+input#email {
+  position: relative;
+  top: 20px;
+  width: 90%;
+  border: 2px solid black;
+  font-size: 15px;
+  padding: 5px;
+}
+input#submit {
+  position: relative;
+  top: 40px;
+  font-size: 15px;
+}
+div#tos {
+  position: absolute;
+  top: 47%;
+  width: 100%;
+  font-size: 30px;
+  text-align: center;
+}
 article {
   position: absolute;
-  top: 50px;
-  width: 96%;
-  padding: 1%;
-  bottom: 0;
+  top: 53%;
+  width: 92%;
+  left: 4%;
+  padding: 3%;
+  bottom: 5%;
   z-index: 1;
   overflow: scroll;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-}
-@media screen and (max-width: 600px) {
-article {
-  position: absolute;
-  top: 50px;
-  width: 96%;
-  padding: 2%;
-  bottom: 0;
-  z-index: 1;
-  overflow: scroll;
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-}
+  box-sizing: border-box;
+  border: 1px solid black;
+  border-radius: 6px;
 }
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
-        self.wfile.write(f'''<article>
-Welcome to UpDown, LHS's student representation app.<br /><br />
-In order to ensure that each student can only vote once, UpDown needs your lexingtonma email:<br /><br />
-<form method='GET' action='/check_email'>
-<input id='email_box' type='email' name='email'/>
-<input id='submit' type='submit' value='GET STARTED' disabled='true'/>
-<br /><br />
-This app was created to channel the power of the student body. As LHS has over 2000 students, we have strength in numbers. By uniting our preferences, we can draw the attention of the administration and call for real change.<br /><br />
+        self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
+Enter your email to vote:<br />
+<input id='email' type='email' name='email' /><br />
+<input id='submit' type='submit' value='I AGREE TO THE TERMS OF SERVICE' disabled='true'/>
+</form>
+<div id='tos'>
+TERMS OF SERVICE:
+</div>
+<article>
+UpDown uses your email to ensure that each student only votes once.<br /><br />
+This app was created to channel the focus of the student body. As LHS has over 2000 students, it can be hard to unify our beliefs. By uniting our preferences, we can work with the administration to bring real change to LHS.<br /><br />
 Using UpDown, students submit and vote on opinions. In this way, the student body can raise issues that we care about.<br /><br />
 The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />
 On UpDown, everything you do is kept anonymous. All that UpDown needs from you is your honest opinions about our school. Your name will not be tied to your votes, nor the opinions that you submit.<br /><br />
 That said, everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy is contingent on your following LHS's Code of Conduct which outlaws bullying, cyberbullying, and hate speech. Not-safe-for-work content is also not allowed. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher or how much you hate school.<br /><br />
-If you agree with our privacy policy and have entered your email, click the GET STARTED button above.<br /><br />
 </form>
 </article>
 
@@ -429,7 +459,7 @@ const exceptionEmails = {list(local.EXCEPTION_EMAILS)};
 const YOGS = {YOGS};
 setTimeout(checkEmail, 1000);
 function checkEmail() {{
-    current_email = document.getElementById('email_box').value;
+    current_email = document.getElementById('email').value;
     console.log('email: ' + current_email);
     if (current_email.endsWith('@lexingtonma.org') && YOGS.indexOf(current_email[0] + current_email[1]) != -1) {{
         console.log('PROPER EMAIL');
@@ -930,7 +960,6 @@ section {
   color: black;
   box-sizing: border-box;
   font-size: 30px;
-  cursor: default;
 }
 section p {
   margin: 0;
