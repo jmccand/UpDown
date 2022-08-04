@@ -521,11 +521,26 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             email_grad = user_email[:2]
             YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
             if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
-                    #redirect to homepage so they can vote
-                    expiration = datetime.date.today() + datetime.timedelta(days=10)
-                    self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={my_uuid}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
-                    self.my_cookies['code'] = my_uuid
-                    self.log_activity()
+                new_cookie = uuid.uuid4().hex
+                while new_cookie in db.cookie_database:
+                    new_cookie = uuid.uuid4().hex
+                    
+                def update_user_ids():
+                    new_id = str(len(db.user_ids))
+                    db.user_ids[new_id] = updown.User(user_email, new_id)
+
+                    def update_cookie_database():
+                        db.cookie_database[new_cookie] = new_id
+                        
+                    self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+
+                self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                
+                #redirect to homepage so they can vote
+                expiration = datetime.date.today() + datetime.timedelta(days=10)
+                self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
+                self.my_cookies['code'] = new_cookie
+                self.log_activity()
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
         else:
@@ -2963,7 +2978,7 @@ def thread_backup():
         print('waking!')
         dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S.new')
         with db.user_ids_lock:
-            with db.cookies_database_lock:
+            with db.cookie_database_lock:
                 with db.opinions_database_lock:
                     with db.verification_links_lock:
                         with db.opinions_calendar_lock:
@@ -2978,8 +2993,8 @@ def main():
         for this_user_ID, user in db.user_ids.items():
             print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_email})')
 
-        print(f'\n{db.cookies_database}')
-        for cookie, this_user_ID in db.cookies_database.items():
+        print(f'\n{db.cookie_database}')
+        for cookie, this_user_ID in db.cookie_database.items():
             print(f'  {cookie} : {this_user_ID}')
 
         print(f'\n{db.verification_links}')
