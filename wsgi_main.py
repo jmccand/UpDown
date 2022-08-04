@@ -60,7 +60,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 
         invalid_cookie = True
         if 'code' in self.my_cookies:
-            if self.my_cookies['code'].value in db.user_cookies:
+            if self.my_cookies['code'].value in db.cookie_database:
                 invalid_cookie = False
             else:
                 if not self.path == '/favicon.ico':
@@ -172,8 +172,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         #print('identify user function called!')
         if 'code' in self.my_cookies:
             my_code = self.my_cookies['code'].value
-            if my_code in db.user_cookies:
-                return db.user_cookies[my_code]
+            if my_code in db.cookie_database:
+                return db.user_ids[db.cookie_database[my_code]]
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got code {my_code}')
         else:
@@ -321,11 +321,11 @@ function close_menu() {
             my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
 
         def update_user_activity():
-            db.user_cookies[my_account.cookie_code] = my_account
+            db.user_ids[my_account.user_ID] = my_account
         
-        self.run_and_sync(db.user_cookies_lock,
+        self.run_and_sync(db.user_ids_lock,
                           update_user_activity,
-                          db.user_cookies)
+                          db.user_ids)
         logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.cookie_code} did {activity_unit}')
         
     def run_and_sync(self, lock_needed, change, database):
@@ -520,7 +520,23 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             user_email = url_arguments['email'][0]
             email_grad = user_email[:2]
             YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
-            print(YOGS)
+            if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
+                    #redirect to homepage so they can vote
+                    expiration = datetime.date.today() + datetime.timedelta(days=10)
+                    self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={my_uuid}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
+                    self.my_cookies['code'] = my_uuid
+                    self.log_activity()
+            else:
+                raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
+        else:
+            raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
+
+    def check_email_old(self):
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        if 'email' in url_arguments:
+            user_email = url_arguments['email'][0]
+            email_grad = user_email[:2]
+            YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
             if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
                 email_taken = False
                 existing_uuid = None
@@ -599,9 +615,9 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 print(f'request browser: {request_browser} and request device: {request_device}')
                 if True or (request_browser == SAFARI and request_device in APPLE) or (request_browser == CHROME and request_device in ANDROID) or request_browser not in (SAFARI, CHROME) or request_device not in APPLE + ANDROID:
                     different_device = False
-                    verified_account = db.user_cookies[db.verification_links[link_uuid]]
-                    if my_account != db.user_cookies[db.verification_links[link_uuid]]:
-                       print(f'warning non-viewed user is using verification link! {db.user_cookies[db.verification_links[link_uuid]].email}')
+                    verified_account = db.user_ids[db.verification_links[link_uuid]]
+                    if my_account != verified_account:
+                       print(f'warning non-viewed user is using verification link! {db.user_ids[db.verification_links[link_uuid]].email}')
                        different_device = True
                     # clear votes for a different device
                     if different_device and not verified_account.verified_email:
@@ -1893,8 +1909,8 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                         my_account.votes[other_opinion_ID] = [('abstain', datetime.datetime.now())]
 
                 def update_user_cookies():
-                    db.user_cookies[my_account.cookie_code] = my_account                    
-                self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+                    db.user_ids[my_account.user_ID] = my_account
+                self.run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
 
                 self.start_response('200 OK', [])
                 if MyWSGIHandler.DEBUG < 2:
@@ -1931,8 +1947,8 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                     self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
 
                     def update_user_cookies():
-                        db.user_cookies[my_account.cookie_code] = my_account
-                    self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+                        db.user_ids[my_account.user_ID] = my_account
+                    self.run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
 
                     self.start_response('200 OK', [])
                     
@@ -2946,20 +2962,25 @@ def thread_backup():
         time.sleep(local.DB_SLEEP_DELAY)
         print('waking!')
         dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S.new')
-        with db.user_cookies_lock:
-            with db.opinions_database_lock:
-                with db.verification_links_lock:
-                    with db.opinions_calendar_lock:
-                        shutil.copytree(local.DIRECTORY_PATH, f'{local.BACKUP_DIRECTORY}/{dirname}')
+        with db.user_ids_lock:
+            with db.cookies_database_lock:
+                with db.opinions_database_lock:
+                    with db.verification_links_lock:
+                        with db.opinions_calendar_lock:
+                            shutil.copytree(local.DIRECTORY_PATH, f'{local.BACKUP_DIRECTORY}/{dirname}')
         os.rename(f'{local.BACKUP_DIRECTORY}/{dirname}',f'{local.BACKUP_DIRECTORY}/{dirname[:-4]}')
 
 def main():
     print('Student Change Web App... running...')
 
     if MyWSGIHandler.DEBUG == 0:
-        print(f'\n{db.user_cookies}')
-        for cookie, user in db.user_cookies.items():
-            print(f'  {cookie} : User({user.email}, {user.cookie_code}, {user.activity}, {user.votes}, {user.verified_email})')
+        print(f'\n{db.user_ids}')
+        for this_user_ID, user in db.user_ids.items():
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_email})')
+
+        print(f'\n{db.cookies_database}')
+        for cookie, this_user_ID in db.cookies_database.items():
+            print(f'  {cookie} : {this_user_ID}')
 
         print(f'\n{db.verification_links}')
         for link, ID in db.verification_links.items():
