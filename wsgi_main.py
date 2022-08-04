@@ -637,51 +637,69 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
             if link_uuid in db.verification_links:
-                    different_device = False
-                    verified_account = db.user_ids[db.verification_links[link_uuid]]
+                verified_account = db.user_ids[db.verification_links[link_uuid]]
+                if my_account != None:
                     if my_account != verified_account:
-                       print(f'warning non-viewed user is using verification link! {db.user_ids[db.verification_links[link_uuid]].email}')
-                       different_device = True
-                    # clear votes for a different device
-                    if different_device and not verified_account.verified_email:
-                        old_cookie_code = db.verification_links[link_uuid]
-                        new_uuid = uuid.uuid4().hex
-                        while new_uuid in db.user_cookies or new_uuid in db.verification_links or new_uuid == old_cookie_code:
-                            new_uuid = uuid.uuid4().hex
-                        my_account = db.user_cookies[db.verification_links[link_uuid]]
-                        my_new_account = updown.User(my_account.email, new_uuid)
-                        def change_uuid_in_user_cookies():
-                            db.user_cookies[new_uuid] = my_new_account
-                            del db.user_cookies[old_cookie_code]
-                        self.run_and_sync(db.user_cookies_lock, change_uuid_in_user_cookies, db.user_cookies)
-                        def change_uuid_in_verification():
-                            db.verification_links[link_uuid] = new_uuid
-                        self.run_and_sync(db.verification_links_lock, change_uuid_in_verification, db.verification_links)
-                        assert my_account.cookie_code != db.verification_links[link_uuid]
-                    # continue to send verification
-                    my_account = db.user_cookies[db.verification_links[link_uuid]]
-                    my_account.verified_email = True
+                        # print(f'warning non-viewed user is using verification link! {db.user_ids[db.verification_links[link_uuid]].email}')
+                        if verified_account.verified_email:
+                            def update_cookie_database():
+                                db.cookie_database[self.my_cookies['code']] = verified_account.user_ID
+                            self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
-                    # update the database
-                    def update_user_cookies():
-                        db.user_cookies[my_account.cookie_code] = my_account
-                    self.run_and_sync(db.user_cookies_lock, update_user_cookies, db.user_cookies)
+                            def update_user_ids():
+                                my_account.obselete = True
+                                db.user_ids[my_account.user_ID] = my_account
 
-                    # send success page
+                            self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                        else:
+                            
+                            def update_verification_links():
+                                db.verification_links[link_uuid] = my_account.user_ID
+                                
+                            self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+
+                            def update_user_ids():
+                                my_account.verified_email = True
+                                db.user_ids[my_account.user_ID] = my_account
+
+                            self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                                
+                            
+                    else:
+                        def update_user_ids():
+                            my_account.verified_email = True
+                            db.user_ids[my_account.user_ID] = my_account
+
+                        self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
                     expiration = datetime.date.today() + datetime.timedelta(days=10)
-                    self.start_response('200 OK', [('Set-Cookie', f'code={my_account.cookie_code}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
-                    self.wfile.write('''<!DOCTYPE HTML>
+                    self.start_response('200 OK', [])
+                        
+                else:
+                    def update_cookie_database():
+                        new_cookie = uuid.uuid4().hex
+                        while new_cookie in db.cookie_database:
+                            new_cookie = uuid.uuid4().hex
+                            
+                        db.cookie_database[new_cookie] = verified_account.user_ID
+                        
+                        expiration = datetime.date.today() + datetime.timedelta(days=10)
+                        self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
+                        self.my_cookies['code'] = new_cookie
+
+                    self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+                    
+                self.log_activity()                    
+                # send success page
+                self.wfile.write('''<!DOCTYPE HTML>
 <html>
 <body>
 Thank you for verifying. Your votes are now counted.<br />
 <a href='/?prompt_add=True'>Return to homepage</a>
 </body>
 </html>'''.encode('utf8'))
-                    if MyWSGIHandler.DEBUG < 2:
-                        print(f'{my_account.email} just verified their email!')
+                if MyWSGIHandler.DEBUG < 2:
+                    print(f'{my_account.email} just verified their email!')
 
-                    self.my_cookies['code'] = my_account.cookie_code
-                    self.log_activity()
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}, which is not in the verification database")
         else:
