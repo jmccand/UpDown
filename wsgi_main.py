@@ -2636,8 +2636,10 @@ td#row4 {
         self.wfile.write('</div></footer>'.encode('utf8'))
         self.wfile.write(f'''<script>
 const stats = {json.dumps(json_stats)};
-var prev = null;
-updateStats(document.getElementById({search_results[0]}));
+var prev = null;'''.encode('utf8'))
+        if len(search_results) > 0:
+            self.wfile.write(f'updateStats(document.getElementById({search_results[0]}));'.encode('utf8'))
+        self.wfile.write(f'''
 function updateStats(element) {{
     const this_ID = element.id;
     document.getElementById('label').innerHTML = stats[this_ID][0];
