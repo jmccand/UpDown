@@ -1457,9 +1457,10 @@ footer {
                     unapproved_list.append((opinion_ID, opinion.text))
             unapproved_list = [list(x) for x in unapproved_list]
             self.wfile.write(f'''<article>
-<div id='opinion'>
-{unapproved_list[0][1]}
-</div>
+<div id='opinion'>'''.encode('utf8'))
+            if len(unapproved_list) > 0:
+                self.wfile.write(f'{unapproved_list[0][1]}'.encode('utf8'))
+            self.wfile.write(f'''</div>
 </article>
 <div id='lock'>
 APPROVAL LOCK<br />
@@ -1499,7 +1500,6 @@ function handleTouchStart(evt) {{
     if (xStart > lock_p.left && xStart < lock_p.right) {{
         if (yStart > lock_p.top && yStart < lock_p.bottom) {{
             unlocked = true;
-            console.log('unlocked');
         }}
     }}
 }}
@@ -1531,18 +1531,19 @@ function handleTouchMove(evt) {{
     xStart = null;
     yStart = null;
     unlocked = false;
-    console.log('voted!');
 }}
 function vote(my_vote) {{
-    var xhttp = new XMLHttpRequest();
-    const opinion_ID = opinionList[current_index][0];
-    let opinion_box = document.getElementById('opinion');
+    if (opinionList.length > 0) {{
+        var xhttp = new XMLHttpRequest();
+        const opinion_ID = opinionList[current_index][0];
+        let opinion_box = document.getElementById('opinion');
 
-    xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
-    xhttp.send();
+        xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
+        xhttp.send();
 
-    current_index++;
-    opinion_box.innerHTML = opinionList[current_index][1];
+        current_index++;
+        opinion_box.innerHTML = opinionList[current_index][1];
+    }}
 }}
 function updateSearch() {{
     let current_opinion = document.getElementById('opinion').innerHTML;
@@ -1956,10 +1957,9 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         my_account = self.identify_user()
         if my_account.email in local.ADMINS and my_account.verified_email:
             url_arguments = urllib.parse.parse_qs(self.query_string)
-            if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments and 'text' in url_arguments:
+            if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
                 my_vote = url_arguments['my_vote'][0]
-                sub_text = url_arguments['text'][0]
                 if opinion_ID in db.opinions_database and my_vote in ('yes', 'no'):
                     # update databases
                     opinion = db.opinions_database[opinion_ID]
