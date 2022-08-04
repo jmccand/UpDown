@@ -2,13 +2,14 @@ import db
 
 class User:
 
-    def __init__(self, email, user_id, activity={}, votes={}, verified_email=False):
+    def __init__(self, email, user_id, activity={}, votes={}, verified_email=False, obselete=False):
 
         self.email = email
         self.user_ID = user_ID
         self.activity = activity
         self.votes = votes
         self.verified_email = verified_email
+        self.obselete = obselete
 
 class Opinion:
 
