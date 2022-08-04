@@ -2,10 +2,10 @@ import db
 
 class User:
 
-    def __init__(self, email, cookie_code, activity={}, votes={}, verified_email=False):
+    def __init__(self, email, user_id, activity={}, votes={}, verified_email=False):
 
         self.email = email
-        self.cookie_code = cookie_code
+        self.user_id = user_id
         self.activity = activity
         self.votes = votes
         self.verified_email = verified_email
