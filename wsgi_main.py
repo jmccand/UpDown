@@ -551,12 +551,13 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                         
                     self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
+                    expiration = datetime.date.today() + datetime.timedelta(days=10)
+                    self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
+                    self.my_cookies['code'] = new_cookie
+
                 self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
                 
                 #redirect to homepage so they can vote
-                expiration = datetime.date.today() + datetime.timedelta(days=10)
-                self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
-                self.my_cookies['code'] = new_cookie
                 self.log_activity()
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
