@@ -326,7 +326,7 @@ function close_menu() {
         self.run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.cookie_code} did {activity_unit}')
+        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')
         
     def run_and_sync(self, lock_needed, change, database):
         lock_needed.acquire()
