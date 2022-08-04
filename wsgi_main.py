@@ -1904,7 +1904,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             opinion_ID = len(db.opinions_database)
             assert str(opinion_ID) not in db.opinions_database
             def update_opinions_database():
-                db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.cookie_code, datetime.datetime.now())])
+                db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.user_ID, datetime.datetime.now())])
             self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             search_index_add_opinion(db.opinions_database[str(opinion_ID)])
             if start_response:
