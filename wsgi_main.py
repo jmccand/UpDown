@@ -521,14 +521,31 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             email_grad = user_email[:2]
             YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
             if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
-                new_cookie = uuid.uuid4().hex
-                while new_cookie in db.cookie_database:
-                    new_cookie = uuid.uuid4().hex
-                    
                 def update_user_ids():
                     new_id = str(len(db.user_ids))
                     db.user_ids[new_id] = updown.User(user_email, new_id)
+                    new_cookie = uuid.uuid4().hex
+                    while new_cookie in db.cookie_database:
+                        new_cookie = uuid.uuid4().hex
 
+                    def update_verification_links():
+                        send_v_link = None
+                        repeat_email = False
+                        for v_link, this_user_ID in db.verification_links.items():
+                            if db.user_ids[this_user_ID].email == user_email:
+                                repeat_email = True
+                                send_v_link = v_link
+
+                        if not repeat_email:
+                            send_v_link = uuid.uuid4().hex
+                            while send_v_link in db.verification_links:
+                                send_v_link = uuid.uuid4().hex
+                            db.verification_links[send_v_link] = new_id
+
+                        self.send_email(user_email, send_v_link)
+
+                    self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+                    
                     def update_cookie_database():
                         db.cookie_database[new_cookie] = new_id
                         
@@ -620,15 +637,6 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
         if 'verification_id' in url_arguments:
             link_uuid = url_arguments['verification_id'][0]
             if link_uuid in db.verification_links:
-                request_ua = user_agents.parse(self.http_user_agent)
-                request_browser = request_ua.browser.family
-                request_device = request_ua.device.family
-                APPLE = ('iPhone', 'iPad')
-                SAFARI = 'Mobile Safari'
-                ANDROID = ('Android',)
-                CHROME = 'Chrome Mobile iOS'
-                print(f'request browser: {request_browser} and request device: {request_device}')
-                if True or (request_browser == SAFARI and request_device in APPLE) or (request_browser == CHROME and request_device in ANDROID) or request_browser not in (SAFARI, CHROME) or request_device not in APPLE + ANDROID:
                     different_device = False
                     verified_account = db.user_ids[db.verification_links[link_uuid]]
                     if my_account != verified_account:
@@ -674,18 +682,6 @@ Thank you for verifying. Your votes are now counted.<br />
 
                     self.my_cookies['code'] = my_account.cookie_code
                     self.log_activity()
-                    #else:
-                        #raise ValueError(f'ip {self.client_address[0]} -- insecure gmail account: {db.user_cookies[db.verification_links[link_uuid]].email}, their link ({link_uuid}) was opened by {my_account.email}')
-                    #print('verify email done!')
-                else:
-                    assert request_device in APPLE + ANDROID
-                    self.start_response('200 OK', [])
-                    self.wfile.write('<!DOCTYPE HTML><html><body>Oops!<br />'.encode('utf8'))
-                    if request_device in APPLE:
-                        self.wfile.write(f'''If you're on an Apple device, you must open this link in Safari to download the app.'''.encode('utf8'))
-                    elif request_device in ANDROID:
-                        self.wfile.write('''If you're on an Android device, you must open this link in Chrome to download the app.'''.encode('utf8'))
-                    self.wfile.write('</body></html>'.encode('utf8'))
             else:
                 raise ValueError(f"ip {self.client_address[0]} -- verify email function got link_uuid {link_uuid}, which is not in the verification database")
         else:
