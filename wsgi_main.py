@@ -159,9 +159,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/already_scheduled'):
                     self.path_root = '/already_scheduled'
                     self.already_scheduled()
-                # just for testing; remove from final version
-                elif self.path == '/get_email':
-                    self.get_email()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
