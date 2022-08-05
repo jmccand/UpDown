@@ -1384,15 +1384,27 @@ article {
   position: absolute;
   top: 70px;
   width: 100%;
-  bottom: 65%;
+  bottom: 55%;
   z-index: 1;
   overflow: scroll;
 }
+div#counter {
+  position: absolute;
+  width: 30%;
+  left: 35%;
+  top: 10%;
+  border: 2px solid black;
+  font-size: 25px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background-color: lightGray;
+  text-align: center;
+}
 div#opinion {
   position: absolute;
-  height: 66%;
+  height: 61%;
   width: 90%;
-  top: 17%;
+  top: 30%;
   left: 5%;
   border: 2px solid black;
   border-radius: 4px;
@@ -1415,7 +1427,7 @@ section {
 }
 div#lock {
   position: absolute;
-  top: 35%;
+  top: 45%;
   height: 8%;
   padding: 1%;
   box-sizing: border-box;
@@ -1428,7 +1440,7 @@ div#lock {
 }
 div#similar_message {
   position: absolute;
-  top: 48%;
+  top: 58%;
   font-size: 25px;
   padding: 0;
   left: 50%;
@@ -1439,7 +1451,7 @@ footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 47%;
+  height: 37%;
   z-index: 1;
   padding: 3%;
   box-sizing: border-box;
@@ -1454,6 +1466,10 @@ footer {
                     unapproved_list.append((opinion_ID, opinion.text))
             unapproved_list = [list(x) for x in unapproved_list]
             self.wfile.write(f'''<article>
+<div id='counter'>'''.encode('utf8'))
+            if len(unapproved_list) > 0:
+                self.wfile.write(f'1/{len(unapproved_list)}'.encode('utf8'))
+            self.wfile.write('''</div>
 <div id='opinion'>'''.encode('utf8'))
             if len(unapproved_list) > 0:
                 self.wfile.write(f'{unapproved_list[0][1]}'.encode('utf8'))
@@ -2898,7 +2914,7 @@ function updateStats(element) {{
             opinions_simplified = filter(lambda x: str(x.ID) != target_ID, opinions_simplified)
             opinions_simplified = [x.text for x in opinions_simplified]
             self.start_response('200 OK', [])
-            self.wfile.write(json.dumps(opinions_simplified[:5]).encode('utf8'))
+            self.wfile.write(json.dumps(opinions_simplified[:4]).encode('utf8'))
 
     def already_scheduled(self):
         my_account = self.identify_user()
