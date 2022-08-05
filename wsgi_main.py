@@ -302,7 +302,7 @@ header {
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
-    document.getElementById('menu').style.width = '250px';
+    let menu = document.getElementById('menu').style.width = '250px';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
@@ -1537,9 +1537,14 @@ function vote(my_vote) {{
 
         xhttp.open('GET', '/approve?opinion_ID=' + opinion_ID + '&my_vote=' + my_vote, true);
         xhttp.send();
-
+        
         current_index++;
-        opinion_box.innerHTML = opinionList[current_index][1];
+        if (current_index < opinionList.length) {{
+            opinion_box.innerHTML = opinionList[current_index][1];
+        }}
+        else {{
+            opinion_box.innerHTML = '';
+        }}
     }}
 }}
 function updateSearch() {{
