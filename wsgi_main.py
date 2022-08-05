@@ -1399,6 +1399,8 @@ div#counter {
   border-radius: 12px;
   background-color: lightGray;
   text-align: center;
+  padding: 5px;
+  height: 35px;
 }
 div#opinion {
   position: absolute;
@@ -1557,9 +1559,11 @@ function vote(my_vote) {{
         current_index++;
         if (current_index < opinionList.length) {{
             opinion_box.innerHTML = opinionList[current_index][1];
+            document.getElementById('counter').innerHTML = current_index + 1 + '/' + opinionList.length;
         }}
         else {{
             opinion_box.innerHTML = '';
+            document.getElementById('counter').innerHTML = '';
         }}
     }}
 }}
