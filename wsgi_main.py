@@ -1951,7 +1951,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                 today_date = datetime.date.today()
                 if (today_date.weekday() + 1) % 7 < 3:
                     see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-                if (today_date.weekday() + 1) % 7 > 3:
+                elif (today_date.weekday() + 1) % 7 > 3:
                     see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
                 else:
                     see_day = today_date
@@ -3012,9 +3012,7 @@ def stem(word):
 
 def thread_backup():
     while True:
-        print('sleeping!')
         time.sleep(local.DB_SLEEP_DELAY)
-        print('waking!')
         dirname = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S.new')
         with db.user_ids_lock:
             with db.cookie_database_lock:
@@ -3023,6 +3021,53 @@ def thread_backup():
                         with db.opinions_calendar_lock:
                             shutil.copytree(local.DIRECTORY_PATH, f'{local.BACKUP_DIRECTORY}/{dirname}')
         os.rename(f'{local.BACKUP_DIRECTORY}/{dirname}',f'{local.BACKUP_DIRECTORY}/{dirname[:-4]}')
+
+def auto_schedule():
+    while True:
+        # sleep time in seconds
+        time.sleep(0.5)
+        see_day = None
+        today_date = datetime.date.today()
+        if (today_date.weekday() + 1) % 7 < 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
+        elif (today_date.weekday() + 1) % 7 > 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
+        else:
+            see_day = today_date
+        next_due_date = None
+        if len(db.opinions_calendar.get(str(see_day), set())) < 10:
+            next_due_date = see_day
+        else:
+            if (see_day.weekday() + 1) % 7 < 3:
+                next_due_date = see_day + datetime.timedelta(days=4)
+            else:
+                next_due_date = see_day + datetime.timedelta(days=3)
+            # convert next due date to datetime
+        next_due_time = datetime.datetime.combine(next_due_date, datetime.datetime.min.time())
+        if datetime.datetime.now() + datetime.timedelta(seconds=0.5) > next_due_time:
+            ages = []
+            seconds_sum = 0
+            for opinion_ID, opinion in db.opinions_database.items():
+                if opinion.approved == True and not opinion.scheduled:
+                    creation_date = opinion.activity[0][-1]
+                    seconds_passed = (datetime.datetime.now() - creation_date).total_seconds()
+                    seconds_sum += seconds_passed
+                    ages.append((seconds_passed, opinion_ID))
+            compiled_set = db.opinions_calendar.get(str(next_due_date), set())
+            
+            for repeat in range(len(compiled_set), 10):
+                remaining = random.random()
+                remaining *= seconds_sum
+                opinion_index = 0
+                while remaining > 0:
+                    remaining -= ages[opinion_index][0]
+                    opinion_index += 1
+                compiled_set.add(ages[opinion_index - 1][1])
+
+            with db.opinions_calendar_lock:
+                db.opinions_calendar[str(next_due_date)] = compiled_set
+                db.opinions_calendar.sync()
+            
 
 def main():
     print('Student Change Web App... running...')
@@ -3062,10 +3107,15 @@ search_index_lock = threading.RLock()
 
 build_search_index()
 
-thread = threading.Thread(target=thread_backup, args=())
-thread.daemon = True
-thread.start()
-print('thread started!')
+backup_thread = threading.Thread(target=thread_backup, args=())
+backup_thread.daemon = True
+backup_thread.start()
+print('backup thread started!')
+
+schedule_thread = threading.Thread(target=auto_schedule, args=())
+schedule_thread.daemon = True
+schedule_thread.start()
+print('schedule thread started!')
 
 if __name__ == '__main__':
     main()
