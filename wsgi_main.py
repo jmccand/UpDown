@@ -3055,15 +3055,19 @@ def auto_schedule():
                     ages.append((seconds_passed, opinion_ID))
             compiled_set = db.opinions_calendar.get(str(next_due_date), set())
 
-            while len(compiled_set) < 10:
-                remaining = random.random()
-                remaining *= seconds_sum
-                opinion_index = 0
-                while remaining > 0:
-                    remaining -= ages[opinion_index][0]
-                    opinion_index += 1
-                if ages[opinion_index - 1][1] not in compiled_set:
-                    compiled_set.add(ages[opinion_index - 1][1])
+            if len(compiled_set) + len(ages) <= 10:
+                for age_secs, opinion_ID in ages:
+                    compiled_set.add(opinion_ID)
+            else:
+                while len(compiled_set) < 10:
+                    remaining = random.random()
+                    remaining *= seconds_sum
+                    opinion_index = 0
+                    while remaining > 0:
+                        remaining -= ages[opinion_index][0]
+                        opinion_index += 1
+                    if ages[opinion_index - 1][1] not in compiled_set:
+                        compiled_set.add(ages[opinion_index - 1][1])
 
             with db.opinions_calendar_lock:
                 db.opinions_calendar[str(next_due_date)] = compiled_set
