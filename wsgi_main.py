@@ -3054,20 +3054,31 @@ def auto_schedule():
                     seconds_sum += seconds_passed
                     ages.append((seconds_passed, opinion_ID))
             compiled_set = db.opinions_calendar.get(str(next_due_date), set())
-            
-            for repeat in range(len(compiled_set), 10):
+
+            while len(compiled_set) < 10:
                 remaining = random.random()
                 remaining *= seconds_sum
                 opinion_index = 0
                 while remaining > 0:
                     remaining -= ages[opinion_index][0]
                     opinion_index += 1
-                compiled_set.add(ages[opinion_index - 1][1])
+                if ages[opinion_index - 1][1] not in compiled_set:
+                    compiled_set.add(ages[opinion_index - 1][1])
 
             with db.opinions_calendar_lock:
                 db.opinions_calendar[str(next_due_date)] = compiled_set
                 db.opinions_calendar.sync()
-            
+
+            for opinion_ID in compiled_set:
+                opinion = db.opinions_database[opinion_ID]
+                if not opinion.scheduled:
+                    assert len(opinion.activity) == 2
+                    opinion.activity.append([(next_due_date, datetime.datetime.now())])
+                    opinion.scheduled = True
+                    with db.opinions_database_lock:
+                        db.opinions_database[opinion_ID] = opinion
+                        db.opinions_database.sync()
+
 
 def main():
     print('Student Change Web App... running...')
