@@ -1015,7 +1015,7 @@ footer {
   right: 30%;
   height: 65px;
   bottom: 5px;
-  background-color: white;
+  background-color: #ffef90ff;
 }
 div#banner {
   top: 70px;
