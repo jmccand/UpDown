@@ -58,19 +58,10 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             print('\npath: ' + self.path)
             print(f'{self.my_cookies}')
 
-        invalid_cookie = True
-        if 'code' in self.my_cookies:
-            if self.my_cookies['code'].value in db.cookie_database:
-                invalid_cookie = False
-            else:
-                if not self.path == '/favicon.ico':
-                    print(f'INVALID COOKIE FOUND: {self.path} and {self.my_cookies["code"].value}\n')
-        else:
-            if not self.path == '/favicon.ico':
-                print(f'INVALID COOKIE FOUND: {self.path }\n')
+        invalid_cookie = self.identify_user() == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and not self.path == '/manifest.json' and not self.path == '/service-worker.js' and not self.path == '/hamburger.png' and not self.path == '/favicon.ico' and not self.path == '/favicon.png':
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if self.path == '/' and 'cookie_code' in url_arguments:
                 self.path_root = '/'
@@ -83,13 +74,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path == '/favicon.ico':
-                    return self.load_image()
-                elif self.path == '/favicon.png':
-                    return self.load_image()
-                elif self.path == '/hamburger.png':
-                    return self.load_image()
-                elif self.path == '/timeline.png':
+                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -1017,9 +1002,11 @@ footer {
   bottom: 0;
   height: 70px;
   position: fixed;
+  width: 100%;
 }
 #small_box {
   border: 3px solid #595959;
+  border-radius: 30px;
   box-sizing: border-box;
   font-size: 45px;
   position: fixed;
@@ -1029,12 +1016,6 @@ footer {
   height: 65px;
   bottom: 5px;
   background-color: white;
-}
-.arrow {
-  font-size: 55px;
-  position: fixed;
-  height: 65px;
-  bottom: 5px;
 }
 div#banner {
   top: 70px;
@@ -1049,6 +1030,11 @@ div#banner {
   box-sizing: border-box;
   z-index: 1;
   display: none;
+}
+.arrow {
+  position: absolute;
+  bottom: 15px;
+  height: 40px;
 }
 </style>
 </head>
@@ -1080,12 +1066,10 @@ div#banner {
 <div id='small_box'>
 1/{len(randomized)}
 </div>
-<div class='arrow' style='left: 10px;' onclick='change(-current_index);'>
-\u21E4
-</div>
-<div class='arrow' style='right: 10px;' onclick='change(page_IDs.length - current_index - 1);'>
-\u21E5
-</div>
+<img id='speed_right' class='arrow' src='speed_right.png' style='right: 0'/>
+<img id='speed_left' class='arrow' src='speed_left.png' style='left: 0'/>
+<img id='arrow_right' class='arrow' src='arrow_right.png' style='right: 55px'/>
+<img id='arrow_left' class='arrow' src='arrow_left.png' style='left: 55px'/>
 </footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
