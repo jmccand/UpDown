@@ -1066,10 +1066,10 @@ div#banner {
 <div id='small_box'>
 1/{len(randomized)}
 </div>
-<img id='speed_right' class='arrow' src='speed_right.png' style='right: 0'/>
-<img id='speed_left' class='arrow' src='speed_left.png' style='left: 0'/>
-<img id='arrow_right' class='arrow' src='arrow_right.png' style='right: 55px'/>
-<img id='arrow_left' class='arrow' src='arrow_left.png' style='left: 55px'/>
+<img id='speed_right' class='arrow' src='speed_right.png' style='right: 10px' onclick='change(opinion_texts.length - current_index - 1)'/>
+<img id='speed_left' class='arrow' src='speed_left.png' style='left: 10px' onclick='change(-current_index)'/>
+<img id='arrow_right' class='arrow' src='arrow_right.png' style='right: 60px' onclick='change(1)'/>
+<img id='arrow_left' class='arrow' src='arrow_left.png' style='left: 60px' onclick='change(-1)'/>
 </footer>'''.encode('utf8'))
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
