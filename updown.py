@@ -26,7 +26,7 @@ class Opinion:
         up_votes = 0
         down_votes = 0
         abstains = 0
-        for user in db.user_cookies.values():
+        for user in db.user_ids.values():
             if user.verified_email and str(self.ID) in user.votes:
                     this_vote = user.votes[str(self.ID)][-1][0]
                     #print(f'{user.email} has voted {this_vote}')
