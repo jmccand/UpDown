@@ -1263,12 +1263,17 @@ self.addEventListener('fetch', function(event) {{
         self.wfile.write('''<style>
 form {
   position: absolute;
-  top: 70px;
-  bottom: 0;
-  width: 100%;
+  top: 100px;
+  width: 92%;
+  height: 130px;
+  left: 4%;
   font-size: 25px;
-  padding: 3%;
+  padding: 6%;
   box-sizing: border-box;
+  border: 3px solid black;
+  border-radius: 20px;
+  text-align: center;
+  background-color: lightGray;
 }
 input {
   position: relative;
@@ -1278,7 +1283,7 @@ input {
 }
 div#similar_message {
   position: absolute;
-  top: 170px;
+  top: 250px;
   height: 45px;
   font-size: 25px;
   width: 100%;
@@ -1287,7 +1292,7 @@ div#similar_message {
 }
 article {
   position: absolute;
-  top: 225px;
+  top: 305px;
   bottom: 0;
   width: 100%;
   font-size: 25px;
