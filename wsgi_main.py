@@ -2598,7 +2598,7 @@ td#row4 {
             # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
             json_stats[opinion_ID][1] = len(opinion.activity) - 1
             if json_stats[opinion_ID][1] >= 2:
-                if datetime.date.today() >= opinion.activity[2][0][2]:
+                if datetime.date.today() >= opinion.activity[2][0][0]:
                     json_stats[opinion_ID][1] += 1
             if len(opinion.activity) == 1:
                 json_stats[opinion_ID][2] = str(to_date(opinion.activity[0][1]))
@@ -2614,19 +2614,19 @@ td#row4 {
                 json_stats[opinion_ID][0] = 'approved'
             elif len(opinion.activity) == 3:
                 #assert len(opinion.activity[2]) == 4
-                if datetime.date.today() < opinion.activity[2][0][2]:
+                if datetime.date.today() < opinion.activity[2][0][0]:
                     json_stats[opinion_ID][5] = 'onto voting'
                     json_stats[opinion_ID][0] = 'scheduled'
-                elif datetime.date.today() > opinion.activity[2][0][2]:
+                elif datetime.date.today() > opinion.activity[2][0][0]:
                     json_stats[opinion_ID][5] = 'onto forwarding' 
                     json_stats[opinion_ID][0] = 'voted on'
                 else:
                     json_stats[opinion_ID][5] = 'currently voting'
                     json_stats[opinion_ID][0] = 'voting'
-                if datetime.date.today() >= opinion.activity[2][0][2]:
-                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][2]))
+                if datetime.date.today() >= opinion.activity[2][0][0]:
+                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][0]))
                 else:
-                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][3]))
+                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][1]))
             elif len(opinion.activity) == 4:
                 #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
                 assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
