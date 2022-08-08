@@ -2768,18 +2768,19 @@ select {
 <table>
 <tr>
 <td>
-sort<br />
-<select name='sort'>
+sort by<br />
+<select name='sort' onchange='this.form.submit()'>
+<option value='overall'>overall</option>
 <option value='care'>care</option>
 <option value='agree'>agree</option>
-<option value='overall'>overall</option>
 </select>
 </td>
 <td>
-filter<br />
-<select name='filter'>
-<option value='resolved'>resolved</option>
-<option value='mine'>mine</option>
+filter for<br />
+<select name='filter' onchange='this.form.submit()'>
+<option value='no_filter'>no filter</option>
+<option value='unresolved'>unresolved</option>
+<option value='my_opinions'>my opinions</option>
 </select>
 </td>
 </tr>
