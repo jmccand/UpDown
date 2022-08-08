@@ -144,6 +144,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/already_scheduled'):
                     self.path_root = '/already_scheduled'
                     self.already_scheduled()
+                elif self.path.startswith('/leaderboard'):
+                    self.path_root = '/leaderboard'
+                    self.leaderboard_page()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -263,6 +266,8 @@ header {
             elif self.path_root == '/view_committee':
                 url_arguments = urllib.parse.parse_qs(self.query_string)
                 title = url_arguments['committee'][0]
+            elif self.path_root == '/leaderboard':
+                title = 'Leaderboard'
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
 <span id='title'>
@@ -275,6 +280,7 @@ header {
             self.wfile.write('''<a href='/'>Voice Your Opinions</a>
 <a href='/submit_opinions'>Submit an Opinion</a>
 <a href='/track_opinions'>Track an Opinion</a>
+<a href='/leaderboard'>Leaderboard</a>
 <a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
             if my_account.email in local.MODERATORS and my_account.verified_email:
                 self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
@@ -2464,6 +2470,214 @@ function update_unselected(element) {{
             raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
         
     def track_opinions_page(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        self.start_response('200 OK', [])
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+        self.send_links_head()
+        self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 50%;
+  z-index: 1;
+  overflow: scroll;
+}
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  z-index: 1;
+}
+#search_bar {
+  position: absolute;
+  top: 0;
+  left: 1%;
+  width: 98%;
+  height: 26px;
+  padding: 2px;
+  border: 0;
+}
+div#results {
+  position: absolute;
+  bottom: 0;
+  top: 32px;
+  width: 100%;
+  overflow: scroll;
+}
+div.result {
+  width: 99%;
+  height: 50px;
+  margin: 0.5%;
+  position: relative;
+  background-color: #cfe2f3ff;
+  z-index: 1;
+  border-radius: 6px;
+}
+img#timeline {
+  height: 90%;
+  position: absolute;
+  left: 8%;
+  top: 5%;
+}
+table#stats {
+  width: 60%;
+  right: 2%;
+  position: absolute;
+  height: 80%;
+  top: 10%;
+  font-size: 40px;
+  text-align: center;
+  border-collapse: collapse;
+}
+div#line {
+  width: 30px;
+  height: 4px;
+  border: 2px solid black;
+  position: absolute;
+  left: 6%;
+  background-color: green;
+  box-sizing: border-box;
+}
+div#label {
+  font-size: 20px;
+  position: absolute;
+  left: 17%;
+}
+td.care {
+  border-right: 2px solid black;
+  width: 50%;
+}
+td.up {
+  border-left: 2px solid black;
+}
+td#row1 {
+  font-size: 20px;
+}
+td#row4 {
+  font-size: 25px;
+}
+</style>'''.encode('utf8'))
+        self.wfile.write('</head><body>'.encode('utf8'))
+        self.send_links_body()
+        self.wfile.write('<article>'.encode('utf8'))
+        self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div><div id='label'></div>'''.encode('utf8'))
+        self.wfile.write('''<table id='stats'>
+<tr><td id='row1' colspan='2'></td></tr>
+<tr><td id='care_per' class='care'></td><td id='up_per' class='up'></td></tr>
+<tr><td class='care'>care</td><td class='up'>agree</td></tr>
+<tr><td id='row4' colspan='2'></td></tr>
+</table>'''.encode('utf8'))
+        self.wfile.write('</article>'.encode('utf8'))
+        self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
+
+        def to_date(dt):
+            return datetime.date(dt.year, dt.month, dt.day)
+
+        json_stats = {}
+        search_results = []
+        if 'words' in url_arguments:
+            search_results = search(url_arguments['words'][0])
+        else:
+            search_results = list(db.opinions_database.keys())
+            search_results.sort(key=lambda x: -int(x))
+        if search_results == []:
+            self.wfile.write('Sorry, there were no results. Try using different keywords.'.encode('utf8'))
+        for opinion_ID in search_results:
+            json_stats[opinion_ID] = [None] * 6
+            # label, stage, date, care, up, message
+            opinion = db.opinions_database[str(opinion_ID)]
+            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
+            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
+            json_stats[opinion_ID][1] = len(opinion.activity) - 1
+            if json_stats[opinion_ID][1] >= 2:
+                if datetime.date.today() >= opinion.activity[2][0][0]:
+                    json_stats[opinion_ID][1] += 1
+            if len(opinion.activity) == 1:
+                json_stats[opinion_ID][2] = str(to_date(opinion.activity[0][1]))
+                json_stats[opinion_ID][5] = 'onto approval'
+                json_stats[opinion_ID][0] = 'created'
+            elif len(opinion.activity) == 2:
+                json_stats[opinion_ID][2] = str(to_date(opinion.activity[1][0][2]))
+                assert opinion.approved in (True, False)
+                if opinion.approved:
+                    json_stats[opinion_ID][5] = 'onto scheduling'
+                else:
+                    json_stats[opinion_ID][5] = 'rejected'
+                json_stats[opinion_ID][0] = 'approved'
+            elif len(opinion.activity) == 3:
+                #assert len(opinion.activity[2]) == 4
+                if datetime.date.today() < opinion.activity[2][0][0]:
+                    json_stats[opinion_ID][5] = 'onto voting'
+                    json_stats[opinion_ID][0] = 'scheduled'
+                elif datetime.date.today() > opinion.activity[2][0][0]:
+                    json_stats[opinion_ID][5] = 'onto forwarding' 
+                    json_stats[opinion_ID][0] = 'voted on'
+                else:
+                    json_stats[opinion_ID][5] = 'currently voting'
+                    json_stats[opinion_ID][0] = 'voting'
+                if datetime.date.today() >= opinion.activity[2][0][0]:
+                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][0]))
+                else:
+                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][1]))
+            elif len(opinion.activity) == 4:
+                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
+                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
+                if opinion.activity[3][0][1] != 'no':
+                    json_stats[opinion_ID][5] = f'onto {opinion.activity[3][0][1]}'
+                else:
+                    json_stats[opinion_ID][5] = 'unforwarded'
+                json_stats[opinion_ID][0] = 'forwarded'
+                json_stats[opinion_ID][2] = str(to_date(opinion.activity[3][0][2]))
+            # elif len(opinion.activity) == 5:
+            #     #assert len(opinion.activity[4]) == 3
+            #     json_stats[opinion_ID][5] = 'onto drafting'
+            #     json_stats[opinion_ID][0] = ''
+            #     json_stats[opinion_ID][2] = str(to_date(opinion.activity[4][0][2]))
+            # care and up percent
+            json_stats[opinion_ID][3] = '---'
+            json_stats[opinion_ID][4] = '---'
+            if json_stats[opinion_ID][1] > 2:
+                up, down, abstain = opinion.count_votes()
+                if up + down + abstain > 0:
+                    care_per = (up + down) / (up + down + abstain) * 100
+                    json_stats[opinion_ID][3] = care_per
+                if up + down > 0:
+                    up_per = up / (up + down) * 100
+                    json_stats[opinion_ID][4] = up_per
+            self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
+{opinion.text}
+</div>'''.encode('utf8'))
+        self.wfile.write('</div></footer>'.encode('utf8'))
+        self.wfile.write(f'''<script>
+const stats = {json.dumps(json_stats)};
+var prev = null;'''.encode('utf8'))
+        if len(search_results) > 0:
+            self.wfile.write(f'updateStats(document.getElementById({search_results[0]}));'.encode('utf8'))
+        self.wfile.write(f'''
+function updateStats(element) {{
+    const this_ID = element.id;
+    document.getElementById('label').innerHTML = stats[this_ID][0];
+    document.getElementById('row1').innerHTML = stats[this_ID][0] + ' on ' + stats[this_ID][2];
+    document.getElementById('care_per').innerHTML = stats[this_ID][3] + '%';
+    document.getElementById('up_per').innerHTML = stats[this_ID][4] + '%';
+    document.getElementById('row4').innerHTML = stats[this_ID][5];
+    document.getElementById('line').style.top = 22 + 64 * stats[this_ID][1] / 6 + '%';
+    document.getElementById('label').style.top = 18 + 64 * stats[this_ID][1] / 6 + '%';
+    if (prev != null) {{
+        prev.style.backgroundColor = '#cfe2f3ff';
+    }}
+    element.style.backgroundColor = 'yellow';
+    prev = element;
+}}
+</script>'''.encode('utf8'))
+        self.wfile.write('''</body></html>'''.encode('utf8'))
+
+        self.log_activity()
+        
+    def leaderboard_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
         self.start_response('200 OK', [])
