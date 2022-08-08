@@ -2705,8 +2705,7 @@ form {
   padding: 4px;
   padding-left: 10px;
   padding-right: 10px;
-  border: 0;
-  border: 2px solid black;
+  border: 1px solid black;
   border-radius: 20px;
   box-sizing: border-box;
 }
@@ -2725,19 +2724,28 @@ td {
 }
 article#results {
   position: absolute;
-  bottom: 0;
+  bottom: 3%;
   top: 38%;
-  width: 100%;
+  width: 96%;
+  left: 2%;
   overflow: scroll;
+  border: 3px solid black;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: gray;
 }
 div.result {
-  width: 99%;
-  height: 50px;
-  margin: 0.5%;
+  width: 90%;
   position: relative;
-  background-color: #cfe2f3ff;
-  z-index: 1;
-  border-radius: 6px;
+  left: 5%;
+  padding: 8px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 18px;
 }
 select {
   font-size: 20px;
