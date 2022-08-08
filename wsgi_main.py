@@ -2718,7 +2718,7 @@ form table {
   font-size: 25px;
   font-weight: bold;
 }
-td {
+form td {
   width: 50%;
   padding: 5px;
 }
@@ -2734,11 +2734,10 @@ article#results {
   box-sizing: border-box;
   background-color: gray;
 }
-div.result {
+table.result {
   width: 90%;
   position: relative;
   left: 5%;
-  padding: 8px;
   margin-top: 15px;
   margin-bottom: 15px;
   background-color: white;
@@ -2746,6 +2745,16 @@ div.result {
   border-radius: 8px;
   box-sizing: border-box;
   font-size: 18px;
+  border-collapse: collapse;
+}
+td.rank {
+  padding-left: 15px;
+  padding-right: 15px;
+  background-color: #ffef90ff;
+  border-right: 2px solid black;
+}
+td.opinion {
+  padding: 15px;
 }
 select {
   font-size: 20px;
@@ -2851,9 +2860,9 @@ filter<br />
                 if up + down > 0:
                     up_per = up / (up + down) * 100
                     json_stats[opinion_ID][4] = up_per
-            self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
-{opinion.text}
-</div>'''.encode('utf8'))
+            self.wfile.write(f'''<table id='{opinion_ID}' class='result' onclick='updateStats(this);'>
+<tr><td class='rank'>1.</td><td class='opinion'>{opinion.text}</td></tr>
+</table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<script>
 const stats = {json.dumps(json_stats)};
