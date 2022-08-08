@@ -1,4 +1,5 @@
 import db
+import datetime
 
 class User:
 
@@ -49,3 +50,15 @@ class Opinion:
             if up + down > 0:
                 agree = up / (up + down) * 100
         return care, agree
+
+    def is_after_voting(self):
+        see_day = None
+        today_date = datetime.date.today()
+        if (today_date.weekday() + 1) % 7 < 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
+        elif (today_date.weekday() + 1) % 7 > 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
+        else:
+            see_day = today_date
+
+        return self.scheduled and self.activity[2][0][0] < today_date and str(self.ID) not in db.opinions_calendar.get(str(see_day), set())
