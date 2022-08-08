@@ -2684,34 +2684,48 @@ function updateStats(element) {{
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
-article {
+form {
   position: absolute;
-  top: 70px;
-  width: 100%;
-  bottom: 50%;
-  z-index: 1;
-  overflow: scroll;
-}
-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 50%;
-  z-index: 1;
+  top: 90px;
+  width: 96%;
+  left: 2%;
+  bottom: 63%;
+  border: 3px solid black;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background-color: lightGray;
 }
 #search_bar {
   position: absolute;
-  top: 0;
-  left: 1%;
-  width: 98%;
-  height: 26px;
-  padding: 2px;
+  top: 10%;
+  left: 4%;
+  width: 92%;
+  height: 40px;
+  font-size: 20px;
+  padding: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
   border: 0;
+  border: 2px solid black;
+  border-radius: 20px;
+  box-sizing: border-box;
 }
-div#results {
+form table {
+  position: absolute;
+  top: 45%;
+  width: 80%;
+  left: 10%;
+  text-align: center;
+  font-size: 20px;
+}
+td {
+  width: 50%;
+  padding: 5px;
+}
+article#results {
   position: absolute;
   bottom: 0;
-  top: 32px;
+  top: 40%;
   width: 100%;
   overflow: scroll;
 }
@@ -2724,62 +2738,16 @@ div.result {
   z-index: 1;
   border-radius: 6px;
 }
-img#timeline {
-  height: 90%;
-  position: absolute;
-  left: 8%;
-  top: 5%;
-}
-table#stats {
-  width: 60%;
-  right: 2%;
-  position: absolute;
-  height: 80%;
-  top: 10%;
-  font-size: 40px;
-  text-align: center;
-  border-collapse: collapse;
-}
-div#line {
-  width: 30px;
-  height: 4px;
-  border: 2px solid black;
-  position: absolute;
-  left: 6%;
-  background-color: green;
-  box-sizing: border-box;
-}
-div#label {
-  font-size: 20px;
-  position: absolute;
-  left: 17%;
-}
-td.care {
-  border-right: 2px solid black;
-  width: 50%;
-}
-td.up {
-  border-left: 2px solid black;
-}
-td#row1 {
-  font-size: 20px;
-}
-td#row4 {
-  font-size: 25px;
-}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('<article>'.encode('utf8'))
-        self.wfile.write('''<img src='timeline.png' id='timeline'/><div id='line'></div><div id='label'></div>'''.encode('utf8'))
-        self.wfile.write('''<table id='stats'>
-<tr><td id='row1' colspan='2'></td></tr>
-<tr><td id='care_per' class='care'></td><td id='up_per' class='up'></td></tr>
-<tr><td class='care'>care</td><td class='up'>agree</td></tr>
-<tr><td id='row4' colspan='2'></td></tr>
-</table>'''.encode('utf8'))
-        self.wfile.write('</article>'.encode('utf8'))
-        self.wfile.write(f'''<footer><form method='GET' action='/track_opinions'><input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/></form><div id='results'>'''.encode('utf8'))
+        self.wfile.write(f'''<form method='GET' action='/leaderboard'>
+<input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/>
+<table>
+<tr><td>sort<br /><select name='sort'></select></td><td>filter<br /><select name='filter'></select></td></tr>
+</table>
+</form>'''.encode('utf8'))
+        self.wfile.write('''<article id='results'>'''.encode('utf8'))
 
         def to_date(dt):
             return datetime.date(dt.year, dt.month, dt.day)
@@ -2858,7 +2826,7 @@ td#row4 {
             self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
 {opinion.text}
 </div>'''.encode('utf8'))
-        self.wfile.write('</div></footer>'.encode('utf8'))
+        self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<script>
 const stats = {json.dumps(json_stats)};
 var prev = null;'''.encode('utf8'))
