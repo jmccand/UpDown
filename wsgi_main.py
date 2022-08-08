@@ -2787,90 +2787,36 @@ filter for<br />
 </table>
 </form>'''.encode('utf8'))
         self.wfile.write('''<article id='results'>'''.encode('utf8'))
-
-        def to_date(dt):
-            return datetime.date(dt.year, dt.month, dt.day)
-
-        json_stats = {}
-        search_results = []
-        if 'words' in url_arguments:
-            search_results = search(url_arguments['words'][0])
+        keywords = url_arguments.get('words', [None])[0]
+        sort_method = url_arguments.get('sort', [None])[0]
+        filter_for = url_arguments.get('filter', [None])[0]
+        results = []
+        if keywords == None:
+            results = list(db.opinions_database.keys())
         else:
-            search_results = list(db.opinions_database.keys())
-            search_results.sort(key=lambda x: -int(x))
-        if search_results == []:
-            self.wfile.write('Sorry, there were no results. Try using different keywords.'.encode('utf8'))
-        for opinion_ID in search_results:
-            json_stats[opinion_ID] = [None] * 6
-            # label, stage, date, care, up, message
-            opinion = db.opinions_database[str(opinion_ID)]
-            # timeline: creation, approval, scheduled (vote), successful (passed to senate), expected bill draft date, date of senate hearing
-            # timeline: creation, approval, scheduled (vote), unsuccessful (failed)
-            json_stats[opinion_ID][1] = len(opinion.activity) - 1
-            if json_stats[opinion_ID][1] >= 2:
-                if datetime.date.today() >= opinion.activity[2][0][0]:
-                    json_stats[opinion_ID][1] += 1
-            if len(opinion.activity) == 1:
-                json_stats[opinion_ID][2] = str(to_date(opinion.activity[0][1]))
-                json_stats[opinion_ID][5] = 'onto approval'
-                json_stats[opinion_ID][0] = 'created'
-            elif len(opinion.activity) == 2:
-                json_stats[opinion_ID][2] = str(to_date(opinion.activity[1][0][2]))
-                assert opinion.approved in (True, False)
-                if opinion.approved:
-                    json_stats[opinion_ID][5] = 'onto scheduling'
-                else:
-                    json_stats[opinion_ID][5] = 'rejected'
-                json_stats[opinion_ID][0] = 'approved'
-            elif len(opinion.activity) == 3:
-                #assert len(opinion.activity[2]) == 4
-                if datetime.date.today() < opinion.activity[2][0][0]:
-                    json_stats[opinion_ID][5] = 'onto voting'
-                    json_stats[opinion_ID][0] = 'scheduled'
-                elif datetime.date.today() > opinion.activity[2][0][0]:
-                    json_stats[opinion_ID][5] = 'onto forwarding' 
-                    json_stats[opinion_ID][0] = 'voted on'
-                else:
-                    json_stats[opinion_ID][5] = 'currently voting'
-                    json_stats[opinion_ID][0] = 'voting'
-                if datetime.date.today() >= opinion.activity[2][0][0]:
-                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][0]))
-                else:
-                    json_stats[opinion_ID][2] = str(to_date(opinion.activity[2][0][1]))
-            elif len(opinion.activity) == 4:
-                #assert len(opinion.activity[3]) == 3, f'{opinion.activity}'
-                assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                if opinion.activity[3][0][1] != 'no':
-                    json_stats[opinion_ID][5] = f'onto {opinion.activity[3][0][1]}'
-                else:
-                    json_stats[opinion_ID][5] = 'unforwarded'
-                json_stats[opinion_ID][0] = 'forwarded'
-                json_stats[opinion_ID][2] = str(to_date(opinion.activity[3][0][2]))
-            # elif len(opinion.activity) == 5:
-            #     #assert len(opinion.activity[4]) == 3
-            #     json_stats[opinion_ID][5] = 'onto drafting'
-            #     json_stats[opinion_ID][0] = ''
-            #     json_stats[opinion_ID][2] = str(to_date(opinion.activity[4][0][2]))
-            # care and up percent
-            json_stats[opinion_ID][3] = '---'
-            json_stats[opinion_ID][4] = '---'
-            if json_stats[opinion_ID][1] > 2:
-                up, down, abstain = opinion.count_votes()
-                if up + down + abstain > 0:
-                    care_per = (up + down) / (up + down + abstain) * 100
-                    json_stats[opinion_ID][3] = care_per
-                if up + down > 0:
-                    up_per = up / (up + down) * 100
-                    json_stats[opinion_ID][4] = up_per
-            self.wfile.write(f'''<table id='{opinion_ID}' class='result' onclick='updateStats(this);'>
-<tr><td class='rank'>1.</td><td class='opinion'>{opinion.text}</td></tr>
+            results = search(keywords)
+        results = [db.opinions_database[x] for x in results]
+        results = list(filter(lambda x: x.is_after_voting(), results))
+        if sort_method == 'overall':
+            results.sort(key=lambda x: x.care_agree_percent()[0] * x.care_agree_percent()[1])
+        elif sort_method == 'care':
+            results.sort(key=lambda x: x.care_agree_percent()[0])
+        elif sort_method == 'agree':
+            results.sort(key=lambda x: x.care_agree_percent()[1])
+        if filter_for == 'unreserved':
+            results = list(filter(lambda x: x.committee_jurisdiction == None, results))
+        elif filter_for == 'my_opinions':
+            results = list(filter(lambda x: x.activity[0][0] == my_account.user_ID))
+        for index, opinion in enumerate(results):
+            self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='updateStats(this);'>
+<tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<script>
-const stats = {json.dumps(json_stats)};
+const stats = [];
 var prev = null;'''.encode('utf8'))
-        if len(search_results) > 0:
-            self.wfile.write(f'updateStats(document.getElementById({search_results[0]}));'.encode('utf8'))
+        if len(results) > 0:
+            self.wfile.write(f'updateStats(document.getElementById({results[0]}));'.encode('utf8'))
         self.wfile.write(f'''
 function updateStats(element) {{
     const this_ID = element.id;
