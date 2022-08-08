@@ -2763,8 +2763,13 @@ select {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
+
+        keywords = url_arguments.get('words', [''])[0]
+        sort_method = url_arguments.get('sort', ['overall'])[0]
+        filter_for = url_arguments.get('filter', ['no_filter'])[0]
+        
         self.wfile.write(f'''<form method='GET' action='/leaderboard'>
-<input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/>
+<input id='search_bar' type='text' name='words' value='{keywords}' placeholder='search...'/>
 <table>
 <tr>
 <td>
@@ -2787,15 +2792,12 @@ filter for<br />
 </table>
 </form>'''.encode('utf8'))
         self.wfile.write('''<article id='results'>'''.encode('utf8'))
-        keywords = url_arguments.get('words', [None])[0]
-        sort_method = url_arguments.get('sort', [None])[0]
-        filter_for = url_arguments.get('filter', [None])[0]
         results = []
-        if keywords == None:
+        if keywords == '':
             results = list(db.opinions_database.keys())
         else:
             results = search(keywords)
-        results = [db.opinions_database[x] for x in results]
+        results = [db.opinions_database[str(x)] for x in results]
         results = list(filter(lambda x: x.is_after_voting(), results))
         if sort_method == 'overall':
             results.sort(key=lambda x: x.care_agree_percent()[0] * x.care_agree_percent()[1])
