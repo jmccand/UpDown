@@ -2689,7 +2689,7 @@ form {
   top: 90px;
   width: 96%;
   left: 2%;
-  bottom: 63%;
+  bottom: 65%;
   border: 3px solid black;
   box-sizing: border-box;
   border-radius: 6px;
@@ -2712,11 +2712,11 @@ form {
 }
 form table {
   position: absolute;
-  top: 45%;
+  top: 40%;
   width: 80%;
   left: 10%;
   text-align: center;
-  font-size: 20px;
+  font-size: 25px;
 }
 td {
   width: 50%;
@@ -2725,7 +2725,7 @@ td {
 article#results {
   position: absolute;
   bottom: 0;
-  top: 40%;
+  top: 38%;
   width: 100%;
   overflow: scroll;
 }
@@ -2738,13 +2738,32 @@ div.result {
   z-index: 1;
   border-radius: 6px;
 }
+select {
+  font-size: 20px;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.wfile.write(f'''<form method='GET' action='/leaderboard'>
 <input id='search_bar' type='text' name='words' value='{url_arguments.get('words', [''])[0]}' placeholder='search...'/>
 <table>
-<tr><td>sort<br /><select name='sort'></select></td><td>filter<br /><select name='filter'></select></td></tr>
+<tr>
+<td>
+sort<br />
+<select name='sort'>
+<option value='care'>care</option>
+<option value='agree'>agree</option>
+<option value='overall'>overall</option>
+</select>
+</td>
+<td>
+filter<br />
+<select name='filter'>
+<option value='resolved'>resolved</option>
+<option value='mine'>mine</option>
+</select>
+</td>
+</tr>
 </table>
 </form>'''.encode('utf8'))
         self.wfile.write('''<article id='results'>'''.encode('utf8'))
