@@ -2755,6 +2755,7 @@ td.rank {
 }
 td.opinion {
   padding: 15px;
+  width: 100%;
 }
 select {
   font-size: 20px;
