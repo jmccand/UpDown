@@ -1279,7 +1279,7 @@ form {
   border: 3px solid black;
   border-radius: 20px;
   text-align: center;
-  background-color: lightGray;
+  background-color: #ffef90ff;
 }
 input {
   position: relative;
@@ -2693,7 +2693,7 @@ form {
   border: 3px solid black;
   box-sizing: border-box;
   border-radius: 6px;
-  background-color: lightGray;
+  background-color: #ffef90ff;
 }
 #search_bar {
   position: absolute;
@@ -2717,6 +2717,7 @@ form table {
   left: 10%;
   text-align: center;
   font-size: 25px;
+  font-weight: bold;
 }
 td {
   width: 50%;
