@@ -985,7 +985,7 @@ article#opinion {
   z-index: 1;
   overflow: scroll;
   border-radius: 6px;
-  border: 2px solid black;
+  border: 3px solid black;
   background-color: #ffef90ff;
   box-sizing: border-box;
 }
@@ -994,12 +994,13 @@ div#counter {
   top: 0;
   font-size: 25px;
   padding: 5px;
+  border-bottom: 2px solid black;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
 }
 section#opinion_text {
-  top: 40px;
+  top: 41px;
   bottom: 0;
   width: 100%;
   padding: 15px;
@@ -1007,7 +1008,7 @@ section#opinion_text {
   background-color: white;
   box-sizing: border-box;
   font-size: 30px;
-  border-top: 2px solid black;
+  border: 2px solid black;
 }
 p#opinion_p {
   margin: 0;
