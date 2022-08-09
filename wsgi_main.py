@@ -963,6 +963,552 @@ function highlight(info) {{
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
+article#ballot_label {
+  position: absolute;
+  top: 120px;
+  font-size: 25px;
+  padding: 10px;
+  width: 96%;
+  left: 2%;
+  border: 2px solid black;
+  border-radius: 25px;
+  box-sizing: border-box;
+  text-align: center;
+  background-color: #ffef90ff;
+}
+article#opinion {
+  position: absolute;
+  top: 220px;
+  width: 96%;
+  left: 2%;
+  bottom: 25%;
+  z-index: 1;
+  overflow: scroll;
+  border-radius: 6px;
+  border: 2px solid black;
+  background-color: #ffef90ff;
+  box-sizing: border-box;
+}
+div#counter {
+  position: absolute;
+  top: 0;
+  font-size: 25px;
+  padding: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+section#opinion_text {
+  top: 40px;
+  bottom: 0;
+  width: 100%;
+  padding: 15px;
+  position: absolute;
+  background-color: white;
+  box-sizing: border-box;
+  font-size: 30px;
+  border-top: 2px solid black;
+}
+p#opinion_p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+div#banner {
+  top: 70px;
+  position: absolute;
+  left: 2%;
+  font-size: 25px;
+  padding: 2%;
+  width: 96%;
+  border-radius: 3px;
+  border: 2px solid black;
+  background-color: lightBlue;
+  box-sizing: border-box;
+  z-index: 1;
+  display: none;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+            self.send_links_body()
+            randomized = list(db.opinions_calendar[str(see_day)])
+            random.shuffle(randomized)
+            my_votes = []
+            opinion_texts = []
+            for opinion_ID in randomized:
+                assert opinion_ID in db.opinions_database
+                opinion = db.opinions_database[opinion_ID]
+                assert opinion.approved == True
+                opinion_texts.append(opinion.text)
+                if str(opinion_ID) in my_account.votes:
+                    this_vote = my_account.votes[str(opinion_ID)][-1][0]
+                    my_votes.append(this_vote)
+                else:
+                    my_votes.append('abstain')
+            self.wfile.write(f'''<article id='ballot_label'>
+Ballot Sun 8/7 - Tue 8/9
+</article>
+<article id='opinion'>
+<div id='counter'>
+</div>
+<section id='opinion_text'>
+<p id='opinion_p'>{db.opinions_database[randomized[0]].text}</p>
+</section>
+</article>'''.encode('utf8'))
+            self.wfile.write(f'''<script>
+const page_IDs = {randomized};
+const opinion_texts = {opinion_texts};
+let votes = {my_votes};
+let current_index = 0;
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('dblclick', handleDoubleClick, false);
+document.addEventListener('keydown', handleKeyDown, false);
+
+change(0);
+
+var xStart = null;
+var yStart = null;
+
+function getTouches(evt) {{
+  return evt.touches ||
+         evt.originalEvent.touches;
+}}
+
+function handleTouchStart(evt) {{
+    const start = getTouches(evt)[0];
+    xStart = start.clientX;
+    yStart = start.clientY;
+}}
+
+function handleTouchMove(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        if (xDiff > 0) {{
+            change(1);
+        }}
+        else {{
+            change(-1);
+        }}
+    }}
+    else {{
+        if (yDiff > 0) {{
+            vote('up');
+        }}
+        else {{ 
+            vote('down');
+        }}
+    }}
+    xStart = null;
+    yStart = null;
+}}
+function handleDoubleClick(evt) {{
+    vote('abstain');
+}}
+function vote(my_vote) {{
+    var xhttp = new XMLHttpRequest();
+    if (checkVoteValidity(my_vote, votes[current_index])) {{
+        xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
+        xhttp.send();
+        votes[current_index] = my_vote;
+        let opinion_box = document.getElementById('opinion_text');
+        if (my_vote == 'up') {{
+            opinion_box.style.borderColor = '#00ff00ff';
+        }}
+        else if (my_vote == 'down') {{
+            opinion_box.style.borderColor = '#ff0000ff';
+        }}
+        else {{
+            opinion_box.style.borderColor = '#595959';
+        }}
+        setTimeout(() => {{change(1)}}, 1000);
+    }}
+}}
+function checkVoteValidity(new_vote, old_vote) {{
+    let up_count = 0;
+    let down_count = 0;
+    for (let index = 0; index < votes.length; index++) {{
+        if (votes[index] == 'up') {{
+            up_count++;
+        }}
+        else if (votes[index] == 'down') {{
+            down_count++;
+        }}
+    }}
+    let valid = true;
+    if (up_count == 5 && new_vote == 'up') {{
+        alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        valid = false;
+    }}
+    else if (down_count == 5 && new_vote == 'down') {{
+        alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        valid = false;
+    }}
+    if (old_vote == 'abstain') {{
+        if (up_count + down_count == 8 && new_vote != 'abstain') {{
+            alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+            valid = false;
+        }}
+    }}
+    return valid;
+}}
+function handleKeyDown(evt) {{
+    let key_pressed = event.key;
+    const keyDict = {{
+        'ArrowUp': [vote, 'up'],
+        'ArrowDown': [vote, 'down'],
+        ' ': [vote, 'abstain'],
+        'ArrowRight': [change, 1],
+        'ArrowLeft': [change, -1]
+    }};
+    if (keyDict[key_pressed] != null) {{
+        var func_arg_list = keyDict[key_pressed];
+        func_arg_list[0](func_arg_list[1]);
+    }}
+}}
+function change(i) {{
+    let opinion_text = document.getElementById('opinion_p');
+    let opinion_box = document.getElementById('opinion_text');
+    let counter = document.getElementById('counter');
+    if (current_index + i < page_IDs.length && current_index + i >= 0) {{
+        current_index += i;
+        opinion_text.innerHTML = opinion_texts[current_index];
+        counter.innerHTML = current_index + 1 + '/' + page_IDs.length;
+        if (votes[current_index] == 'up') {{
+            opinion_box.style.borderColor = '#00ff00ff';
+        }}
+        else if (votes[current_index] == 'down') {{
+            opinion_box.style.borderColor = '#ff0000ff';
+        }}
+        else {{
+            opinion_box.style.borderColor = '#595959';
+        }}
+    }}
+}}
+</script>
+'''.encode('utf8'))
+            self.wfile.write('''<div id='banner'></div>
+<script>
+function banner(text) {
+    document.getElementById('banner').innerHTML = text;
+    document.getElementById('banner').style.display = 'table-cell';
+    setTimeout(function close() {
+document.getElementById('banner').style.display = 'none';
+}, 3000);
+}
+</script>'''.encode('utf8'))
+        self.wfile.write(f'''</footer>
+<script>
+if ('serviceWorker' in navigator) {{
+    window.addEventListener('load', function() {{
+        navigator.serviceWorker.register('service-worker.js').then(function(registration) {{
+        console.log('Registered!');
+        }}, function(err) {{
+            console.log('ServiceWorker registration failed: ', err);
+        }}).catch(function(err) {{
+            console.log(err);
+        }});
+    }});
+}} else {{
+  console.log('service worker is not supported');
+}}
+self.addEventListener('install', function() {{
+  console.log('Install!');
+}});
+self.addEventListener("activate", event => {{
+  console.log('Activate!');
+}});
+self.addEventListener('fetch', function(event) {{
+  console.log('Fetch!', event.request);
+}});
+</script>'''.encode('utf8'))
+        self.wfile.write('</body></html>'.encode('utf8'))
+        self.log_activity()
+        
+    def opinions_page_old(self):
+        reset_cookie = False
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        if not 'code' in self.my_cookies:
+            if 'cookie_code' in url_arguments:
+                self.my_cookies['code'] = url_arguments['cookie_code'][0]
+                reset_cookie = True
+        my_account = self.identify_user()
+        
+        if reset_cookie:
+            self.start_response('200 OK', [('Set-Cookie', f'code={url_arguments["cookie_code"][0]}; path=/')])
+        else:
+            self.start_response('200 OK', [])
+        
+        see_day = None
+        today_date = datetime.date.today()
+        if (today_date.weekday() + 1) % 7 < 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
+        elif (today_date.weekday() + 1) % 7 > 3:
+            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
+        else:
+            see_day = today_date
+        print(f'day of the week that opinions page is viewing: {see_day}')
+        if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
+<link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''<style>
+article#opinion {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 30%;
+  overflow: scroll;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  height: 30%;
+  width: 100%;
+  z-index: 1;
+}
+footer table {
+  position: absolute;
+  text-align: center;
+  font-size: 30px;
+  width: 50%;
+  left: 25%;
+  top: 20%;
+  border-collapse: collapse;
+}
+article#cover {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 0;
+  background-color: #6d9eebff;
+  z-index: 2;
+}
+article#cover div {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  margin-right: -50%;
+  transform: translate(-50%, 0);
+  text-align: center;
+  padding: 0;
+  font-size: 40px;
+  font-family: Georgia;
+}
+section {
+  top: 25%;
+  bottom: 35%;
+  width: 96%;
+  left: 2%;
+  padding: 15px;
+  position: fixed;
+  background-color: white;
+  border-radius: 6px;
+  border: 3px solid #595959;
+  color: black;
+  box-sizing: border-box;
+  font-size: 30px;
+  cursor: default;
+}
+article#opinion div {
+  font-size: 50px;
+}
+section p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: Verdana;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('''<article id='opinion'>
+<div id='highlight_title'>
+</div>
+<section>
+<p id='opinion_text'>
+</p>
+</section>
+</article>
+<footer>
+<table>
+<tr style='font-family: Garamond'><td id='care_per'>---%</td><td id='agree_per'>---%</td></tr>
+<tr style='font-family: "Times New Roman"'><td>care</td><td>agree</td></tr>
+</table>
+</footer>'''.encode('utf8'))
+
+            highlights = []
+
+            self.wfile.write('''<article id='cover'><div id='cover_div'>'''.encode('utf8'))
+
+            if datetime.date.today().weekday() == 2:
+                self.wfile.write('''Middle Wednesday:<br />Ballot Recap'''.encode('utf8'))
+                highlights.append(('Middle Wednesday:<br />Ballot Recap',))
+            else:
+                self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
+                highlights.append(('Off Day:<br />Ballot Recap',))
+            self.wfile.write('''</div></article>'''.encode('utf8'))
+            
+            see_old_days = []
+            check_day = see_day
+            if check_day.weekday() not in (3, 6):
+                check_day = check_day - datetime.timedelta(days=3)
+            while len(see_old_days) < 2 and check_day > local.LAUNCH_DATE:
+                # check_day.weekday is either 3 or 6
+                assert check_day.weekday() in (3, 6)
+                if db.opinions_calendar.get(str(check_day), set()) != set():
+                    see_old_days.append(check_day)
+                if check_day.weekday() == 3:
+                    check_day = check_day - datetime.timedelta(days=4)
+                else:
+                    check_day = check_day - datetime.timedelta(days=3)
+            # reorder so most recent is last
+            see_old_days = see_old_days[::-1]
+            print(f'{see_old_days}')
+
+            for day in see_old_days:
+                def day_to_nice_string(d):
+                    return d.strftime('%A %m/%d')
+                end_date = day + datetime.timedelta(days=3)
+                highlights.append((f'{day_to_nice_string(day)} - {day_to_nice_string(end_date)}',))
+                this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
+                this_list.sort(key=lambda x: -1 * x.care_agree_percent()[0] * x.care_agree_percent()[1])
+                for opinion in this_list:
+                    highlights.append((opinion.text,) + opinion.care_agree_percent())
+
+            # javascript doesn't have tuples
+            highlights = [list(x) for x in highlights]
+                        
+            self.wfile.write(f'''<script>
+let highlights = {highlights}
+let current_index = 0;
+let timeElapsed = 0;
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('keydown', handleKeyDown, false);
+
+var xStart = null;
+var yStart = null;
+
+setInterval(increaseTimeElapsed, 200, 200);
+
+function getTouches(evt) {{
+  return evt.touches ||
+         evt.originalEvent.touches;
+}}
+
+function handleTouchStart(evt) {{
+    const start = getTouches(evt)[0];
+    xStart = start.clientX;
+    yStart = start.clientY;
+}}
+
+function handleTouchMove(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        if (xDiff > 0) {{
+            change(1);
+        }}
+        else {{
+            change(-1);
+        }}
+    }}
+    else {{
+        return;
+    }}
+    xStart = null;
+    yStart = null;
+}}
+function handleKeyDown(evt) {{
+    let key_pressed = event.key;
+    const keyDict = {{
+        'ArrowRight': [change, 1],
+        'ArrowLeft': [change, -1]
+    }};
+    if (keyDict[key_pressed] != null) {{
+        var func_arg_list = keyDict[key_pressed];
+        func_arg_list[0](func_arg_list[1]);
+    }}
+}}
+function increaseTimeElapsed(time) {{
+    timeElapsed += time;
+    if (highlights[current_index].length == 1) {{
+        if (timeElapsed > 3000) {{
+            change(1);
+        }}
+    }}
+    else {{
+        if (timeElapsed > 4500) {{
+            change(1);
+        }}
+    }}
+}}
+function change(i) {{
+    let newIndex = current_index + i;
+    if (newIndex < 0) {{
+        newIndex = 0;
+    }}
+    else if (newIndex >= highlights.length) {{
+        newIndex = highlights.length - 1;
+    }}
+    if (highlights[newIndex].length == 1) {{
+        cover(highlights[newIndex][0]);
+    }}
+    else {{
+        highlight(highlights[newIndex]);
+    }}
+    current_index = newIndex;
+    timeElapsed = 0;
+}}
+function cover(text) {{
+    document.getElementById('cover_div').innerHTML = text;
+    document.getElementById('cover').style.display = 'initial';
+}}
+function highlight(info) {{
+    document.getElementById('opinion_text').innerHTML = info[0];
+    document.getElementById('care_per').innerHTML = info[1] + '%';
+    document.getElementById('agree_per').innerHTML = info[2] + '%';
+    document.getElementById('cover').style.display = 'none';
+}}
+</script>
+'''.encode('utf8'))
+        else:
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
+<link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''<style>
 article#opinion {
   position: absolute;
   top: 70px;
