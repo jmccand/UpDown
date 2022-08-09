@@ -2713,6 +2713,27 @@ span#reserved_for {
   border: 1px solid black;
   border-radius: 6px;
 }
+div#opinion_text {
+  position: absolute;
+  top: 40px;
+  bottom: 70%;
+  width: 96%;
+  left: 2%;
+  border: 2px solid black;
+  border-radius: 12px;
+  background-color: white;
+}
+table#development {
+  position: absolute;
+  top: 32%;
+  width: 96%;
+  left: 2%;
+  text-align: center;
+  font-size: 20px;
+  border: 2px solid black;
+  border-radius: 20px;
+  background-color: #6d9eebff;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
@@ -2781,6 +2802,11 @@ document.getElementById('{filter_for}').selected = 'selected';
 reserved for <span id='reserved_for'>Oversight</span>
 </div>
 <div id='close_popup'>X</div>
+<div id='opinion_text'>
+</div>
+<table id='development'>
+<tr><td>created<br />_/_/_</td><td><br />--></td><td>voted<br />_/_/_</td></tr<
+</table>
 </article>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
