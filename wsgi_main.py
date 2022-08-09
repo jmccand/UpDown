@@ -2676,6 +2676,43 @@ td.opinion {
 select {
   font-size: 20px;
 }
+article#view_popup {
+  position: absolute;
+  top: 90px;
+  bottom: 3%;
+  border: 3px solid black;
+  border-radius: 6px;
+  width: 96%;
+  left: 2%;
+  box-sizing: border-box;
+  background-color: gray;
+}
+div#close_popup {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 3px;
+  padding-right: 8px;
+  font-size: 25px;
+}
+div#reserved_header {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding: 5px;
+  font-size: 20px;
+  text-align: center;
+  background-color: #ffef90ff;
+  box-sizing: border-box;
+  border-bottom: 2px solid black;
+}
+span#reserved_for {
+  padding: 3px;
+  font-size: 18px;
+  background-color: lightGray;
+  border: 1px solid black;
+  border-radius: 6px;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
@@ -2735,32 +2772,16 @@ document.getElementById('{filter_for}').selected = 'selected';
         for index, opinion in enumerate(results):
             print('for loop!')
             if filter_keep(opinion):
-                self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='updateStats(this);'>
+                self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='view(this);'>
 <tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
-        self.wfile.write(f'''<script>
-const stats = [];
-var prev = null;'''.encode('utf8'))
-        if len(results) > 0:
-            self.wfile.write(f'updateStats(document.getElementById({results[0]}));'.encode('utf8'))
-        self.wfile.write(f'''
-function updateStats(element) {{
-    const this_ID = element.id;
-    document.getElementById('label').innerHTML = stats[this_ID][0];
-    document.getElementById('row1').innerHTML = stats[this_ID][0] + ' on ' + stats[this_ID][2];
-    document.getElementById('care_per').innerHTML = stats[this_ID][3] + '%';
-    document.getElementById('up_per').innerHTML = stats[this_ID][4] + '%';
-    document.getElementById('row4').innerHTML = stats[this_ID][5];
-    document.getElementById('line').style.top = 22 + 64 * stats[this_ID][1] / 6 + '%';
-    document.getElementById('label').style.top = 18 + 64 * stats[this_ID][1] / 6 + '%';
-    if (prev != null) {{
-        prev.style.backgroundColor = '#cfe2f3ff';
-    }}
-    element.style.backgroundColor = 'yellow';
-    prev = element;
-}}
-</script>'''.encode('utf8'))
+        self.wfile.write('''<article id='view_popup'>
+<div id='reserved_header'>
+reserved for <span id='reserved_for'>Oversight</span>
+</div>
+<div id='close_popup'>X</div>
+</article>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
