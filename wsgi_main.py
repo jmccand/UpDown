@@ -2809,12 +2809,16 @@ document.getElementById('{filter_for}').selected = 'selected';
             results.sort(key=lambda x: x.care_agree_percent()[0])
         elif sort_method == 'agree':
             results.sort(key=lambda x: x.care_agree_percent()[1])
-        if filter_for == 'unreserved':
-            results = list(filter(lambda x: x.committee_jurisdiction == None, results))
-        elif filter_for == 'my_opinions':
-            results = list(filter(lambda x: x.activity[0][0] == my_account.user_ID, results))
+        def filter_keep(opinion):
+            if filter_for == 'unreserved':
+                return opinion.committee_jurisdiction == None
+            elif filter_for == 'my_opinions':
+                return opinion.activity[0][0] == my_account.user_ID
+            else:
+                return True
         for index, opinion in enumerate(results):
-            self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='updateStats(this);'>
+            if filter_keep(opinion):
+                self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='updateStats(this);'>
 <tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
