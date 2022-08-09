@@ -2796,11 +2796,7 @@ document.getElementById('{sort_method}').selected = 'selected';
 document.getElementById('{filter_for}').selected = 'selected';
 </script>'''.encode('utf8'))
         self.wfile.write('''<article id='results'>'''.encode('utf8'))
-        results = []
-        if keywords == '':
-            results = list(db.opinions_database.keys())
-        else:
-            results = search(keywords)
+        results = list(db.opinions_database.keys())
         results = [db.opinions_database[str(x)] for x in results]
         results = list(filter(lambda x: x.is_after_voting(), results))
         if sort_method == 'overall':
@@ -2810,6 +2806,10 @@ document.getElementById('{filter_for}').selected = 'selected';
         elif sort_method == 'agree':
             results.sort(key=lambda x: x.care_agree_percent()[1])
         def filter_keep(opinion):
+            print('filter keep called!')
+            if not is_matching(opinion.text, keywords):
+                return False
+            print('onto filters')
             if filter_for == 'unreserved':
                 return opinion.committee_jurisdiction == None
             elif filter_for == 'my_opinions':
@@ -2817,6 +2817,7 @@ document.getElementById('{filter_for}').selected = 'selected';
             else:
                 return True
         for index, opinion in enumerate(results):
+            print('for loop!')
             if filter_keep(opinion):
                 self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='updateStats(this);'>
 <tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
@@ -3159,6 +3160,10 @@ def search(input_text):
     ordered_results = [x[0] for x in tuple_results]
     
     return ordered_results
+
+def is_matching(text1, text2):
+    print(f'{(set(simplify_text(text1)) & set(simplify_text(text2))) != set()=}')
+    return text1 == '' or text2 == '' or (set(simplify_text(text1)) & set(simplify_text(text2))) != set()
 
 # poached from Lucene’s EnglishMinimalStemmer, Apache Software License v2
 def stem(word):
