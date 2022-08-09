@@ -1051,7 +1051,7 @@ div#banner {
                 else:
                     my_votes.append('abstain')
             self.wfile.write(f'''<article id='ballot_label'>
-Ballot Sun 8/7 - Tue 8/9
+Ballot {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
 </article>
 <article id='opinion'>
 <div id='counter'>
