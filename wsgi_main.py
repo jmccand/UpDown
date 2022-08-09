@@ -2775,22 +2775,26 @@ select {
 <td>
 sort by<br />
 <select name='sort' onchange='this.form.submit()'>
-<option value='overall'>overall</option>
-<option value='care'>care</option>
-<option value='agree'>agree</option>
+<option id='overall' value='overall'>overall</option>
+<option id='care' value='care'>care</option>
+<option id='agree' value='agree'>agree</option>
 </select>
 </td>
 <td>
 filter for<br />
 <select name='filter' onchange='this.form.submit()'>
-<option value='no_filter'>no filter</option>
-<option value='unresolved'>unresolved</option>
-<option value='my_opinions'>my opinions</option>
+<option id='no_filter' value='no_filter'>no filter</option>
+<option id='unresolved' value='unresolved'>unresolved</option>
+<option id='my_opinions' value='my_opinions'>my opinions</option>
 </select>
 </td>
 </tr>
 </table>
-</form>'''.encode('utf8'))
+</form>
+<script>
+document.getElementById('{sort_method}').selected = 'selected';
+document.getElementById('{filter_for}').selected = 'selected';
+</script>'''.encode('utf8'))
         self.wfile.write('''<article id='results'>'''.encode('utf8'))
         results = []
         if keywords == '':
@@ -2808,7 +2812,7 @@ filter for<br />
         if filter_for == 'unreserved':
             results = list(filter(lambda x: x.committee_jurisdiction == None, results))
         elif filter_for == 'my_opinions':
-            results = list(filter(lambda x: x.activity[0][0] == my_account.user_ID))
+            results = list(filter(lambda x: x.activity[0][0] == my_account.user_ID, results))
         for index, opinion in enumerate(results):
             self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='updateStats(this);'>
 <tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
