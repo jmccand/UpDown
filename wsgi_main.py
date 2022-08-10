@@ -2734,6 +2734,56 @@ table#development {
   border-radius: 20px;
   background-color: #6d9eebff;
 }
+table#stats {
+  position: absolute;
+  top: 45%;
+  padding: 3px;
+  border: 2px solid black;
+  border-radius: 20px;
+  background-color: #6d9eebff;
+  width: 96%;
+  left: 2%;
+  box-sizing: border-box;
+}
+td#chart {
+  width: 65%;
+}
+p.stat {
+  padding: 8px;
+  background-color: #ffef90ff;
+  border: 1px solid black;
+  border-radius: 12px;
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+div#similar_opinion {
+  position: absolute;
+  bottom: 3%;
+  width: 96%;
+  left: 2%;
+  height: 18%;
+  font-size: 16px;
+  text-align: center;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 24px;
+  box-sizing: border-box;
+  background-color: #ffef90ff;
+}
+div#similar_text {
+  position: absolute;
+  bottom: 0;
+  top: 30px;
+  width: 100%;
+  left: 0;
+  text-align: center;
+  border-top: 1px solid black;
+  border-radius: 0 0 24px 24px;
+  box-sizing: border-box;
+  background-color: white;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
@@ -2805,8 +2855,24 @@ reserved for <span id='reserved_for'>Oversight</span>
 <div id='opinion_text'>
 </div>
 <table id='development'>
-<tr><td>created<br />_/_/_</td><td><br />--></td><td>voted<br />_/_/_</td></tr<
+<tr><td>created<br />_/_/_</td><td>--></td><td>voted<br />_/_/_</td></tr<
 </table>
+<table id='stats'>
+<tr>
+<td id='chart'>chart</td>
+<td>
+<p class='stat'>80% care</p>
+<p class='stat'>90% agree</p>
+<p class='stat'>70% overall</p>
+</td>
+</tr>
+</table>
+<div id='similar_opinion'>
+Most similar opinion:
+<div id='similar_text'>
+similar
+</div>
+</div>
 </article>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
