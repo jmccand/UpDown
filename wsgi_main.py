@@ -2907,7 +2907,11 @@ const config = {
       },
       title: {
         display: true,
-        text: 'Care'
+        text: 'Care',
+        color: 'black',
+        font: {
+          size: 18
+        }
       }
     }
   },
