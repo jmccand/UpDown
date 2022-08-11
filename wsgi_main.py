@@ -2737,6 +2737,7 @@ table#development {
 table#stats {
   position: absolute;
   top: 45%;
+  height: 100px;
   padding: 3px;
   border: 2px solid black;
   border-radius: 20px;
@@ -2745,8 +2746,14 @@ table#stats {
   left: 2%;
   box-sizing: border-box;
 }
-td#chart {
+td#chart_td {
   width: 65%;
+}
+canvas#chart {
+  position: absolute;
+  top: 0;
+  left: 25px;
+  width: 45%;
 }
 p.stat {
   padding: 8px;
@@ -2859,7 +2866,10 @@ reserved for <span id='reserved_for'>Oversight</span>
 </table>
 <table id='stats'>
 <tr>
-<td id='chart'>chart</td>
+<td id='chart_td'>
+<canvas id='chart'>
+</canvas>
+</td>
 <td>
 <p class='stat'>80% care</p>
 <p class='stat'>90% agree</p>
@@ -2873,7 +2883,40 @@ Most similar opinion:
 similar
 </div>
 </div>
-</article>'''.encode('utf8'))
+</article>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = {
+  labels: ['care', ''],
+  datasets: [
+    {
+      label: 'Dataset 1',
+      data: [80, 20],
+      backgroundColor: ['black', 'white']
+    }
+  ]
+};
+const config = {
+  type: 'doughnut',
+  data: data,
+  options: {
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Care'
+      }
+    }
+  },
+};
+const myChart = new Chart(
+    document.getElementById('chart'),
+    config
+);
+</script>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
