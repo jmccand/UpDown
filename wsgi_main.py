@@ -2901,6 +2901,7 @@ const config = {
   data: data,
   options: {
     responsive: false,
+    cutout: 40,
     plugins: {
       legend: {
         display: false
