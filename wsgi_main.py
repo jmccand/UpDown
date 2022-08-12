@@ -144,6 +144,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/already_scheduled'):
                     self.path_root = '/already_scheduled'
                     self.already_scheduled()
+                elif self.path.startswith('/leaderboard_lookup'):
+                    self.path_root = '/leaderboard_lookup'
+                    self.handle_leaderboard_lookup()
                 elif self.path.startswith('/leaderboard'):
                     self.path_root = '/leaderboard'
                     self.leaderboard_page()
@@ -2787,7 +2790,7 @@ div#similar_opinion {
   width: 96%;
   left: 2%;
   height: 18%;
-  font-size: 16px;
+  font-size: 20px;
   text-align: center;
   padding: 5px;
   border: 2px solid black;
@@ -3201,7 +3204,35 @@ function updateStats(element) {{
                 response = [selected, unselected[:20]]
                 self.start_response('200 OK', [])
                 self.wfile.write(json.dumps(response).encode('utf8'))
-                
+
+    def handle_leaderboard_lookup(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        if 'opinion_ID' in url_arguments:
+            opinion_ID = url_arguments['opinion_ID'][0]
+            opinion = db.opinions_database[opinion_ID]
+            if opinion.is_after_voting():
+                # text
+                response = [opinion.text]
+                # creation date
+                response.append(opinion.activity[0][1].strftime('%-m/%-d/%Y'))
+                # voting date
+                response.append(opinion.activity[2][0][0].strftime('%-m/%-d/%Y'))
+                # care, agree, overall percentages and rankings
+                care_p, agree_p = opinion.care_agree_percent()
+                overall_p = care_p * agree_p
+                care_r, agree_r, overall_r = opinion.rankings()
+                response.extend([[care_p*100, care_r], [agree_p*100, agree_r], [overall_p*100, overall_r]])
+                # similar opinion
+                similar_opinion_ID = search(opinion.text)[0]
+                similar_opinion_text = db.opinions_database[similar_opinion_ID]
+                response.append([similar_opinion_ID, similar_opinion_text])
+                self.start_response('200 OK', [])
+                self.wfile.write(json.dumps(response).encode('utf8'))
+            else:
+                self.start_response('400 BAD REQUEST', [])
+        else:
+            self.start_response('400 BAD REQUEST', [])
             
                 
 class invalidCookie(ValueError):
