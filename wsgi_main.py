@@ -2751,9 +2751,25 @@ td#chart_td {
 }
 canvas#chart {
   position: absolute;
-  top: 0;
-  left: 25px;
-  width: 45%;
+  top: 15px;
+  left: 40px;
+  width: 40%;
+}
+div#chart_cover {
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  width: 40%;
+  height: 134px;
+}
+#chart_cover p {
+  position: absolute;
+  margin: 0;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
 }
 p.stat {
   padding: 8px;
@@ -2869,6 +2885,9 @@ reserved for <span id='reserved_for'>Oversight</span>
 <td id='chart_td'>
 <canvas id='chart'>
 </canvas>
+<div id='chart_cover'>
+<p>2nd</p>
+</div>
 </td>
 <td>
 <p class='stat'>80% care</p>
@@ -2901,13 +2920,13 @@ const config = {
   data: data,
   options: {
     responsive: false,
-    cutout: 40,
+    cutout: 50,
     plugins: {
       legend: {
         display: false
       },
       title: {
-        display: true,
+        display: false,
         text: 'Care',
         color: 'black',
         font: {
