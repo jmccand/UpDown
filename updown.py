@@ -62,3 +62,20 @@ class Opinion:
             see_day = today_date
 
         return self.scheduled and self.activity[2][0][0] < today_date and str(self.ID) not in db.opinions_calendar.get(str(see_day), set())
+
+    def rankings(self):
+        my_care, my_agree = self.care_agree_percent()
+        my_overall = my_care * my_agree
+        care_rank = 1
+        agree_rank = 1
+        overall_rank = 1
+        for opinion in db.opinions_database.values():
+            this_care, this_agree = opinion.care_agree_percent()
+            this_overall = this_care * this_agree
+            if this_care > my_care:
+                care_rank += 1
+            if this_agree > my_agree:
+                agree_rank += 1
+            if this_overall > my_overall:
+                overall_rank += 1
+        return care_rank, agree_rank, overall_rank
