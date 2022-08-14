@@ -2689,6 +2689,7 @@ article#view_popup {
   left: 2%;
   box-sizing: border-box;
   background-color: gray;
+  display: none;
 }
 div#close_popup {
   position: absolute;
@@ -2869,7 +2870,7 @@ document.getElementById('{filter_for}').selected = 'selected';
         for index, opinion in enumerate(results):
             print('for loop!')
             if filter_keep(opinion):
-                self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='view(this);'>
+                self.wfile.write(f'''<table id='{opinion.ID}' class='result' onclick='openpop(this);'>
 <tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
