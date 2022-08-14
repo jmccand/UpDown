@@ -2894,9 +2894,9 @@ reserved for <span id='reserved_for'>Oversight</span>
 </div>
 </td>
 <td>
-<p class='stat' id='care'>80% care</p>
-<p class='stat' id='agree'>90% agree</p>
-<p class='stat' id='overall'>70% overall</p>
+<p class='stat' id='care_stat'>80% care</p>
+<p class='stat' id='agree_stat'>90% agree</p>
+<p class='stat' id='overall_stat'>70% overall</p>
 </td>
 </tr>
 </table>
@@ -2919,9 +2919,9 @@ function openpop(element) {{
             document.getElementById('opinion_text').innerHTML = response[0];
             document.getElementById('created').innerHTML = 'created<br />' + response[1];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
-            document.getElementById('care').innerHTML = response[3][0] + ' care';
-            document.getElementById('agree').innerHTML = response[4][0] + ' agree';
-            document.getElementById('overall').innerHTML = response[5][0] + ' overall';
+            document.getElementById('care_stat').innerHTML = response[3][0] + ' care';
+            document.getElementById('agree_stat').innerHTML = response[4][0] + ' agree';
+            document.getElementById('overall_stat').innerHTML = response[5][0] + ' overall';
             document.getElementById('similar_text').innerHTML = response[6][1];
             document.getElementById('view_popup').style.display = 'initial';
         }}
@@ -2929,8 +2929,10 @@ function openpop(element) {{
 }}
 function closepop() {{
     document.getElementById('view_popup').style.display = 'none';
-}}'''.encode('utf8'))
-        self.wfile.write('''const data = {
+}}
+</script>'''.encode('utf8'))
+        self.wfile.write('''<script>
+var data = {
   labels: ['care', ''],
   datasets: [
     {
@@ -2940,7 +2942,7 @@ function closepop() {{
     }
   ]
 };
-const config = {
+var config = {
   type: 'doughnut',
   data: data,
   options: {
@@ -2961,7 +2963,7 @@ const config = {
     }
   },
 };
-const myChart = new Chart(
+var myChart = new Chart(
     document.getElementById('chart'),
     config
 );
