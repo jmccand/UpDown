@@ -58,7 +58,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             print('\npath: ' + self.path)
             print(f'{self.my_cookies}')
 
-        invalid_cookie = self.identify_user() == None and self.path != 'favicon.ico'
+        invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
         if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
@@ -567,7 +567,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                         # print(f'warning non-viewed user is using verification link! {db.user_ids[db.verification_links[link_uuid]].email}')
                         if verified_account.verified_email:
                             def update_cookie_database():
-                                db.cookie_database[self.my_cookies['code']] = verified_account.user_ID
+                                db.cookie_database[self.my_cookies['code'].value] = verified_account.user_ID
                             self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
                             def update_user_ids():
@@ -2873,15 +2873,15 @@ document.getElementById('{filter_for}').selected = 'selected';
 <tr><td class='rank'>{index + 1}.</td><td class='opinion'>{opinion.text}</td></tr>
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
-        self.wfile.write('''<article id='view_popup'>
+        self.wfile.write(f'''<article id='view_popup'>
 <div id='reserved_header'>
 reserved for <span id='reserved_for'>Oversight</span>
 </div>
-<div id='close_popup'>X</div>
+<div id='close_popup' onclick='closepop()'>X</div>
 <div id='opinion_text'>
 </div>
 <table id='development'>
-<tr><td>created<br />_/_/_</td><td>--></td><td>voted<br />_/_/_</td></tr<
+<tr><td id='created'>created<br />_/_/_</td><td>--></td><td id='voted'>voted<br />_/_/_</td></tr>
 </table>
 <table id='stats'>
 <tr>
@@ -2893,9 +2893,9 @@ reserved for <span id='reserved_for'>Oversight</span>
 </div>
 </td>
 <td>
-<p class='stat'>80% care</p>
-<p class='stat'>90% agree</p>
-<p class='stat'>70% overall</p>
+<p class='stat' id='care'>80% care</p>
+<p class='stat' id='agree'>90% agree</p>
+<p class='stat' id='overall'>70% overall</p>
 </td>
 </tr>
 </table>
@@ -2908,7 +2908,28 @@ similar
 </article>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const data = {
+function openpop(element) {{
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
+    xhttp.send();
+    xhttp.onreadystatechange = function() {{
+        if (this.readyState == 4 && this.status == 200) {{
+            var response = JSON.parse(this.responseText);
+            document.getElementById('opinion_text').innerHTML = response[0];
+            document.getElementById('created').innerHTML = 'created<br />' + response[1];
+            document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
+            document.getElementById('care').innerHTML = response[3][0] + ' care';
+            document.getElementById('agree').innerHTML = response[4][0] + ' agree';
+            document.getElementById('overall').innerHTML = response[5][0] + ' overall';
+            document.getElementById('similar_text').innerHTML = response[6][1];
+            document.getElementById('view_popup').style.display = 'initial';
+        }}
+    }};
+}}
+function closepop() {{
+    document.getElementById('view_popup').style.display = 'none';
+}}'''.encode('utf8'))
+        self.wfile.write('''const data = {
   labels: ['care', ''],
   datasets: [
     {
