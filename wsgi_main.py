@@ -90,9 +90,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/about_the_senate':
                     self.path_root = '/about_the_senate'
                     self.about_the_senate_page()
-                elif self.path == '/meet_the_senators':
-                    self.path_root = '/meet_the_senators'
-                    self.meet_the_senators_page()
                 elif self.path.startswith('/vote'):
                     self.path_root = '/vote'
                     self.vote()
@@ -111,21 +108,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/senate':
                     self.path_root = '/senate'
                     self.senate_page()
-                elif self.path == '/schedule_opinions':
-                    self.path_root = '/schedule_opinions'
-                    self.schedule_opinions_page()
-                elif self.path.startswith('/schedule_date'):
-                    self.path_root = '/schedule_date'
-                    self.schedule_date_page()
-                elif self.path.startswith('/schedule'):
-                    self.path_root = '/schedule'
-                    self.schedule()
-                elif self.path.startswith('/unschedule'):
-                    self.path_root = '/unschedule'
-                    self.unschedule()
-                elif self.path.startswith('/track_opinions'):
-                    self.path_root = '/track_opinions'
-                    self.track_opinions_page()
                 elif self.path == '/forward_opinions':
                     self.path_root = '/forward_opinions'
                     self.forward_opinions_page()
@@ -256,14 +238,10 @@ header {
                 title = 'Vote!'
             elif self.path_root == '/submit_opinions':
                 title = 'Submit'
-            elif self.path_root == '/track_opinions':
-                title = 'Track!'
             elif self.path_root == '/senate':
                 title = 'Senate'
             elif self.path_root == '/approve_opinions':
                 title = 'Approve'
-            elif self.path_root == '/schedule_opinions':
-                title = 'Schedule'
             elif self.path_root == '/forward_opinions':
                 title = 'Forward'
             elif self.path_root == '/view_committee':
@@ -282,13 +260,11 @@ header {
         if my_account != None:
             self.wfile.write('''<a href='/'>Voice Your Opinions</a>
 <a href='/submit_opinions'>Submit an Opinion</a>
-<a href='/track_opinions'>Track an Opinion</a>
 <a href='/leaderboard'>Leaderboard</a>
 <a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
             if my_account.email in local.MODERATORS and my_account.verified_email:
                 self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
             if my_account.email in local.ADMINS and my_account.verified_email:
-                self.wfile.write('''<a href='/schedule_opinions'>Schedule Opinions</a>'''.encode('utf8'))
                 self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members and my_account.verified_email:
