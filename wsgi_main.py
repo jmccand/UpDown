@@ -2727,6 +2727,16 @@ div#opinion_text {
   border-radius: 12px;
   background-color: white;
 }
+#opinion_text p {
+  position: absolute;
+  margin: 0;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  font-size: 25px;
+  text-align: center;
+}
 table#development {
   position: absolute;
   top: 32%;
@@ -2806,6 +2816,7 @@ div#similar_text {
   width: 100%;
   left: 0;
   text-align: center;
+  font-size: 18px;
   border-top: 1px solid black;
   border-radius: 0 0 24px 24px;
   box-sizing: border-box;
@@ -2890,7 +2901,7 @@ reserved for <span id='reserved_for'>Oversight</span>
 <canvas id='chart'>
 </canvas>
 <div id='chart_cover' onclick='stepChart()'>
-<p>2nd</p>
+<p></p>
 </div>
 </td>
 <td>
@@ -2903,7 +2914,6 @@ reserved for <span id='reserved_for'>Oversight</span>
 <div id='similar_opinion'>
 Most similar opinion:
 <div id='similar_text'>
-similar
 </div>
 </div>
 </article>'''.encode('utf8'))
@@ -2952,7 +2962,7 @@ function openpop(element) {{
     xhttp.onreadystatechange = function() {{
         if (this.readyState == 4 && this.status == 200) {{
             response = JSON.parse(this.responseText);
-            document.getElementById('opinion_text').innerHTML = response[0];
+            document.getElementById('opinion_text').innerHTML = '<p>' + response[0] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[1];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
             document.getElementById('care_stat').innerHTML = response[3][0] + ' care';
