@@ -2889,7 +2889,7 @@ reserved for <span id='reserved_for'>Oversight</span>
 <td id='chart_td'>
 <canvas id='chart'>
 </canvas>
-<div id='chart_cover'>
+<div id='chart_cover' onclick='stepChart()'>
 <p>2nd</p>
 </div>
 </td>
@@ -2944,13 +2944,14 @@ var myChart = null;
 </script>'''.encode('utf8'))
         self.wfile.write(f'''<script>
 let stepIndex = 0;
+var response;
 function openpop(element) {{
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
     xhttp.send();
     xhttp.onreadystatechange = function() {{
         if (this.readyState == 4 && this.status == 200) {{
-            var response = JSON.parse(this.responseText);
+            response = JSON.parse(this.responseText);
             document.getElementById('opinion_text').innerHTML = response[0];
             document.getElementById('created').innerHTML = 'created<br />' + response[1];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
@@ -2969,6 +2970,13 @@ function openpop(element) {{
             document.getElementById('chart_cover').innerHTML = '<p>' + response[3 + stepIndex][1] + '</p>';
         }}
     }};
+}}
+function stepChart() {{
+    stepIndex++;
+    stepIndex = stepIndex % 3;
+    myChart.data.datasets[0].data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
+    myChart.update();
+    document.getElementById('chart_cover').innerHTML = '<p>' + response[3 + stepIndex][1] + '</p>';
 }}
 function closepop() {{
     document.getElementById('view_popup').style.display = 'none';
