@@ -2965,6 +2965,8 @@ function openpop(element) {{
             }}
             myChart.data.datasets[0].data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
             myChart.update();
+
+            document.getElementById('chart_cover').innerHTML = '<p>' + response[3 + stepIndex][1] + '</p>';
         }}
     }};
 }}
