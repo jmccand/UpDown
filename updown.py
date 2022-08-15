@@ -9,7 +9,7 @@ class User:
         self.user_ID = user_ID
         self.activity = activity
         self.votes = votes
-        self.verified_email = verified_email
+        self.verified_result = verified_result
         self.obselete = obselete
 
 class Opinion:
@@ -21,7 +21,9 @@ class Opinion:
         self.activity = activity
         self.approved = approved
         self.scheduled = scheduled
-        self.committee_jurisdiction = committee_jurisdiction
+        self.reserved_for = reserved_for
+        self.bill = bill
+        self.resolved = resolved
 
     def count_votes(self):
         up_votes = 0
