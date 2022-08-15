@@ -2851,11 +2851,11 @@ document.getElementById('{filter_for}').selected = 'selected';
         results = [db.opinions_database[str(x)] for x in results]
         results = list(filter(lambda x: x.is_after_voting(), results))
         if sort_method == 'overall':
-            results.sort(key=lambda x: x.care_agree_percent()[0] * x.care_agree_percent()[1])
+            results.sort(key=lambda x: -1 * x.care_agree_percent()[0] * x.care_agree_percent()[1])
         elif sort_method == 'care':
-            results.sort(key=lambda x: x.care_agree_percent()[0])
+            results.sort(key=lambda x: -1 * x.care_agree_percent()[0])
         elif sort_method == 'agree':
-            results.sort(key=lambda x: x.care_agree_percent()[1])
+            results.sort(key=lambda x: -1 * x.care_agree_percent()[1])
         def filter_keep(opinion):
             print('filter keep called!')
             if not is_matching(opinion.text, keywords):
