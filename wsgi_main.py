@@ -176,8 +176,26 @@ header {
   height: 100%;
   z-index: 1;
   border-right: 2px solid black;
-}
-#title {
+  border-bottom: 2px solid black;
+  box-sizing: border-box;
+}'''.encode('utf8'))
+        if self.path_root == '/leaderboard':
+            self.wfile.write('''#title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  background-color: #ffef90ff;
+  font-size: 40px;
+  padding: 10px;
+  font-family: 'Times New Roman';
+  border-bottom: 2px solid black;
+  box-sizing: border-box;
+}'''.encode('utf8'))
+        else:
+            self.wfile.write('''#title {
   position: absolute;
   top: 0;
   left: 0;
@@ -186,16 +204,20 @@ header {
   text-align: center;
   background-color: #ffef90ff;
   font-size: 50px;
+  padding: 5px;
   font-family: 'Times New Roman';
   border-bottom: 2px solid black;
-}
-#logo {
+  box-sizing: border-box;
+}'''.encode('utf8'))
+        self.wfile.write('''#logo {
   position: absolute;
   height: 100%;
   top: 0;
   right: 0;
   z-index: 1;
   border-left: 2px solid black;
+  border-bottom: 2px solid black;
+  box-sizing: border-box;
 }
 #menu {
   width: 0;
@@ -214,9 +236,9 @@ header {
   display: block;
   white-space: nowrap;
   overflow: hidden;
-  padding: 10px;
+  padding: 15px;
   color: black;
-  font-size: 20px;
+  font-size: 25px;
   text-decoration: none;
 }
 #menu #x_menu {
@@ -235,7 +257,7 @@ header {
             title = 'Welcome'
         else:
             if self.path_root == '/':
-                title = 'Vote!'
+                title = 'Ballot'
             elif self.path_root == '/submit_opinions':
                 title = 'Submit'
             elif self.path_root == '/senate':
@@ -244,11 +266,11 @@ header {
                 title = 'Approve'
             elif self.path_root == '/forward_opinions':
                 title = 'Forward'
+            elif self.path_root == '/leaderboard':
+                title = 'Leaderboard'
             elif self.path_root == '/view_committee':
                 url_arguments = urllib.parse.parse_qs(self.query_string)
                 title = url_arguments['committee'][0]
-            elif self.path_root == '/leaderboard':
-                title = 'Leaderboard'
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
 <span id='title'>
@@ -258,14 +280,14 @@ header {
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
         if my_account != None:
-            self.wfile.write('''<a href='/'>Voice Your Opinions</a>
-<a href='/submit_opinions'>Submit an Opinion</a>
+            self.wfile.write('''<a href='/'>Ballot</a>
+<a href='/submit_opinions'>Submit</a>
 <a href='/leaderboard'>Leaderboard</a>
-<a href='/senate'>The Student Faculty Senate</a>'''.encode('utf8'))
+<a href='/senate'>The Senate</a>'''.encode('utf8'))
             if my_account.email in local.MODERATORS and my_account.verified_email:
-                self.wfile.write('''<a href='/approve_opinions'>Approve Opinions</a>'''.encode('utf8'))
+                self.wfile.write('''<a href='/approve_opinions'>Approve</a>'''.encode('utf8'))
             if my_account.email in local.ADMINS and my_account.verified_email:
-                self.wfile.write('''<a href='/forward_opinions'>Forward Opinions</a>'''.encode('utf8'))
+                self.wfile.write('''<a href='/forward_opinions'>Forward</a>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members and my_account.verified_email:
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
