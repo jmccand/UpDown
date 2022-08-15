@@ -2914,7 +2914,7 @@ var data = {
   datasets: [
     {
       label: 'Dataset 1',
-      data: [80, 20],
+      data: [100, 0],
       backgroundColor: ['black', 'white']
     }
   ]
@@ -2963,8 +2963,7 @@ function openpop(element) {{
             if (myChart == null) {{
                 myChart = new Chart(document.getElementById('chart'), config);
             }}
-            myChart.data.datasets.data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
-            console.log([response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]]);
+            myChart.data.datasets[0].data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
             myChart.update();
         }}
     }};
