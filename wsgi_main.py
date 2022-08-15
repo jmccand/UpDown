@@ -2906,32 +2906,9 @@ Most similar opinion:
 similar
 </div>
 </div>
-</article>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</article>'''.encode('utf8'))
+        self.wfile.write('''<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function openpop(element) {{
-    var xhttp = new XMLHttpRequest();
-    xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
-    xhttp.send();
-    xhttp.onreadystatechange = function() {{
-        if (this.readyState == 4 && this.status == 200) {{
-            var response = JSON.parse(this.responseText);
-            document.getElementById('opinion_text').innerHTML = response[0];
-            document.getElementById('created').innerHTML = 'created<br />' + response[1];
-            document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
-            document.getElementById('care_stat').innerHTML = response[3][0] + ' care';
-            document.getElementById('agree_stat').innerHTML = response[4][0] + ' agree';
-            document.getElementById('overall_stat').innerHTML = response[5][0] + ' overall';
-            document.getElementById('similar_text').innerHTML = response[6][1];
-            document.getElementById('view_popup').style.display = 'initial';
-        }}
-    }};
-}}
-function closepop() {{
-    document.getElementById('view_popup').style.display = 'none';
-}}
-</script>'''.encode('utf8'))
-        self.wfile.write('''<script>
 var data = {
   labels: ['care', ''],
   datasets: [
@@ -2963,10 +2940,38 @@ var config = {
     }
   },
 };
-var myChart = new Chart(
-    document.getElementById('chart'),
-    config
-);
+var myChart = null;
+</script>'''.encode('utf8'))
+        self.wfile.write(f'''<script>
+let stepIndex = 0;
+function openpop(element) {{
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
+    xhttp.send();
+    xhttp.onreadystatechange = function() {{
+        if (this.readyState == 4 && this.status == 200) {{
+            var response = JSON.parse(this.responseText);
+            document.getElementById('opinion_text').innerHTML = response[0];
+            document.getElementById('created').innerHTML = 'created<br />' + response[1];
+            document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
+            document.getElementById('care_stat').innerHTML = response[3][0] + ' care';
+            document.getElementById('agree_stat').innerHTML = response[4][0] + ' agree';
+            document.getElementById('overall_stat').innerHTML = response[5][0] + ' overall';
+            document.getElementById('similar_text').innerHTML = response[6][1];
+            document.getElementById('view_popup').style.display = 'initial';
+            stepIndex = 0;
+            if (myChart == null) {{
+                myChart = new Chart(document.getElementById('chart'), config);
+            }}
+            myChart.data.datasets.data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
+            console.log([response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]]);
+            myChart.update();
+        }}
+    }};
+}}
+function closepop() {{
+    document.getElementById('view_popup').style.display = 'none';
+}}
 </script>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
