@@ -3,7 +3,7 @@ import datetime
 
 class User:
 
-    def __init__(self, email, user_ID, activity={}, votes={}, verified_email=False, obselete=False):
+    def __init__(self, email, user_ID, activity={}, votes={}, verified_result=False, obselete=False):
 
         self.email = email
         self.user_ID = user_ID
@@ -14,7 +14,7 @@ class User:
 
 class Opinion:
 
-    def __init__(self, ID, text, activity, approved=None, scheduled=False, committee_jurisdiction=None):
+    def __init__(self, ID, text, activity, approved=None, scheduled=False, reserved_for=None, bill='', resolved=False):
 
         self.ID = ID
         self.text = text
@@ -79,3 +79,4 @@ class Opinion:
             if this_overall > my_overall:
                 overall_rank += 1
         return care_rank, agree_rank, overall_rank
+ 
