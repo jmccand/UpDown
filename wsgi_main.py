@@ -3250,7 +3250,7 @@ function updateStats(element) {{
                 response.append(opinion.activity[2][0][0].strftime('%-m/%-d/%Y'))
                 # care, agree, overall percentages and rankings
                 care_p, agree_p = opinion.care_agree_percent()
-                overall_p = care_p * agree_p
+                overall_p = care_p * agree_p / 100
                 care_r, agree_r, overall_r = opinion.rankings()
                 response.extend([[care_p, care_r], [agree_p, agree_r], [overall_p, overall_r]])
                 # similar opinion
