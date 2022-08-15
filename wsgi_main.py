@@ -3251,7 +3251,7 @@ function updateStats(element) {{
                 care_p, agree_p = opinion.care_agree_percent()
                 overall_p = care_p * agree_p
                 care_r, agree_r, overall_r = opinion.rankings()
-                response.extend([[care_p*100, care_r], [agree_p*100, agree_r], [overall_p*100, overall_r]])
+                response.extend([[care_p, care_r], [agree_p, agree_r], [overall_p, overall_r]])
                 # similar opinion
                 similar_opinion_ID = list(filter(lambda x: x != opinion.ID, search(opinion.text)))[0]
                 similar_opinion_text = db.opinions_database[str(similar_opinion_ID)].text
