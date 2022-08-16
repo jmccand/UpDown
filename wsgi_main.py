@@ -284,12 +284,12 @@ header {
 <a href='/submit_opinions'>Submit</a>
 <a href='/leaderboard'>Leaderboard</a>
 <a href='/senate'>The Senate</a>'''.encode('utf8'))
-            if my_account.email in local.MODERATORS and my_account.verified_email:
+            if my_account.email in local.MODERATORS and my_account.verified_result == True:
                 self.wfile.write('''<a href='/approve_opinions'>Approve</a>'''.encode('utf8'))
-            if my_account.email in local.ADMINS and my_account.verified_email:
+            if my_account.email in local.ADMINS and my_account.verified_result == True:
                 self.wfile.write('''<a href='/forward_opinions'>Forward</a>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
-                if my_account.email in members and my_account.verified_email:
+                if my_account.email in members and my_account.verified_result == True:
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
@@ -563,7 +563,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 if my_account != None:
                     if my_account != verified_account:
                         # print(f'warning non-viewed user is using verification link! {db.user_ids[db.verification_links[link_uuid]].email}')
-                        if verified_account.verified_email:
+                        if verified_account.verified_result == True:
                             def update_cookie_database():
                                 db.cookie_database[self.my_cookies['code'].value] = verified_account.user_ID
                             self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
@@ -581,7 +581,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                             self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
 
                             def update_user_ids():
-                                my_account.verified_email = True
+                                my_account.verified_result = True
                                 db.user_ids[my_account.user_ID] = my_account
 
                             self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
@@ -589,7 +589,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                             
                     else:
                         def update_user_ids():
-                            my_account.verified_email = True
+                            my_account.verified_result = True
                             db.user_ids[my_account.user_ID] = my_account
 
                         self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
@@ -1287,7 +1287,7 @@ function updateSearch() {
 
     def approve_opinions_page(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -1889,7 +1889,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
     def approve(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -1929,7 +1929,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
         see_month_str = url_arguments.get('month', [datetime.date.today().strftime('%Y-%m')])[0]
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -2169,7 +2169,7 @@ function close_pop() {
 
     def schedule_date_page(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2296,7 +2296,7 @@ function update_unselected(element) {{
 
     def schedule(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2343,7 +2343,7 @@ function update_unselected(element) {{
 
     def unschedule(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2871,7 +2871,7 @@ document.getElementById('{filter_for}').selected = 'selected';
                 return False
             print('onto filters')
             if filter_for == 'unreserved':
-                return opinion.committee_jurisdiction == None
+                return opinion.reserved_for == None
             elif filter_for == 'my_opinions':
                 return opinion.activity[0][0] == my_account.user_ID
             else:
@@ -2996,7 +2996,7 @@ function closepop() {{
 
     def forward_opinions_page(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -3040,7 +3040,7 @@ tr.unselected {
                     self.wfile.write(f'''<tr><td colspan='3'>{this_date}</td></tr>'''.encode('utf8'))
                     for opinion_ID in list(opinion_set):
                         opinion = db.opinions_database[opinion_ID]
-                        if opinion.committee_jurisdiction == None:
+                        if opinion.reserved_for == None:
                             up_votes, down_votes, abstains = opinion.count_votes()
                             up_percent = 'N/A'
                             if up_votes + down_votes != 0:
@@ -3083,7 +3083,7 @@ function forward(element) {{
 
     def forward(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'opinion_ID' in url_arguments and 'committee' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -3098,7 +3098,7 @@ function forward(element) {{
                     else:
                         opinion.activity[3].append((my_account.email, committee, datetime.datetime.now()))
 
-                    opinion.committee_jurisdiction = committee
+                    opinion.reserved_for = committee
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
                     self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
@@ -3110,7 +3110,7 @@ function forward(element) {{
         url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments['committee'][0]
         if committee in ('Executive', 'Oversight'):
-            if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_email:
+            if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_result == True:
                 self.start_response('200 OK', [])
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
@@ -3162,7 +3162,7 @@ Voted for on <span id='stat8'></span>.'''.encode('utf8'))
                     return datetime.date(dt.year, dt.month, dt.day)
                 json_stats = {}
                 for opinion_ID, opinion in db.opinions_database.items():
-                    if opinion.committee_jurisdiction == committee:
+                    if opinion.reserved_for == committee:
                         json_stats[opinion_ID] = []
                         up_votes, down_votes, abstains = opinion.count_votes()
                         up_percent = 'N/A'
@@ -3234,7 +3234,7 @@ function updateStats(element) {{
 
     def already_scheduled(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_email:
+        if my_account.email in local.ADMINS and my_account.verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 see_date = url_arguments['date'][0]
@@ -3426,15 +3426,14 @@ def auto_schedule():
                     with db.opinions_database_lock:
                         db.opinions_database[opinion_ID] = opinion
                         db.opinions_database.sync()
-
-
+    
 def main():
     print('Student Change Web App... running...')
 
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_ids}')
         for this_user_ID, user in db.user_ids.items():
-            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_email})')
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_result})')
 
         print(f'\n{db.cookie_database}')
         for cookie, this_user_ID in db.cookie_database.items():
