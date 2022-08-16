@@ -2960,31 +2960,31 @@ function openpop(element) {{
     xhttp.onreadystatechange = function() {{
         if (this.readyState == 4 && this.status == 200) {{
             response = JSON.parse(this.responseText);
-            document.getElementById('opinion_text').innerHTML = '<p>' + response[0] + '</p>';
-            document.getElementById('created').innerHTML = 'created<br />' + response[1];
-            document.getElementById('voted').innerHTML = 'voted<br />' + response[2];
-            document.getElementById('care_stat').innerHTML = response[3][0] + ' care';
-            document.getElementById('agree_stat').innerHTML = response[4][0] + ' agree';
-            document.getElementById('overall_stat').innerHTML = response[5][0] + ' overall';
-            document.getElementById('similar_text').innerHTML = response[6][1];
+            document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
+            document.getElementById('created').innerHTML = 'created<br />' + response[2];
+            document.getElementById('voted').innerHTML = 'voted<br />' + response[3];
+            document.getElementById('care_stat').innerHTML = response[4][0] + ' care';
+            document.getElementById('agree_stat').innerHTML = response[5][0] + ' agree';
+            document.getElementById('overall_stat').innerHTML = response[6][0] + ' overall';
+            document.getElementById('similar_text').innerHTML = response[7][1];
             document.getElementById('view_popup').style.display = 'initial';
             stepIndex = 0;
             if (myChart == null) {{
                 myChart = new Chart(document.getElementById('chart'), config);
             }}
-            myChart.data.datasets[0].data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
+            myChart.data.datasets[0].data = [response[4 + stepIndex][0], 100 - response[4 + stepIndex][0]];
             myChart.update();
 
-            document.getElementById('chart_cover').innerHTML = '<p>' + response[3 + stepIndex][1] + '</p>';
+            document.getElementById('chart_cover').innerHTML = '<p>' + response[4 + stepIndex][1] + '</p>';
         }}
     }};
 }}
 function stepChart() {{
     stepIndex++;
     stepIndex = stepIndex % 3;
-    myChart.data.datasets[0].data = [response[3 + stepIndex][0], 100 - response[3 + stepIndex][0]];
+    myChart.data.datasets[0].data = [response[4 + stepIndex][0], 100 - response[4 + stepIndex][0]];
     myChart.update();
-    document.getElementById('chart_cover').innerHTML = '<p>' + response[3 + stepIndex][1] + '</p>';
+    document.getElementById('chart_cover').innerHTML = '<p>' + response[4 + stepIndex][1] + '</p>';
 }}
 function closepop() {{
     document.getElementById('view_popup').style.display = 'none';
@@ -3258,8 +3258,17 @@ function updateStats(element) {{
             opinion_ID = url_arguments['opinion_ID'][0]
             opinion = db.opinions_database[opinion_ID]
             if opinion.is_after_voting():
+                response = [[]]
+                
+                # dropdown
+                isSenator = False
+                for committee, members in local.COMMITTEE_MEMBERS.items():
+                    if my_account.email in members:
+                        isSenator = True
+                        response[0].append((committee, reserve_count(committee)))
+                            
                 # text
-                response = [opinion.text]
+                response.append(opinion.text)
                 # creation date
                 response.append(opinion.activity[0][1].strftime('%-m/%-d/%Y'))
                 # voting date
@@ -3426,7 +3435,14 @@ def auto_schedule():
                     with db.opinions_database_lock:
                         db.opinions_database[opinion_ID] = opinion
                         db.opinions_database.sync()
-    
+
+def reserve_count(committee):
+    cur_count = 0
+    for opinion_ID, opinion in db.opinions_database.items():
+        if opinion.reserved_for == committee and not opinion.resolved:
+            cur_count += 1
+    return cur_count
+
 def main():
     print('Student Change Web App... running...')
 
