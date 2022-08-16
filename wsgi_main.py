@@ -2889,9 +2889,21 @@ document.getElementById('{filter_for}').selected = 'selected';
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<article id='view_popup'>
-<div id='reserved_header'>
-reserved for <span id='reserved_for'>Oversight</span>
-</div>
+<div id='reserved_header'>'''.encode('utf8'))
+        if isSenator:
+            self.wfile.write('''reserved for <select id='reserved_for'>
+<option id='unreserved' value='unreserved'>unreserved</option>'''.encode('utf8'))
+            for committee, members in local.COMMITTEE_MEMBERS.items():
+                if my_account.email in members:
+                    reserved_count = reserve_count(committee)
+                    if reserved_count < 2:
+                        self.wfile.write(f'''<option id='{committee}' value='{committee}'>{committee} ({reserved_count}/2)</option>'''.encode('utf8'))
+                    else:
+                        self.wfile.write(f'''<option id='{committee}' value='{committee}' disabled='true'>{committee} ({reserved_count}/2)</option>'''.encode('utf8'))
+            self.wfile.write('</select>'.encode('utf8'))
+        else:
+            self.wfile.write('''reserved for <span id='reserved_for'>Oversight</span>'''.encode('utf8'))
+        self.wfile.write('''</div>
 <div id='close_popup' onclick='closepop()'>X</div>
 <div id='opinion_text'>
 </div>
