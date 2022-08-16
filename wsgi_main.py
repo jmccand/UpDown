@@ -2976,9 +2976,14 @@ function openpop(element) {{
     xhttp.send();
     xhttp.onreadystatechange = function() {{
         if (this.readyState == 4 && this.status == 200) {{
-            response = JSON.parse(this.responseText);
-            document.getElementById('reserved_for').innerHTML = response[0][0];
-            console.log(response[0][0]);
+            response = JSON.parse(this.responseText);'''.encode('utf8'))
+        if not isSenator:
+            self.wfile.write('''
+            document.getElementById('reserved_for').innerHTML = response[0][0];'''.encode('utf8'))
+        else:
+            self.wfile.write('''
+            document.getElementById(response[0][0]).selected = 'true';'''.encode('utf8'))
+        self.wfile.write(f'''
             document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[2];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[3];
