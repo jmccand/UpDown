@@ -3276,7 +3276,12 @@ function updateStats(element) {{
             opinion = db.opinions_database[opinion_ID]
             if opinion.is_after_voting():
                 response = [[]]
-                
+
+                if opinion.reserved_for == None:
+                    response[0].append('unreserved')
+                else:
+                    response[0].append(opinion.reserved_for)
+                    
                 # dropdown
                 isSenator = False
                 if my_account.verified_result == True:
