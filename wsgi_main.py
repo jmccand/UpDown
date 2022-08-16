@@ -2596,6 +2596,11 @@ function updateStats(element) {{
         
     def leaderboard_page(self):
         my_account = self.identify_user()
+        isSenator = False
+        if my_account.verified_result == True:
+            for committee, members in local.COMMITTEE_MEMBERS.items():
+                if my_account.email in members:
+                    isSenator = True
         url_arguments = urllib.parse.parse_qs(self.query_string)
         self.start_response('200 OK', [])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -2708,7 +2713,7 @@ div#reserved_header {
   box-sizing: border-box;
   border-bottom: 2px solid black;
 }
-span#reserved_for {
+#reserved_for {
   padding: 3px;
   font-size: 18px;
   background-color: lightGray;
@@ -2827,7 +2832,7 @@ div#similar_text {
         keywords = url_arguments.get('words', [''])[0]
         sort_method = url_arguments.get('sort', ['overall'])[0]
         filter_for = url_arguments.get('filter', ['no_filter'])[0]
-        
+
         self.wfile.write(f'''<form method='GET' action='/leaderboard'>
 <input id='search_bar' type='text' name='words' value='{keywords}' placeholder='search...'/>
 <table>
@@ -3262,10 +3267,11 @@ function updateStats(element) {{
                 
                 # dropdown
                 isSenator = False
-                for committee, members in local.COMMITTEE_MEMBERS.items():
-                    if my_account.email in members:
-                        isSenator = True
-                        response[0].append((committee, reserve_count(committee)))
+                if my_account.verified_result == True:
+                    for committee, members in local.COMMITTEE_MEMBERS.items():
+                        if my_account.email in members:
+                            isSenator = True
+                            response[0].append((committee, reserve_count(committee)))
                             
                 # text
                 response.append(opinion.text)
