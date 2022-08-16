@@ -2902,7 +2902,7 @@ document.getElementById('{filter_for}').selected = 'selected';
                         self.wfile.write(f'''<option id='{committee}' value='{committee}' disabled='true'>{committee} ({reserved_count}/2)</option>'''.encode('utf8'))
             self.wfile.write('</select>'.encode('utf8'))
         else:
-            self.wfile.write('''reserved for <span id='reserved_for'>Oversight</span>'''.encode('utf8'))
+            self.wfile.write('''reserved for <span id='reserved_for'></span>'''.encode('utf8'))
         self.wfile.write('''</div>
 <div id='close_popup' onclick='closepop()'>X</div>
 <div id='opinion_text'>
@@ -2977,6 +2977,8 @@ function openpop(element) {{
     xhttp.onreadystatechange = function() {{
         if (this.readyState == 4 && this.status == 200) {{
             response = JSON.parse(this.responseText);
+            document.getElementById('reserved_for').innerHTML = response[0][0];
+            console.log(response[0][0]);
             document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[2];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[3];
@@ -3277,6 +3279,7 @@ function updateStats(element) {{
             if opinion.is_after_voting():
                 response = [[]]
 
+                assert opinion.reserved_for in [None] + list(local.COMMITTEE_MEMBERS.keys())
                 if opinion.reserved_for == None:
                     response[0].append('unreserved')
                 else:
