@@ -108,12 +108,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/senate':
                     self.path_root = '/senate'
                     self.senate_page()
-                elif self.path == '/forward_opinions':
-                    self.path_root = '/forward_opinions'
-                    self.forward_opinions_page()
-                elif self.path.startswith('/forward'):
-                    self.path_root = '/forward'
-                    self.forward()
                 elif self.path.startswith('/view_committee'):
                     self.path_root = '/view_committee'
                     self.view_committee_page()
@@ -267,8 +261,6 @@ header {
                 title = 'Senate'
             elif self.path_root == '/approve_opinions':
                 title = 'Approve'
-            elif self.path_root == '/forward_opinions':
-                title = 'Forward'
             elif self.path_root == '/leaderboard':
                 title = 'Leaderboard'
             elif self.path_root == '/view_committee':
@@ -289,8 +281,6 @@ header {
 <a href='/senate'>The Senate</a>'''.encode('utf8'))
             if my_account.email in local.MODERATORS and my_account.verified_result == True:
                 self.wfile.write('''<a href='/approve_opinions'>Approve</a>'''.encode('utf8'))
-            if my_account.email in local.ADMINS and my_account.verified_result == True:
-                self.wfile.write('''<a href='/forward_opinions'>Forward</a>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members and my_account.verified_result == True:
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
@@ -3035,118 +3025,7 @@ function reserve(element) {
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
-
-    def forward_opinions_page(self):
-        my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
-            self.start_response('200 OK', [])
-            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-            self.send_links_head()
-            self.wfile.write('''
-<style>
-article {
-  position: absolute;
-  top: 50px;
-  width: 100%;
-  height: 91%;
-  z-index: 1;
-  overflow: scroll;
-}
-td.up {
-  color: limegreen;
-}
-td.care {
-  color: black;
-}
-tr.selected {
-  background-color: yellow;
-}
-tr.unselected {
-  background-color: white;
-}
-</style>
-</head>
-<body>'''.encode('utf8'))
-            self.send_links_body()
-            self.wfile.write('''<article>
-<table>
-<tr>
-<td>
-<table>'''.encode('utf8'))
-            sorted_dates = list(db.opinions_calendar.keys())
-            sorted_dates.sort()
-            opinion_ID_list = []
-            for this_date in sorted_dates[::-1]:
-                if datetime.datetime.strptime(this_date, '%Y-%m-%d').date() < datetime.date.today():
-                    opinion_set = db.opinions_calendar[this_date]
-                    self.wfile.write(f'''<tr><td colspan='3'>{this_date}</td></tr>'''.encode('utf8'))
-                    for opinion_ID in list(opinion_set):
-                        opinion = db.opinions_database[opinion_ID]
-                        if opinion.reserved_for == None:
-                            up_votes, down_votes, abstains = opinion.count_votes()
-                            up_percent = 'N/A'
-                            if up_votes + down_votes != 0:
-                                up_percent = up_votes / (up_votes + down_votes) * 100
-                            care_percent = 'N/A'
-                            if up_votes + down_votes + abstains != 0:
-                                care_percent = up_votes / (up_votes + down_votes + abstains) * 100
-                            self.wfile.write(f'''<tr id='{opinion_ID}' onclick='select(this);' class='unselected'><td>{opinion.text}</td><td class='care'>{care_percent}%</td><td class='up'>{up_percent}%</td></tr>'''.encode('utf8'))
-                            opinion_ID_list.append(opinion_ID)
-            self.wfile.write('''</table></td><td>
-<button id='Executive' onclick='forward(this);'>EXECUTIVE</button><br />
-<button id='Oversight' onclick='forward(this);'>OVERSIGHT</button><br />
-<!--<button id='Communications' onclick='forward(this);'>COMMUNICATIONS</button><br />-->
-<!--<button id='Policy' onclick='forward(this);'>POLICY</button><br />-->
-<!--<button id='Social_action' onclick='forward(this);'>SOCIAL ACTION</button><br />-->
-<!--<button id='Climate' onclick='forward(this);'>CLIMATE</button><br />-->
-</td></tr></table></article>'''.encode('utf8'))
-            self.wfile.write(f'''<script>
-const opinionList = {opinion_ID_list};
-let selected = opinionList[0];
-document.getElementById(selected).className = 'selected';
-function select(element) {{
-    document.getElementById(selected).className = 'unselected';
-    element.className = 'selected';
-    selected = element.id;
-}}
-function forward(element) {{
-    var xhttp = new XMLHttpRequest();
-    xhttp.open('GET', '/forward?committee=' + element.id + '&opinion_ID=' + selected, true);
-    xhttp.send();
-    document.getElementById(selected).style = 'display: none;';
-}}
-
-</script>'''.encode('utf8'))
-            self.wfile.write('''</body></html>'''.encode('utf8'))
-            
-            self.log_activity()
-        else:
-            raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
-
-    def forward(self):
-        my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
-            url_arguments = urllib.parse.parse_qs(self.query_string)
-            if 'opinion_ID' in url_arguments and 'committee' in url_arguments:
-                opinion_ID = url_arguments['opinion_ID'][0]
-                opinion = db.opinions_database[opinion_ID]
-                committee = url_arguments['committee'][0]
-                if committee in ('Executive', 'Oversight'):
-    
-                    self.log_activity([committee, opinion_ID])
-
-                    if len(opinion.activity) == 3:
-                        opinion.activity.append([(my_account.email, committee, datetime.datetime.now())])
-                    else:
-                        opinion.activity[3].append((my_account.email, committee, datetime.datetime.now()))
-
-                    opinion.reserved_for = committee
-                    def update_opinions_database():
-                        db.opinions_database[opinion_ID] = opinion
-                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
-
-                    self.start_response('200 OK', [])
-
+        
     def view_committee_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
