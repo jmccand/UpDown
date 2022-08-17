@@ -3343,6 +3343,7 @@ function updateStats(element) {{
         url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments.get('committee', [''])[0]
         if my_account.email in local.COMMITTEE_MEMBERS.get(committee, set()):
+            if reserve_count(committee) < 2:
                 opinion_ID = url_arguments.get('opinion_ID', [''])[0]
                 if opinion_ID != '':
                     opinion = db.opinions_database[opinion_ID]
