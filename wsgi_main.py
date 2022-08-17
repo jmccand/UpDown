@@ -2987,7 +2987,12 @@ function openpop(element) {{
             document.getElementById('reserved_for').innerHTML = response[0][0];'''.encode('utf8'))
         else:
             self.wfile.write('''
-            document.getElementById(response[0][0]).selected = 'true';'''.encode('utf8'))
+            document.getElementById(response[0][0]).selected = 'true';
+            for (var index = 1; index < response[0].length; index++) {
+                const committee_name = response[0][index][0];
+                document.getElementById(committee_name).innerHTML = committee_name + ' (' + response[0][index][1] + '/2)';
+            }
+'''.encode('utf8'))
         self.wfile.write(f'''
             document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[2];
