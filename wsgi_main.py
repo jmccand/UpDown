@@ -37,7 +37,7 @@ def application(environ, start_response):
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 5
+    DEBUG = 0
 
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -132,6 +132,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/leaderboard'):
                     self.path_root = '/leaderboard'
                     self.leaderboard_page()
+                elif self.path.startswith('/reserve'):
+                    self.path_root = '/reserve'
+                    self.reserve()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -3330,7 +3333,29 @@ function updateStats(element) {{
         else:
             self.start_response('400 BAD REQUEST', [])
             
-                
+    def reserve(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        committee = url_arguments.get('committee', [''])[0]
+        if my_account.email in local.COMMITTEE_MEMBERS.get(committee, set()):
+                opinion_ID = url_arguments.get('opinion_ID', [''])[0]
+                if opinion_ID != '':
+                    opinion = db.opinions_database[opinion_ID]
+                    if len(opinion.activity) == 3:
+                        opinion.activity.append([(my_account.email, committee, datetime.datetime.now())])
+                    else:
+                        opinion.activity[3].append((my_account.email, committee, datetime.datetime.now()))
+
+                    opinion.reserved_for = committee
+                    def update_opinions_database():
+                        db.opinions_database[opinion_ID] = opinion
+                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+
+                    self.log_activity([committee, opinion_ID])
+                    
+                    self.start_response('200 OK', [])
+
+                    
 class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
