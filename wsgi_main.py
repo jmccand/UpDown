@@ -2891,7 +2891,7 @@ document.getElementById('{filter_for}').selected = 'selected';
         self.wfile.write(f'''<article id='view_popup'>
 <div id='reserved_header'>'''.encode('utf8'))
         if isSenator:
-            self.wfile.write('''reserved for <select id='reserved_for'>
+            self.wfile.write('''reserved for <select id='reserved_for' onchange='reserve(this)'>
 <option id='unreserved' value='unreserved'>unreserved</option>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members:
@@ -2969,11 +2969,13 @@ var myChart = null;
 </script>'''.encode('utf8'))
         self.wfile.write(f'''<script>
 let stepIndex = 0;
+var view_opinion_id;
 var response;
 function openpop(element) {{
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
     xhttp.send();
+    view_opinion_id = element.id;
     xhttp.onreadystatechange = function() {{
         if (this.readyState == 4 && this.status == 200) {{
             response = JSON.parse(this.responseText);'''.encode('utf8'))
@@ -3013,6 +3015,14 @@ function stepChart() {{
 function closepop() {{
     document.getElementById('view_popup').style.display = 'none';
 }}
+</script>'''.encode('utf8'))
+        if isSenator:
+            self.wfile.write('''<script>
+function reserve(element) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/reserve?opinion_ID=' + view_opinion_id + '&committee=' + element.value);
+    xhttp.send();
+}
 </script>'''.encode('utf8'))
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
