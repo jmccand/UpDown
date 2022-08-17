@@ -37,7 +37,7 @@ def application(environ, start_response):
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 0
+    DEBUG = 5
 
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -3515,7 +3515,7 @@ def main():
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_ids}')
         for this_user_ID, user in db.user_ids.items():
-            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_result})')
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_result}, {user.obselete})')
 
         print(f'\n{db.cookie_database}')
         for cookie, this_user_ID in db.cookie_database.items():
@@ -3527,7 +3527,7 @@ def main():
 
         print(f'\n{db.opinions_database}')
         for ID, opinion in db.opinions_database.items():
-            print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity}, {opinion.approved})')
+            print(f'  {ID} : Opinion({opinion.ID}, {opinion.text}, {opinion.activity}, {opinion.approved}, {opinion.scheduled}, {opinion.reserved_for}, {opinion.bill}, {opinion.resolved})')
 
         print(f'\n{db.opinions_calendar}')
         sorted_calendar = list(db.opinions_calendar.keys())
