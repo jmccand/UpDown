@@ -3040,15 +3040,20 @@ table#info {
   position: absolute;
   top: 80px;
   width: 100%;
-  bottom: 50%;
+  padding: 10px;
   border: 2px solid black;
   background-color: lightBlue;
   text-align: center;
   font-size: 30px;
+  box-sizing: border-box;
+}
+#info td {
+  padding: 3px;
+  padding-top: 8px;
 }
 button#submit_bill {
   position: absolute;
-  top: 50%;
+  top: 45%;
   width: 98%;
   left: 1%;
   font-size: 30px;
@@ -3061,8 +3066,9 @@ button#submit_bill {
 footer {
   position: absolute;
   bottom: 0;
-  width: 100%;
-  height: 40%;
+  width: 96%;
+  left: 2%;
+  height: 43%;
 }
 div.reserved {
   width: 98%;
@@ -3074,6 +3080,7 @@ div.reserved {
   z-index: 1;
   border-radius: 6px;
   box-sizing: border-box;
+  font-size: 20px;
 }
 </style>
 </head>
