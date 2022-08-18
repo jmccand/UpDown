@@ -3051,6 +3051,19 @@ table#info {
   padding: 3px;
   padding-top: 8px;
 }
+table#stats {
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  font-size: 25px;
+  box-sizing: border-box;
+}
+#stats td {
+  width: 50%;
+}
+td#time_elapsed {
+  font-size: 25px;
+}
 button#submit_bill {
   position: absolute;
   top: 45%;
@@ -3089,7 +3102,7 @@ div.reserved {
                 self.wfile.write(f'''
 <table id='info'>
 <tr><td>voted<br />_/_/_</td><td>reserved<br />_/_/_</td></tr>
-<tr><td><table><tr><td>65%<br />care</td><td>75%<br />support</td></tr></table></td><td>time elapsed:<br />3 weeks</td></tr>
+<tr><td><table id='stats'><tr><td>65%<br />care</td><td>75%<br />support</td></tr></table></td><td id='time_elapsed'>time elapsed:<br />3 weeks</td></tr>
 </table>
 <button id='submit_bill'>UPDATE RESOLUTION</button>
 <footer>
