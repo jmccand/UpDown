@@ -3030,107 +3030,68 @@ function reserve(element) {
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments['committee'][0]
-        if committee in ('Executive', 'Oversight'):
+        if committee in local.COMMITTEE_MEMBERS.keys():
             if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_result == True:
                 self.start_response('200 OK', [])
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
                 self.wfile.write('''<style>
-article {
+table#info {
   position: absolute;
-  top: 50px;
+  top: 80px;
   width: 100%;
-  height: 41%;
-  z-index: 1;
-  overflow: scroll;
+  bottom: 50%;
+  border: 2px solid black;
+  background-color: lightBlue;
+  text-align: center;
+  font-size: 30px;
 }
-div.stat {
+button#submit_bill {
   position: absolute;
-  right: 0;
-  width: 40%;
-  text-align: right;
+  top: 50%;
+  width: 98%;
+  left: 1%;
+  font-size: 30px;
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 30px;
+  text-align: center;
+  background-color: #ffef90ff;
 }
 footer {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   width: 100%;
-  height: 50%;
-  z-index: 1;
-  overflow: scroll;
+  height: 40%;
 }
-div.result {
-  width: 99%;
-  height: 50px;
-  margin: 0.5%;
+div.reserved {
+  width: 98%;
+  margin: 1%;
+  margin-bottom: 4%;
+  padding: 3%;
   position: relative;
   background-color: #cfe2f3ff;
   z-index: 1;
   border-radius: 6px;
+  box-sizing: border-box;
 }
-</style>'''.encode('utf8'))
+</style>
+</head>
+<body>'''.encode('utf8'))
                 self.send_links_body()
-                self.wfile.write(f'<article>'.encode('utf8'))
-                self.wfile.write(f'''Submitted to the {committee} committee on <span id='stat0'></span>.<br />
-<span id='stat1'></span>% care percent (<span id='stat2'></span>).<br />
-<span id='stat3'></span>% up percent (<span id='stat4'></span>).<br />
-Created on <span id='stat5'></span>.<br />
-Approved on <span id='stat6'></span>.<br />
-Scheduled on <span id='stat7'></span>.<br />
-Voted for on <span id='stat8'></span>.'''.encode('utf8'))
-                self.wfile.write('</article><footer>'.encode('utf8'))
-                
-                def to_date(dt):
-                    return datetime.date(dt.year, dt.month, dt.day)
-                json_stats = {}
-                for opinion_ID, opinion in db.opinions_database.items():
-                    if opinion.reserved_for == committee:
-                        json_stats[opinion_ID] = []
-                        up_votes, down_votes, abstains = opinion.count_votes()
-                        up_percent = 'N/A'
-                        if up_votes + down_votes != 0:
-                            up_percent = up_votes / (up_votes + down_votes) * 100
-                        care_percent = 'N/A'
-                        if up_votes + down_votes + abstains != 0:
-                            care_percent = (up_votes + down_votes) / (up_votes + down_votes + abstains) * 100
-                        if len(opinion.activity) >= 4:
-                            assert opinion.activity[3][0][1] in local.COMMITTEE_MEMBERS, f'{opinion.activity[3][1]}'
-                            json_stats[opinion_ID].append(str(to_date(opinion.activity[3][0][2])))
-                        json_stats[opinion_ID].append(care_percent)
-                        json_stats[opinion_ID].append(f'{up_votes + down_votes} / {up_votes + down_votes + abstains}')
-                        json_stats[opinion_ID].append(up_percent)
-                        json_stats[opinion_ID].append(f'{up_votes} / {up_votes + down_votes}')
-                        if len(opinion.activity) >= 1:
-                            json_stats[opinion_ID].append(str(to_date(opinion.activity[0][1])))
-                        if len(opinion.activity) >= 2:
-                            assert opinion.approved in (True, False)
-                            json_stats[opinion_ID].append(str(to_date(opinion.activity[1][0][2])))
-                        if len(opinion.activity) >= 3:
-                            json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][3])))
-                            json_stats[opinion_ID].append(str(to_date(opinion.activity[2][0][2])))
-                        if len(opinion.activity) >= 5:
-                            json_stats[opinion_ID].append(str(to_date(opinion.activity[4][0][2])))
-                        self.wfile.write(f'''<div id='{opinion_ID}' class='result' onclick='updateStats(this);'>
-<span class='left'>
-{opinion.text}
-</span>
-</div>'''.encode('utf8'))
-                self.wfile.write(f'''<script>
-const stats = {json.dumps(json_stats)};
-let prev = null;
-function updateStats(element) {{
-    const this_ID = element.id;
-    const these_stats = stats[this_ID];
-    for (let i = 0; i < these_stats.length; i++) {{
-        document.getElementById('stat' + i).innerHTML = these_stats[i];
-    }}
-    if (prev != null) {{
-        prev.style.backgroundColor = '#cfe2f3ff';
-    }}
-    element.style.backgroundColor = 'yellow';
-    prev = element;
-}}
-</script>'''.encode('utf8'))
-                self.wfile.write('''</footer></body></html>'''.encode('utf8'))
+                self.wfile.write(f'''
+<table id='info'>
+<tr><td>voted<br />_/_/_</td><td>reserved<br />_/_/_</td></tr>
+<tr><td><table><tr><td>65%<br />care</td><td>75%<br />support</td></tr></table></td><td>time elapsed:<br />3 weeks</td></tr>
+</table>
+<button id='submit_bill'>UPDATE RESOLUTION</button>
+<footer>
+<div class='reserved'>opinion</div>
+<div class='reserved'>opinion</div>
+</footer>'''.encode('utf8'))
+                self.wfile.write('''</body></html>'''.encode('utf8'))
+                self.log_activity()
+
                 
     def submit_opinion_search(self):
         my_account = self.identify_user()
