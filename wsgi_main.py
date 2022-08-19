@@ -3134,7 +3134,24 @@ button.savebtn {
 </head>
 <body>'''.encode('utf8'))
                 self.send_links_body()
-                self.wfile.write(f'''
+
+                data = []
+                for opinion_ID, opinion in db.opinions_database.items():
+                    if opinion.reserved_for == committee and not opinion.resolved:
+                        # start new list
+                        data.append([opinion.text])
+                        # voted date
+                        data[-1].append(opinion.activity[2][-1][0].strftime('%-m/%-d/%Y'))
+                        # reserved date
+                        data[-1].append(opinion.activity[3][-1][2].strftime('%-m/%-d/%Y'))
+                        # voting stats
+                        data[-1].append(list(opinion.care_agree_percent()))
+                        # time elapsed since reservation
+                        data[-1].append((datetime.date.today() - opinion.activity[2][-1][0]).days / 7)
+                        # resolution
+                        data[-1].append(opinion.bill)
+                        
+                self.wfile.write('''
 <table id='info'>
 <tr><td>voted<br />_/_/_</td><td>reserved<br />_/_/_</td></tr>
 <tr><td><table id='stats'><tr><td>65%<br />care</td><td>75%<br />support</td></tr></table></td><td id='time_elapsed'>time elapsed:<br />3 weeks</td></tr>
