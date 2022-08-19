@@ -3090,6 +3090,7 @@ div.reserved {
   padding: 3%;
   position: relative;
   background-color: #cfe2f3ff;
+  border: 2px solid #cfe2f3ff;
   border-radius: 6px;
   box-sizing: border-box;
   font-size: 20px;
@@ -3162,7 +3163,7 @@ button.savebtn {
 <button id='submit_bill'>UPDATE RESOLUTION</button>
 <footer>'''.encode('utf8'))
                 for index, opinion_info in enumerate(data):
-                    self.wfile.write(f'''<div class='reserved' onclick='updateInfo({index})'>{opinion_info[1]}</div>'''.encode('utf8'))
+                    self.wfile.write(f'''<div id='{opinion_info[0]}' class='reserved' onclick='updateInfo({index})'>{opinion_info[1]}</div>'''.encode('utf8'))
                 self.wfile.write('</footer>'.encode('utf8'))
                 self.wfile.write('''<article id='popup'>
 <textarea id='resolution'></textarea>
@@ -3172,6 +3173,7 @@ button.savebtn {
 </article>'''.encode('utf8'))
                 self.wfile.write(f'''<script>
 let data = {data};
+var old_selected;
 if (data.length > 0) {{
     updateInfo(0);
 }}
@@ -3181,6 +3183,11 @@ function updateInfo(op_index) {{
     document.getElementById('care').innerHTML = data[op_index][4][0] + '%<br />care';
     document.getElementById('agree').innerHTML = data[op_index][4][1] + '%<br />agree';
     document.getElementById('time_elapsed').innerHTML = 'time elapsed:<br />' + data[op_index][5] + ' days';
+    if (old_selected != null) {{
+        old_selected.style.borderColor = '#cfe2f3ff';
+    }}
+    document.getElementById(data[op_index][0]).style.borderColor = 'black';
+    old_selected = document.getElementById(data[op_index][0]);
 }}
 </script>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
