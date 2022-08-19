@@ -3104,6 +3104,7 @@ article#popup {
   border: 3px solid black;
   border-radius: 30px;
   box-sizing: border-box;
+  display: none;
 }
 textarea#resolution {
   position: absolute;
@@ -3147,19 +3148,19 @@ button.savebtn {
                         # voting stats
                         data[-1].append(list(opinion.care_agree_percent()))
                         # time elapsed since reservation
-                        data[-1].append((datetime.date.today() - opinion.activity[2][-1][0]).days / 7)
+                        data[-1].append((datetime.date.today() - opinion.activity[2][-1][0]).days)
                         # resolution
                         data[-1].append(opinion.bill)
                         
                 self.wfile.write('''
 <table id='info'>
-<tr><td>voted<br />_/_/_</td><td>reserved<br />_/_/_</td></tr>
-<tr><td><table id='stats'><tr><td>65%<br />care</td><td>75%<br />support</td></tr></table></td><td id='time_elapsed'>time elapsed:<br />3 weeks</td></tr>
+<tr><td id='voted'>voted<br />_/_/_</td><td id='reserved'>reserved<br />_/_/_</td></tr>
+<tr><td><table id='stats'><tr><td id='care'>65%<br />care</td><td id='agree'>75%<br />agree</td></tr></table></td><td id='time_elapsed'>time elapsed:<br />2 weeks</td></tr>
 </table>
 <button id='submit_bill'>UPDATE RESOLUTION</button>
 <footer>'''.encode('utf8'))
-                for opinion_info in data:
-                    self.wfile.write(f'''<div class='reserved'>{opinion_info[0]}</div>'''.encode('utf8'))
+                for index, opinion_info in enumerate(data):
+                    self.wfile.write(f'''<div class='reserved' onclick='updateInfo({index})'>{opinion_info[0]}</div>'''.encode('utf8'))
                 self.wfile.write('</footer>'.encode('utf8'))
                 self.wfile.write('''<article id='popup'>
 <textarea id='resolution'></textarea>
@@ -3169,6 +3170,16 @@ button.savebtn {
 </article>'''.encode('utf8'))
                 self.wfile.write(f'''<script>
 let data = {data};
+if (data.length > 0) {{
+    updateInfo(0);
+}}
+function updateInfo(op_index) {{
+    document.getElementById('voted').innerHTML = 'voted:<br />' + data[op_index][1];
+    document.getElementById('reserved').innerHTML = 'reserved:<br />' + data[op_index][2];
+    document.getElementById('care').innerHTML = data[op_index][3][0] + '%<br />care';
+    document.getElementById('agree').innerHTML = data[op_index][3][1] + '%<br />agree';
+    document.getElementById('time_elapsed').innerHTML = 'time elapsed:<br />' + data[op_index][4] + ' days';
+}}
 </script>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
                 self.log_activity()
