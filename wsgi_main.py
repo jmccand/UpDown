@@ -3160,7 +3160,7 @@ button.savebtn {
 <tr><td id='voted'>voted<br />_/_/_</td><td id='reserved'>reserved<br />_/_/_</td></tr>
 <tr><td><table id='stats'><tr><td id='care'>65%<br />care</td><td id='agree'>75%<br />agree</td></tr></table></td><td id='time_elapsed'>time elapsed:<br />2 weeks</td></tr>
 </table>
-<button id='submit_bill'>UPDATE RESOLUTION</button>
+<button id='submit_bill' onclick='openpop()'>UPDATE RESOLUTION</button>
 <footer>'''.encode('utf8'))
                 for index, opinion_info in enumerate(data):
                     self.wfile.write(f'''<div id='{opinion_info[0]}' class='reserved' onclick='updateInfo({index})'>{opinion_info[1]}</div>'''.encode('utf8'))
@@ -3173,7 +3173,7 @@ button.savebtn {
 </article>'''.encode('utf8'))
                 self.wfile.write(f'''<script>
 let data = {data};
-var old_selected;
+var cur_index;
 if (data.length > 0) {{
     updateInfo(0);
 }}
@@ -3183,11 +3183,15 @@ function updateInfo(op_index) {{
     document.getElementById('care').innerHTML = data[op_index][4][0] + '%<br />care';
     document.getElementById('agree').innerHTML = data[op_index][4][1] + '%<br />agree';
     document.getElementById('time_elapsed').innerHTML = 'time elapsed:<br />' + data[op_index][5] + ' days';
-    if (old_selected != null) {{
-        old_selected.style.borderColor = '#cfe2f3ff';
+    if (cur_index != null) {{
+        document.getElementById(data[cur_index][0]).style.borderColor = '#cfe2f3ff';
     }}
     document.getElementById(data[op_index][0]).style.borderColor = 'black';
-    old_selected = document.getElementById(data[op_index][0]);
+    cur_index = op_index;
+}}
+function openpop() {{
+    document.getElementById('resolution').innerHTML = data[cur_index][6];
+    document.getElementById('popup').style.display = 'initial';
 }}
 </script>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
