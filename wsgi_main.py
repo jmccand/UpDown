@@ -3157,16 +3157,19 @@ button.savebtn {
 <tr><td><table id='stats'><tr><td>65%<br />care</td><td>75%<br />support</td></tr></table></td><td id='time_elapsed'>time elapsed:<br />3 weeks</td></tr>
 </table>
 <button id='submit_bill'>UPDATE RESOLUTION</button>
-<footer>
-<div class='reserved'>opinion</div>
-<div class='reserved'>opinion</div>
-</footer>'''.encode('utf8'))
+<footer>'''.encode('utf8'))
+                for opinion_info in data:
+                    self.wfile.write(f'''<div class='reserved'>{opinion_info[0]}</div>'''.encode('utf8'))
+                self.wfile.write('</footer>'.encode('utf8'))
                 self.wfile.write('''<article id='popup'>
 <textarea id='resolution'></textarea>
 <table id='save'>
 <tr><td><button class='savebtn'>SAVE AS DRAFT</button></td><td><button class='savebtn'>SAVE AS FINAL</button></td></tr>
 </table>
 </article>'''.encode('utf8'))
+                self.wfile.write(f'''<script>
+let data = {data};
+</script>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
                 self.log_activity()
 
