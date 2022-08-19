@@ -3090,10 +3090,45 @@ div.reserved {
   padding: 3%;
   position: relative;
   background-color: #cfe2f3ff;
-  z-index: 1;
   border-radius: 6px;
   box-sizing: border-box;
   font-size: 20px;
+}
+article#popup {
+  position: absolute;
+  width: 94%;
+  left: 3%;
+  top: 80px;
+  bottom: 45%;
+  background-color: #ffef90ff;
+  border: 3px solid black;
+  border-radius: 30px;
+  box-sizing: border-box;
+}
+textarea#resolution {
+  position: absolute;
+  width: 94%;
+  left: 3%;
+  top: 3%;
+  bottom: 60px;
+  padding: 10px;
+  font-size: 18px;
+  border: 1px solid black;
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+table#save {
+  position: absolute;
+  padding: 20px;
+  bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+button.savebtn {
+  width: 100%;
+  padding: 3px;
+  box-sizing: border-box;
+  font-size: 18px;
 }
 </style>
 </head>
@@ -3109,6 +3144,12 @@ div.reserved {
 <div class='reserved'>opinion</div>
 <div class='reserved'>opinion</div>
 </footer>'''.encode('utf8'))
+                self.wfile.write('''<article id='popup'>
+<textarea id='resolution'></textarea>
+<table id='save'>
+<tr><td><button class='savebtn'>SAVE AS DRAFT</button></td><td><button class='savebtn'>SAVE AS FINAL</button></td></tr>
+</table>
+</article>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
                 self.log_activity()
 
