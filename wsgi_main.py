@@ -3140,7 +3140,9 @@ button.savebtn {
                 for opinion_ID, opinion in db.opinions_database.items():
                     if opinion.reserved_for == committee and not opinion.resolved:
                         # start new list
-                        data.append([opinion.text])
+                        data.append([opinion.ID])
+                        # opinion text
+                        data[-1].append(opinion.text)
                         # voted date
                         data[-1].append(opinion.activity[2][-1][0].strftime('%-m/%-d/%Y'))
                         # reserved date
@@ -3160,7 +3162,7 @@ button.savebtn {
 <button id='submit_bill'>UPDATE RESOLUTION</button>
 <footer>'''.encode('utf8'))
                 for index, opinion_info in enumerate(data):
-                    self.wfile.write(f'''<div class='reserved' onclick='updateInfo({index})'>{opinion_info[0]}</div>'''.encode('utf8'))
+                    self.wfile.write(f'''<div class='reserved' onclick='updateInfo({index})'>{opinion_info[1]}</div>'''.encode('utf8'))
                 self.wfile.write('</footer>'.encode('utf8'))
                 self.wfile.write('''<article id='popup'>
 <textarea id='resolution'></textarea>
@@ -3174,11 +3176,11 @@ if (data.length > 0) {{
     updateInfo(0);
 }}
 function updateInfo(op_index) {{
-    document.getElementById('voted').innerHTML = 'voted:<br />' + data[op_index][1];
-    document.getElementById('reserved').innerHTML = 'reserved:<br />' + data[op_index][2];
-    document.getElementById('care').innerHTML = data[op_index][3][0] + '%<br />care';
-    document.getElementById('agree').innerHTML = data[op_index][3][1] + '%<br />agree';
-    document.getElementById('time_elapsed').innerHTML = 'time elapsed:<br />' + data[op_index][4] + ' days';
+    document.getElementById('voted').innerHTML = 'voted:<br />' + data[op_index][2];
+    document.getElementById('reserved').innerHTML = 'reserved:<br />' + data[op_index][3];
+    document.getElementById('care').innerHTML = data[op_index][4][0] + '%<br />care';
+    document.getElementById('agree').innerHTML = data[op_index][4][1] + '%<br />agree';
+    document.getElementById('time_elapsed').innerHTML = 'time elapsed:<br />' + data[op_index][5] + ' days';
 }}
 </script>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
