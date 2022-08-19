@@ -3148,7 +3148,7 @@ button.savebtn {
                         # voting stats
                         data[-1].append(list(opinion.care_agree_percent()))
                         # time elapsed since reservation
-                        data[-1].append((datetime.date.today() - opinion.activity[2][-1][0]).days)
+                        data[-1].append((datetime.datetime.today() - opinion.activity[3][-1][2]).days)
                         # resolution
                         data[-1].append(opinion.bill)
                         
