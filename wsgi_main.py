@@ -3168,7 +3168,7 @@ button.savebtn {
                 self.wfile.write('''<article id='popup'>
 <textarea id='resolution'></textarea>
 <table id='save'>
-<tr><td><button class='savebtn'>SAVE AS DRAFT</button></td><td><button class='savebtn'>SAVE AS FINAL</button></td></tr>
+<tr><td><button class='savebtn' onclick='editBill("no")'>SAVE AS DRAFT</button></td><td><button class='savebtn' onclick='editBill("yes")'>SAVE AS FINAL</button></td></tr>
 </table>
 </article>'''.encode('utf8'))
                 self.wfile.write(f'''<script>
@@ -3192,6 +3192,17 @@ function updateInfo(op_index) {{
 function openpop() {{
     document.getElementById('resolution').innerHTML = data[cur_index][6];
     document.getElementById('popup').style.display = 'initial';
+}}
+function editBill(mark_resolved) {{
+    let new_bill = document.getElementById('resolution').value;
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/edit_bill?opinion_ID=' + data[cur_index][0] + '&bill=' + new_bill + '&mark_resolved=' + mark_resolved);
+    xhttp.send();
+    data[cur_index][6] = new_bill;
+    if (mark_resolved == 'yes') {{
+        document.getElementById(data[cur_index][0]).style.display = 'none';
+    }}
+    document.getElementById('popup').style.display = 'none';
 }}
 </script>'''.encode('utf8'))
                 self.wfile.write('''</body></html>'''.encode('utf8'))
