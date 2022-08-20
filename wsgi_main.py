@@ -2845,7 +2845,7 @@ sort by<br />
 filter for<br />
 <select name='filter' onchange='this.form.submit()'>
 <option id='no_filter' value='no_filter'>no filter</option>
-<option id='unresolved' value='unresolved'>unresolved</option>
+<option id='unreserved' value='unreserved'>unreserved</option>
 <option id='my_opinions' value='my_opinions'>my opinions</option>
 </select>
 </td>
@@ -2867,10 +2867,8 @@ document.getElementById('{filter_for}').selected = 'selected';
         elif sort_method == 'agree':
             results.sort(key=lambda x: -1 * x.care_agree_percent()[1])
         def filter_keep(opinion):
-            print('filter keep called!')
             if not is_matching(opinion.text, keywords):
                 return False
-            print('onto filters')
             if filter_for == 'unreserved':
                 return opinion.reserved_for == None
             elif filter_for == 'my_opinions':
