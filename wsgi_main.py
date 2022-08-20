@@ -548,6 +548,56 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
+
+    def verification_page(self):
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        verification_ID = url_arguments.get('verification_id', [None])[0]
+        if verification_ID != None and verification_ID in db.verification_links:
+            self.start_response('200 OK', [])
+            self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''<style>
+article {
+  position: absolute;
+  top: 70px;
+  width: 100%;
+  bottom: 0;
+}
+table.device {
+  position: relative;
+  top: 50px;
+  width: 80%;
+  left: 10%;
+  box-sizing: border-box;
+  border: 3px solid black;
+  border-radius: 20px;
+}
+td.session_info {
+  padding: 5px;
+  border-right: 3px solid black;
+  width: 70%;
+}
+td.status {
+  width: 30%;
+}
+</style>
+</head>
+<body>'''.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('''<article>'''.encode('utf8'))
+            my_email = db.user_ids[db.verification_links[verification_ID]].email
+            id_list = []
+            for ID, user in db.user_ids.items():
+                if user.email == my_email:
+                    id_list.append(ID)
+            cookie_list = []
+            for cookie, ID in db.cookie_database.items():
+                if ID in id_list:
+                    self.wfile.write(f'''<table class='device'>
+<tr><td class='session_info'>{cookie}</td><td class='status'>
+<select name='{cookie}'><option value='yes'>logged in</option><option value='no'>logged out</option></select></td></tr>
+</table>'''.encode('utf8'))
+            self.wfile.write('''</article></body></html>'''.encode('utf8'))
         
     def verify_email(self):
         url_arguments = urllib.parse.parse_qs(self.query_string)
