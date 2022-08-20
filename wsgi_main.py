@@ -129,6 +129,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/reserve'):
                     self.path_root = '/reserve'
                     self.reserve()
+                elif self.path.startswith('/edit_bill'):
+                    self.path_root = '/edit_bill'
+                    self.edit_bill()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -3316,6 +3319,35 @@ function editBill(mark_resolved) {{
                     self.log_activity([committee, opinion_ID])
                     
                     self.start_response('200 OK', [])
+
+    def edit_bill(self):
+        my_account = self.identify_user()
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        opinion_ID = url_arguments.get('opinion_ID', [''])[0]
+        new_bill = url_arguments.get('bill', [None])[0]
+        mark_resolved = url_arguments.get('mark_resolved', [''])[0]
+        if opinion_ID != '' and new_bill != None and mark_resolved in ('yes', 'no'):
+            opinion = db.opinions_database[opinion_ID]
+            if my_account.email in local.COMMITTEE_MEMBERS[opinion.reserved_for] and my_account.verified_result == True:
+                opinion.bill = new_bill
+                if len(opinion.activity) == 4:
+                    opinion.activity.append([(my_account.user_ID, new_bill, datetime.datetime.now())])
+                else:
+                    opinion.activity[4].append((my_account.user_ID, new_bill, datetime.datetime.now()))
+                if mark_resolved == 'yes':
+                    opinion.resolved = True
+                    if len(opinion.activity) == 5:
+                        opinion.activity.append([(my_account.user_ID,)])
+                    else:
+                        opinion.activity[5].append((my_account.user_ID,))
+                def update_opinions_database():
+                    db.opinions_database[opinion_ID] = opinion
+                self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                
+                self.log_activity()
+
+                self.start_response('200 OK', [])
+                        
 
                     
 class invalidCookie(ValueError):
