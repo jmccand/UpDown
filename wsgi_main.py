@@ -2846,6 +2846,7 @@ filter for<br />
 <select name='filter' onchange='this.form.submit()'>
 <option id='no_filter' value='no_filter'>no filter</option>
 <option id='unreserved' value='unreserved'>unreserved</option>
+<option id='unresolved' value='unresolved'>unresolved</option>
 <option id='my_opinions' value='my_opinions'>my opinions</option>
 </select>
 </td>
@@ -2871,6 +2872,8 @@ document.getElementById('{filter_for}').selected = 'selected';
                 return False
             if filter_for == 'unreserved':
                 return opinion.reserved_for == None
+            elif filter_for == 'unresolved':
+                return not opinion.resolved
             elif filter_for == 'my_opinions':
                 return opinion.activity[0][0] == my_account.user_ID
             else:
