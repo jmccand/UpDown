@@ -96,6 +96,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/verify_email'):
                     self.path_root = '/verify_email'
                     self.verify_email()
+                elif self.path.startswith('/verification'):
+                    self.path_root = '/verification'
+                    self.verification_page()
                 elif self.path == '/approve_opinions':
                     self.path_root = '/approve_opinions'
                     self.approve_opinions_page()
@@ -253,22 +256,25 @@ header {
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
         title = ''
-        if my_account == None:
-            title = 'Welcome'
+        if self.path_root == '/verification':
+            title = 'Verify'
         else:
-            if self.path_root == '/':
-                title = 'Ballot'
-            elif self.path_root == '/submit_opinions':
-                title = 'Submit'
-            elif self.path_root == '/senate':
-                title = 'Senate'
-            elif self.path_root == '/approve_opinions':
-                title = 'Approve'
-            elif self.path_root == '/leaderboard':
-                title = 'Leaderboard'
-            elif self.path_root == '/view_committee':
-                url_arguments = urllib.parse.parse_qs(self.query_string)
-                title = url_arguments['committee'][0]
+            if my_account == None:
+                title = 'Welcome'
+            else:
+                if self.path_root == '/':
+                    title = 'Ballot'
+                elif self.path_root == '/submit_opinions':
+                    title = 'Submit'
+                elif self.path_root == '/senate':
+                    title = 'Senate'
+                elif self.path_root == '/approve_opinions':
+                    title = 'Approve'
+                elif self.path_root == '/leaderboard':
+                    title = 'Leaderboard'
+                elif self.path_root == '/view_committee':
+                    url_arguments = urllib.parse.parse_qs(self.query_string)
+                    title = url_arguments['committee'][0]
         self.wfile.write(f'''<header>
 <img id='hamburger' src='hamburger.png' onclick='open_menu();'/>
 <span id='title'>
