@@ -606,11 +606,12 @@ td.status {
             for ID, user in db.user_ids.items():
                 if user.email == my_email:
                     id_list.append(ID)
-            cookie_list = []
             for cookie, ID in db.cookie_database.items():
                 if ID in id_list:
-                    self.wfile.write(f'''<table class='device'>
-<tr><td class='session_info'>{cookie}</td><td class='status'>
+                    if cookie in db.device_info:
+                        ip_address, parsed_ua = db.device_info[cookie]
+                        self.wfile.write(f'''<table class='device'>
+<tr><td class='session_info'>{parsed_ua}</td><td class='status'>
 <select name='{cookie}'><option value='yes'>logged in</option><option value='no'>logged out</option></select></td></tr>
 </table>'''.encode('utf8'))
             self.wfile.write('''</article></body></html>'''.encode('utf8'))
