@@ -603,6 +603,9 @@ td.status {
   background-color: lightBlue;
   border-radius: 0 17px 17px 0;
 }
+select.status_drop {
+  font-size: 20px;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -617,10 +620,17 @@ td.status {
                 if ID in id_list:
                     if cookie in db.device_info:
                         ip_address, parsed_ua = db.device_info[cookie]
+                        my_verified_result = db.user_ids[db.cookie_database[cookie]].verified_result
                         self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{parsed_ua}</td><td class='status'>
-<select name='{cookie}'><option value='yes'>logged in</option><option value='no'>logged out</option></select></td></tr>
-</table>'''.encode('utf8'))
+<select class='status_drop' name='{cookie}'>
+<option id='{cookie}_True' value='yes'>logged in</option>
+<option id='{cookie}_None' value='unverified' disabled='true'>unverified</option>
+<option id='{cookie}_False' value='no'>logged out</option></select></td></tr>
+</table>
+<script>
+document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
+</script>'''.encode('utf8'))
             self.wfile.write('''</article></body></html>'''.encode('utf8'))
         
     def verify_email(self):
