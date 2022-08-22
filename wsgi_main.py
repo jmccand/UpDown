@@ -623,7 +623,7 @@ select.status_drop {
                         my_verified_result = db.user_ids[db.cookie_database[cookie]].verified_result
                         self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{parsed_ua}</td><td class='status'>
-<select class='status_drop' name='{cookie}'>
+<select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
 <option id='{cookie}_True' value='yes'>logged in</option>
 <option id='{cookie}_None' value='unverified' disabled='true'>unverified</option>
 <option id='{cookie}_False' value='no'>logged out</option></select></td></tr>
