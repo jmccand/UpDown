@@ -569,6 +569,18 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
         url_arguments = urllib.parse.parse_qs(self.query_string)
         verification_ID = url_arguments.get('verification_id', [None])[0]
         if verification_ID != None and verification_ID in db.verification_links:
+            # handle form submission
+            if len(url_arguments) > 1:
+                for cookie_key, arg_list in url_arguments.items():
+                    if cookie_key != 'verification_id':
+                        assert arg_list[0] in ('yes', 'no', 'unverified')
+                        submitted_verification = None
+                        if arg_list[0] == 'yes':
+                            submitted_verification = True
+                        elif arg_list[0] == 'no':
+                            submitted_verification = False
+                        verify_device(cookie_key, submitted_verification)
+            # send response
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
