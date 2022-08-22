@@ -146,6 +146,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         if 'code' in self.my_cookies:
             my_code = self.my_cookies['code'].value
             if my_code in db.cookie_database:
+                self.update_device_info()
                 return db.user_ids[db.cookie_database[my_code]]
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got code {my_code}')
@@ -154,6 +155,15 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 return None
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
+
+    def update_device_info(self):
+        if 'code' in self.my_cookies:
+            my_code = self.my_cookies['code'].value
+            if my_code in db.cookie_database:
+                parsed_ua = user_agents.parse(self.http_user_agent)
+                def update_device_info():
+                    db.device_info[my_code] = [self.client_address, parsed_ua]
+                self.run_and_sync(db.device_info_lock, update_device_info, db.device_info)
 
     def send_links_head(self):
         self.wfile.write('''<meta charset="utf-8">
