@@ -573,7 +573,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
-article {
+form {
   position: absolute;
   top: 70px;
   width: 100%;
@@ -610,7 +610,7 @@ select.status_drop {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<input type='hidden' name='verification_id' value='{verification_ID}' /><article>'''.encode('utf8'))
+            self.wfile.write('''<input type='hidden' name='verification_id' value='{verification_ID}' /><form method='GET' action='/verification'>'''.encode('utf8'))
             my_email = db.user_ids[db.verification_links[verification_ID]].email
             id_list = []
             for ID, user in db.user_ids.items():
@@ -631,7 +631,7 @@ select.status_drop {
 <script>
 document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 </script>'''.encode('utf8'))
-            self.wfile.write('''</article></body></html>'''.encode('utf8'))
+            self.wfile.write('''</form></body></html>'''.encode('utf8'))
         
     def verify_email(self):
         url_arguments = urllib.parse.parse_qs(self.query_string)
