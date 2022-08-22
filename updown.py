@@ -3,7 +3,7 @@ import datetime
 
 class User:
 
-    def __init__(self, email, user_ID, activity={}, votes={}, verified_result=False, obselete=False):
+    def __init__(self, email, user_ID, activity={}, votes={}, verified_result=None, obselete=False):
 
         self.email = email
         self.user_ID = user_ID
