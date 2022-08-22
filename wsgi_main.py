@@ -610,7 +610,7 @@ select.status_drop {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<article>'''.encode('utf8'))
+            self.wfile.write('''<input type='hidden' name='verification_id' value='{verification_ID}' /><article>'''.encode('utf8'))
             my_email = db.user_ids[db.verification_links[verification_ID]].email
             id_list = []
             for ID, user in db.user_ids.items():
