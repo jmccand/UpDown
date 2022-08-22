@@ -582,8 +582,8 @@ article {
 table.device {
   position: relative;
   top: 50px;
-  width: 80%;
-  left: 10%;
+  width: 90%;
+  left: 5%;
   box-sizing: border-box;
   border: 3px solid black;
   border-radius: 20px;
@@ -591,10 +591,17 @@ table.device {
 td.session_info {
   padding: 5px;
   border-right: 3px solid black;
-  width: 70%;
+  width: 60%;
+  background-color: #ffef90ff;
+  border-radius: 17px 0 0 17px;
+  padding: 10px;
+  font-size: 18px;
 }
 td.status {
-  width: 30%;
+  width: 40%;
+  text-align: center;
+  background-color: lightBlue;
+  border-radius: 0 17px 17px 0;
 }
 </style>
 </head>
