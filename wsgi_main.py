@@ -573,13 +573,13 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             if len(url_arguments) > 1:
                 for cookie_key, arg_list in url_arguments.items():
                     if cookie_key != 'verification_id':
-                        assert arg_list[0] in ('yes', 'no', 'unverified')
-                        submitted_verification = None
-                        if arg_list[0] == 'yes':
-                            submitted_verification = True
-                        elif arg_list[0] == 'no':
-                            submitted_verification = False
-                        verify_device(cookie_key, submitted_verification)
+                        if arg_list[0] in ('yes', 'no', 'unverified'):
+                            submitted_verification = None
+                            if arg_list[0] == 'yes':
+                                submitted_verification = True
+                            elif arg_list[0] == 'no':
+                                submitted_verification = False
+                            verify_device(cookie_key, submitted_verification)
             # send response
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -3599,6 +3599,57 @@ def reserve_count(committee):
         if opinion.reserved_for == committee and not opinion.resolved:
             cur_count += 1
     return cur_count
+
+def verify_device(cookie_code):
+    my_account = db.user_ids[db.cookie_database[cookie_code]]
+    verified_account = None
+    verified_link = None
+    for verification_ID, account_ID in db.verification_links.items():
+        this_account = db.user_ids[account_ID]
+        if this_account.email == my_account.email:
+            verified_account = this_account
+            verified_link = verification_ID
+    assert verified_account != None and verified_link != None
+    # if my account is not the original account, reconfigure to point to verified
+    if my_account != verified_account:
+        # if the account is verified then transfer the account pointer
+        if verified_account.verified_result == True:
+            def update_cookie_database():
+                db.cookie_database[cookie_code] = verified_account.user_ID
+            run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+
+            def update_user_ids():
+                my_account.obselete = True
+                db.user_ids[my_account.user_ID] = my_account
+
+            run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+        # if the account isn't verified then transfer the verification pointer
+        else:
+            def update_verification_links():
+                db.verification_links[link_uuid] = my_account.user_ID
+
+            run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+
+            def update_user_ids():
+                my_account.verified_result = True
+                db.user_ids[my_account.user_ID] = my_account
+
+            run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+
+
+    # if my account is the original account, verify the email
+    else:
+        def update_user_ids():
+            my_account.verified_result = True
+            db.user_ids[my_account.user_ID] = my_account
+
+        run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+
+    # TODO: manual log activity showing my_account verified email
+    self.log_activity()
+    
+    if MyWSGIHandler.DEBUG < 2:
+        print(f'{my_account.email} just verified their email!')
 
 def main():
     print('Student Change Web App... running...')
