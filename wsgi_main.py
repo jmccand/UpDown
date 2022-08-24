@@ -163,7 +163,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 parsed_ua = user_agents.parse(self.http_user_agent)
                 def update_device_info():
                     db.device_info[my_code] = [self.client_address, parsed_ua]
-                self.run_and_sync(db.device_info_lock, update_device_info, db.device_info)
+                run_and_sync(db.device_info_lock, update_device_info, db.device_info)
 
     def send_links_head(self):
         self.wfile.write('''<meta charset="utf-8">
@@ -324,7 +324,7 @@ function close_menu() {
         def update_user_activity():
             db.user_ids[my_account.user_ID] = my_account
         
-        self.run_and_sync(db.user_ids_lock,
+        run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
         logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')
@@ -538,18 +538,18 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
 
                         self.send_email(user_email, send_v_link)
 
-                    self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+                    run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
                     
                     def update_cookie_database():
                         db.cookie_database[new_cookie] = new_id
                         
-                    self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+                    run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
                     expiration = datetime.date.today() + datetime.timedelta(days=10)
                     self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                     self.my_cookies['code'] = new_cookie
 
-                self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
                 
                 #redirect to homepage so they can vote
                 self.log_activity()
@@ -651,25 +651,25 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
                         if verified_account.verified_result == True:
                             def update_cookie_database():
                                 db.cookie_database[self.my_cookies['code'].value] = verified_account.user_ID
-                            self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+                            run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
                             def update_user_ids():
                                 my_account.obselete = True
                                 db.user_ids[my_account.user_ID] = my_account
 
-                            self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                            run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
                         else:
                             
                             def update_verification_links():
                                 db.verification_links[link_uuid] = my_account.user_ID
                                 
-                            self.run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+                            run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
 
                             def update_user_ids():
                                 my_account.verified_result = True
                                 db.user_ids[my_account.user_ID] = my_account
 
-                            self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                            run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
                                 
                             
                     else:
@@ -677,7 +677,7 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
                             my_account.verified_result = True
                             db.user_ids[my_account.user_ID] = my_account
 
-                        self.run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+                        run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
                     expiration = datetime.date.today() + datetime.timedelta(days=10)
                     self.start_response('200 OK', [])
                         
@@ -693,7 +693,7 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
                         self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                         self.my_cookies['code'] = new_cookie
 
-                    self.run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+                    run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
                     
                 self.log_activity()                    
                 # send success page
@@ -1925,7 +1925,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             assert str(opinion_ID) not in db.opinions_database
             def update_opinions_database():
                 db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.user_ID, datetime.datetime.now())])
-            self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+            run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             search_index_add_opinion(db.opinions_database[str(opinion_ID)])
             if start_response:
                 self.start_response('200 OK', [])
@@ -1960,7 +1960,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
                 def update_user_cookies():
                     db.user_ids[my_account.user_ID] = my_account
-                self.run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
+                run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
 
                 self.start_response('200 OK', [])
                 if MyWSGIHandler.DEBUG < 2:
@@ -1993,11 +1993,11 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                    run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
 
                     def update_user_cookies():
                         db.user_ids[my_account.user_ID] = my_account
-                    self.run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
+                    run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
 
                     self.start_response('200 OK', [])
                     
@@ -2400,7 +2400,7 @@ function update_unselected(element) {{
 
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                    run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
 
                     selected = set()
                     if this_date in db.opinions_calendar:
@@ -2413,7 +2413,7 @@ function update_unselected(element) {{
                         
                     def update_opinions_calendar():
                         db.opinions_calendar[this_date] = selected
-                    self.run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
+                    run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
                     
                     self.start_response('200 OK', [])
 
@@ -2445,7 +2445,7 @@ function update_unselected(element) {{
 
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                    run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
 
                     selected = set()
                     if this_date in db.opinions_calendar:
@@ -2458,7 +2458,7 @@ function update_unselected(element) {{
 
                     def update_opinions_calendar():
                         db.opinions_calendar[this_date] = selected
-                    self.run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
+                    run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
 
                     self.start_response('200 OK', [])
 
@@ -3404,7 +3404,7 @@ function editBill(mark_resolved) {{
                     opinion.reserved_for = committee
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
-                    self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                    run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
 
                     self.log_activity([committee, opinion_ID])
                     
@@ -3432,7 +3432,7 @@ function editBill(mark_resolved) {{
                         opinion.activity[5].append((my_account.user_ID,))
                 def update_opinions_database():
                     db.opinions_database[opinion_ID] = opinion
-                self.run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
                 
                 self.log_activity()
 
