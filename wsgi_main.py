@@ -329,13 +329,6 @@ function close_menu() {
                           db.user_ids)
         logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')
         
-    def run_and_sync(self, lock_needed, change, database):
-        lock_needed.acquire()
-        try:
-            change()
-        finally:
-            lock_needed.release()
-
     def load_image(self):
         image_type = os.path.splitext(self.path)[1][1:]
         if image_type in ('ico', 'png'):
@@ -3451,6 +3444,13 @@ class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
 
+def run_and_sync(lock_needed, change, database):
+    lock_needed.acquire()
+    try:
+        change()
+    finally:
+        lock_needed.release()
+            
 def simplify_text(text):
     split_text = re.split('''\W+''', text)
     if split_text[-1] == '':
