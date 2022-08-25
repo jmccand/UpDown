@@ -3623,7 +3623,28 @@ def verify_device(cookie_code):
                 db.user_ids[my_account.user_ID] = my_account
 
             run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
-        # if the account isn't verified then transfer the verification pointer
+
+            # manual log activity showing my_account verified email
+            what = [cookie_code]
+            activity_unit = ['/verification'] + what + [datetime.datetime.now()]
+            if datetime.date.today() in my_account.activity:
+                my_account.activity[datetime.date.today()].append(tuple(activity_unit))
+            else:
+                my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
+            if datetime.date.today() in verified_account.activity:
+                verified_account.activity[datetime.date.today()].append(tuple(activity_unit))
+            else:
+                verified_account.activity[datetime.date.today()] = [tuple(activity_unit)]
+
+            def update_user_activity():
+                db.user_ids[my_account.user_ID] = my_account
+                db.user_ids[verified_account.user_ID] = verified_account
+
+            run_and_sync(db.user_ids_lock,
+                              update_user_activity,
+                              db.user_ids)
+            logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')            
+        # if the account isn't verified then transfer the verification "pointer"
         else:
             def update_verification_links():
                 db.verification_links[link_uuid] = my_account.user_ID
@@ -3635,7 +3656,22 @@ def verify_device(cookie_code):
                 db.user_ids[my_account.user_ID] = my_account
 
             run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+            
+            # manual log activity showing my_account verified email
+            what = [cookie_code]
+            activity_unit = ['/verification'] + what + [datetime.datetime.now()]
+            if datetime.date.today() in my_account.activity:
+                my_account.activity[datetime.date.today()].append(tuple(activity_unit))
+            else:
+                my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
 
+            def update_user_activity():
+                db.user_ids[my_account.user_ID] = my_account
+
+            run_and_sync(db.user_ids_lock,
+                              update_user_activity,
+                              db.user_ids)
+            logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')
 
     # if my account is the original account, verify the email
     else:
@@ -3645,8 +3681,21 @@ def verify_device(cookie_code):
 
         run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
 
-    # TODO: manual log activity showing my_account verified email
-    self.log_activity()
+        # manual log activity showing my_account verified email
+        what = [cookie_code]
+        activity_unit = ['/verification'] + what + [datetime.datetime.now()]
+        if datetime.date.today() in my_account.activity:
+            my_account.activity[datetime.date.today()].append(tuple(activity_unit))
+        else:
+            my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
+
+        def update_user_activity():
+            db.user_ids[my_account.user_ID] = my_account
+
+        run_and_sync(db.user_ids_lock,
+                          update_user_activity,
+                          db.user_ids)
+        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')        
     
     if MyWSGIHandler.DEBUG < 2:
         print(f'{my_account.email} just verified their email!')
