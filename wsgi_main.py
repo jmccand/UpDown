@@ -522,8 +522,6 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
 
-                print(f'MY NEW COOKIE IS {new_cookie}')
-
                 #redirect to homepage so they can vote
                 self.log_activity()
             else:
@@ -599,7 +597,7 @@ select.status_drop {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<input type='hidden' name='verification_id' value='{verification_ID}' /><form method='GET' action='/verification'>'''.encode('utf8'))
+            self.wfile.write(f'''<form method='GET' action='/verification'><input type='hidden' name='verification_id' value='{verification_ID}' />'''.encode('utf8'))
             my_email = db.user_ids[db.verification_links[verification_ID]].email
             id_list = []
             for ID, user in db.user_ids.items():
