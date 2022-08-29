@@ -537,7 +537,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
         if verification_ID != None and verification_ID in db.verification_links:
             if my_account == None:
                 # create new account
-                my_email = db.user_ids[db.verification_links[verification_ID]].email
+                my_email = db.verification_links[verification_ID]
                 new_cookie, new_id, v_link = create_account(my_email)
                 # set cookie
                 expiration = datetime.date.today() + datetime.timedelta(days=10)
@@ -598,7 +598,7 @@ select.status_drop {
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write(f'''<form method='GET' action='/verification'><input type='hidden' name='verification_id' value='{verification_ID}' />'''.encode('utf8'))
-            my_email = db.user_ids[db.verification_links[verification_ID]].email
+            my_email = db.verification_links[verification_ID]
             id_list = []
             for ID, user in db.user_ids.items():
                 if user.email == my_email:
@@ -3719,8 +3719,8 @@ def create_account(user_email):
             global send_v_link
             send_v_link = None
             repeat_email = False
-            for v_link, this_user_ID in db.verification_links.items():
-                if db.user_ids[this_user_ID].email == user_email:
+            for v_link, v_email in db.verification_links.items():
+                if v_email == user_email:
                     repeat_email = True
                     send_v_link = v_link
 
@@ -3728,7 +3728,7 @@ def create_account(user_email):
                 send_v_link = uuid.uuid4().hex
                 while send_v_link in db.verification_links:
                     send_v_link = uuid.uuid4().hex
-                db.verification_links[send_v_link] = new_id
+                db.verification_links[send_v_link] = user_email
 
         run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
     run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
@@ -3747,8 +3747,8 @@ def main():
             print(f'  {cookie} : {this_secure}')
 
         print(f'\n{db.verification_links}')
-        for link, ID in db.verification_links.items():
-            print(f'  {link} : {ID}')
+        for link, email in db.verification_links.items():
+            print(f'  {link} : {email}')
 
         print(f'\n{db.opinions_database}')
         for ID, opinion in db.opinions_database.items():
