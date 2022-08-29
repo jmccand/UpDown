@@ -3,13 +3,12 @@ import datetime
 
 class User:
 
-    def __init__(self, email, user_ID, activity={}, votes={}, verified_result=None, obselete=False):
+    def __init__(self, email, user_ID, activity={}, votes={}, obselete=False):
 
         self.email = email
         self.user_ID = user_ID
         self.activity = activity
         self.votes = votes
-        self.verified_result = verified_result
         self.obselete = obselete
 
 class Opinion:
