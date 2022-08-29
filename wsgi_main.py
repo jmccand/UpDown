@@ -3645,7 +3645,7 @@ def verify_device(cookie_code):
         verified_account = db.user_ids[db.cookie_database[verified_cookie][0]]
         # fix my cookie to point to verified account and be verified
         def update_cookie_database():
-            db.cookie_database[cookie_code] = (verified_account.user_ID, True)
+            db.cookie_database[cookie_code] = (verified_account.user_ID, 'verified')
         run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
         def update_user_ids():
@@ -3655,7 +3655,7 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
 
         # manual log activity showing my_account verified email
-        what = [cookie_code, True]
+        what = [cookie_code, 'verified']
         activity_unit = ['/verification'] + what + [datetime.datetime.now()]
         if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
