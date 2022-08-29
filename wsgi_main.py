@@ -145,10 +145,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             if my_code in db.cookie_database:
                 self.update_device_info()
                 return db.user_ids[db.cookie_database[my_code][0]]
-            else:
-                raise ValueError(f'ip {self.client_address[0]} -- identify user function got code {my_code}')
-        else:
-            if nocookie:
+            elif nocookie:
                 return None
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
@@ -262,7 +259,9 @@ header {
 
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
-        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        verified_result = False
+        if my_account != None:
+            verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         title = ''
         if self.path_root == '/verification':
             title = 'Verify'
