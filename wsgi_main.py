@@ -3652,7 +3652,7 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
 
         # manual log activity showing my_account verified email
-        what = [cookie_code]
+        what = [cookie_code, True]
         activity_unit = ['/verification'] + what + [datetime.datetime.now()]
         if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
@@ -3679,7 +3679,7 @@ def verify_device(cookie_code):
         run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
         
         # manual log activity showing my_account verified email
-        what = [cookie_code]
+        what = [cookie_code, True]
         activity_unit = ['/verification'] + what + [datetime.datetime.now()]
         if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
@@ -3692,10 +3692,34 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')        
+        logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')        
     
     if MyWSGIHandler.DEBUG < 2:
         print(f'{my_account.email} just verified their email!')
+
+def block_device(cookie_code):
+    my_account = db.user_ids[db.cookie_database[cookie_code][0]]
+    # block my cookie
+    def update_cookie_database():
+        db.cookie_database[cookie_code] = (my_account.user_ID, False)
+    run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+
+    # manual log activity showing my_account verified email
+    what = [cookie_code, False]
+    activity_unit = ['/verification'] + what + [datetime.datetime.now()]
+    if datetime.date.today() in my_account.activity:
+        my_account.activity[datetime.date.today()].append(tuple(activity_unit))
+    else:
+        my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
+
+    def update_user_activity():
+        db.user_ids[my_account.user_ID] = my_account
+
+    run_and_sync(db.user_ids_lock,
+                      update_user_activity,
+                      db.user_ids)
+    logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')
+    
         
 def create_account(user_email):
     global new_id
