@@ -262,6 +262,7 @@ header {
 
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         title = ''
         if self.path_root == '/verification':
             title = 'Verify'
@@ -295,10 +296,10 @@ header {
 <a href='/submit_opinions'>Submit</a>
 <a href='/leaderboard'>Leaderboard</a>
 <a href='/senate'>The Senate</a>'''.encode('utf8'))
-            if my_account.email in local.MODERATORS and my_account.verified_result == True:
+            if my_account.email in local.MODERATORS and verified_result == True:
                 self.wfile.write('''<a href='/approve_opinions'>Approve</a>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
-                if my_account.email in members and my_account.verified_result == True:
+                if my_account.email in members and verified_result == True:
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
@@ -551,11 +552,10 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 for cookie_key, arg_list in url_arguments.items():
                     if cookie_key != 'verification_id':
                         if arg_list[0] in ('yes', 'no', 'unverified'):
-                            submitted_verification = None
                             if arg_list[0] == 'yes':
                                 verify_device(cookie_key)
                             elif arg_list[0] == 'no':
-                                submitted_verification = False
+                                block_device(cookie_key)
             # send response
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -617,7 +617,7 @@ select.status_drop {
             cookie_list.sort(key=lambda x: creation_date(db.user_ids[db.cookie_database[x]]))
             for cookie in cookie_list:
                 ip_address, parsed_ua = db.device_info[cookie]
-                my_verified_result = db.user_ids[db.cookie_database[cookie]].verified_result
+                my_verified_result = db.cookie_database[cookie][1]
                 self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{'THIS DEVICE: ' if cookie==self.my_cookies['code'].value else ''}{parsed_ua}</td><td class='status'>
 <select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
@@ -1364,7 +1364,8 @@ function updateSearch() {
 
     def approve_opinions_page(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if my_account.email in local.ADMINS and verified_result == True:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -1966,7 +1967,8 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
     def approve(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if my_account.email in local.ADMINS and verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -2004,9 +2006,10 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
 
     def schedule_opinions_page(self):
         my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         url_arguments = urllib.parse.parse_qs(self.query_string)
         see_month_str = url_arguments.get('month', [datetime.date.today().strftime('%Y-%m')])[0]
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == True:
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -2246,7 +2249,8 @@ function close_pop() {
 
     def schedule_date_page(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if my_account.email in local.ADMINS and verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2373,7 +2377,8 @@ function update_unselected(element) {{
 
     def schedule(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if my_account.email in local.ADMINS and verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2420,7 +2425,8 @@ function update_unselected(element) {{
 
     def unschedule(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if my_account.email in local.ADMINS and verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2673,8 +2679,9 @@ function updateStats(element) {{
         
     def leaderboard_page(self):
         my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         isSenator = False
-        if my_account.verified_result == True:
+        if verified_result == True:
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members:
                     isSenator = True
@@ -3113,10 +3120,11 @@ function reserve(element) {
         
     def view_committee_page(self):
         my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments['committee'][0]
         if committee in local.COMMITTEE_MEMBERS.keys():
-            if my_account.email in local.COMMITTEE_MEMBERS[committee] and my_account.verified_result == True:
+            if my_account.email in local.COMMITTEE_MEMBERS[committee] and verified_result == True:
                 self.start_response('200 OK', [])
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
@@ -3317,7 +3325,8 @@ function editBill(mark_resolved) {{
 
     def already_scheduled(self):
         my_account = self.identify_user()
-        if my_account.email in local.ADMINS and my_account.verified_result == True:
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if my_account.email in local.ADMINS and verified_result == True:
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 see_date = url_arguments['date'][0]
@@ -3336,6 +3345,7 @@ function editBill(mark_resolved) {{
 
     def handle_leaderboard_lookup(self):
         my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'opinion_ID' in url_arguments:
             opinion_ID = url_arguments['opinion_ID'][0]
@@ -3351,7 +3361,7 @@ function editBill(mark_resolved) {{
                     
                 # dropdown
                 isSenator = False
-                if my_account.verified_result == True:
+                if verified_result == True:
                     for committee, members in local.COMMITTEE_MEMBERS.items():
                         if my_account.email in members:
                             isSenator = True
@@ -3404,13 +3414,14 @@ function editBill(mark_resolved) {{
 
     def edit_bill(self):
         my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         url_arguments = urllib.parse.parse_qs(self.query_string)
         opinion_ID = url_arguments.get('opinion_ID', [''])[0]
         new_bill = url_arguments.get('bill', [None])[0]
         mark_resolved = url_arguments.get('mark_resolved', [''])[0]
         if opinion_ID != '' and new_bill != None and mark_resolved in ('yes', 'no'):
             opinion = db.opinions_database[opinion_ID]
-            if my_account.email in local.COMMITTEE_MEMBERS[opinion.reserved_for] and my_account.verified_result == True:
+            if my_account.email in local.COMMITTEE_MEMBERS[opinion.reserved_for] and verified_result == True:
                 opinion.bill = new_bill
                 if len(opinion.activity) == 4:
                     opinion.activity.append([(my_account.user_ID, new_bill, datetime.datetime.now())])
@@ -3736,7 +3747,7 @@ def main():
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_ids}')
         for this_user_ID, user in db.user_ids.items():
-            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.verified_result}, {user.obselete})')
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.obselete})')
 
         print(f'\n{db.cookie_database}')
         for cookie, this_user_ID in db.cookie_database.items():
