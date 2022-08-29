@@ -3737,7 +3737,7 @@ def create_account(user_email):
             new_cookie = uuid.uuid4().hex
 
         def update_cookie_database():
-            db.cookie_database[new_cookie] = new_id
+            db.cookie_database[new_cookie] = (new_id, 'unsure')
 
         run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
