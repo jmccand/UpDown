@@ -144,7 +144,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             my_code = self.my_cookies['code'].value
             if my_code in db.cookie_database:
                 self.update_device_info()
-                return db.user_ids[db.cookie_database[my_code]]
+                return db.user_ids[db.cookie_database[my_code][0]]
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got code {my_code}')
         else:
@@ -604,7 +604,8 @@ select.status_drop {
                 if user.email == my_email:
                     id_list.append(ID)
             cookie_list = []
-            for cookie, ID in db.cookie_database.items():
+            for cookie, secure in db.cookie_database.items():
+                ID = secure[0]
                 if ID in id_list:
                     if cookie in db.device_info:
                         cookie_list.append(cookie)
@@ -614,7 +615,7 @@ select.status_drop {
                     if user_activity[0][-1] < earliest:
                         earliest = user_activity[0][-1]
                 return earliest
-            cookie_list.sort(key=lambda x: creation_date(db.user_ids[db.cookie_database[x]]))
+            cookie_list.sort(key=lambda x: creation_date(db.user_ids[db.cookie_database[x][0]]))
             for cookie in cookie_list:
                 ip_address, parsed_ua = db.device_info[cookie]
                 my_verified_result = db.cookie_database[cookie][1]
@@ -3604,7 +3605,7 @@ def reserve_count(committee):
     return cur_count
 
 def verify_device(cookie_code):
-    my_account = db.user_ids[db.cookie_database[cookie_code]]
+    my_account = db.user_ids[db.cookie_database[cookie_code][0]]
     verified_account = None
     verified_link = None
     for verification_ID, account_ID in db.verification_links.items():
