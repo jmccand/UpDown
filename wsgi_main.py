@@ -522,6 +522,8 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
 
+                print(f'MY NEW COOKIE IS {new_cookie}')
+
                 #redirect to homepage so they can vote
                 self.log_activity()
             else:
@@ -3683,10 +3685,12 @@ def verify_device(cookie_code):
         print(f'{my_account.email} just verified their email!')
 
 def create_account(user_email):
-    new_id = None
-    new_cookie = None
-    send_v_link = None
+    global new_id
+    global new_cookie
+    global send_v_link
     def update_user_ids():
+        global new_id
+        global new_cookie
         new_id = str(len(db.user_ids))
         db.user_ids[new_id] = updown.User(user_email, new_id)
         new_cookie = uuid.uuid4().hex
@@ -3699,6 +3703,7 @@ def create_account(user_email):
         run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
         def update_verification_links():
+            global send_v_link
             send_v_link = None
             repeat_email = False
             for v_link, this_user_ID in db.verification_links.items():
