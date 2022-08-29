@@ -603,12 +603,22 @@ select.status_drop {
             for ID, user in db.user_ids.items():
                 if user.email == my_email:
                     id_list.append(ID)
+            cookie_list = []
             for cookie, ID in db.cookie_database.items():
                 if ID in id_list:
                     if cookie in db.device_info:
-                        ip_address, parsed_ua = db.device_info[cookie]
-                        my_verified_result = db.user_ids[db.cookie_database[cookie]].verified_result
-                        self.wfile.write(f'''<table class='device'>
+                        cookie_list.append(cookie)
+            def creation_date(user_obj):
+                earliest = datetime.datetime.now()
+                for active_date, user_activity in user_obj.activity.items():
+                    if user_activity[0][-1] < earliest:
+                        earliest = user_activity[0][-1]
+                return earliest
+            cookie_list.sort(key=lambda x: creation_date(db.user_ids[db.cookie_database[x]]))
+            for cookie in cookie_list:
+                ip_address, parsed_ua = db.device_info[cookie]
+                my_verified_result = db.user_ids[db.cookie_database[cookie]].verified_result
+                self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{parsed_ua}</td><td class='status'>
 <select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
 <option id='{cookie}_True' value='yes'>logged in</option>
