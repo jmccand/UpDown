@@ -3743,8 +3743,8 @@ def main():
             print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.obselete})')
 
         print(f'\n{db.cookie_database}')
-        for cookie, this_user_ID in db.cookie_database.items():
-            print(f'  {cookie} : {this_user_ID}')
+        for cookie, this_secure in db.cookie_database.items():
+            print(f'  {cookie} : {this_secure}')
 
         print(f'\n{db.verification_links}')
         for link, ID in db.verification_links.items():
