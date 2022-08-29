@@ -61,7 +61,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verify_email') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if self.path == '/' and 'cookie_code' in url_arguments:
                 self.path_root = '/'
@@ -93,9 +93,6 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/vote'):
                     self.path_root = '/vote'
                     self.vote()
-                elif self.path.startswith('/verify_email'):
-                    self.path_root = '/verify_email'
-                    self.verify_email()
                 elif self.path.startswith('/verification'):
                     self.path_root = '/verification'
                     self.verification_page()
@@ -479,14 +476,14 @@ function checkEmail() {{
         msg['Subject'] = "Add your votes to the count?"
         msg['From'] = local.FROM_EMAIL
         msg['To'] = to_email
-        text = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verify_email?verification_id={v_uuid}'
+        text = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verification?verification_id={v_uuid}'
         html = f'''<html>
 <body>
 <p>
 Welcome to the Student Representation App for LHS!
 <br />
 <br />
-Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verify_email?verification_id={v_uuid}'>this link</a>.
+Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verification_id={v_uuid}'>this link</a>.
 </p>
 </body>
 </html>'''
