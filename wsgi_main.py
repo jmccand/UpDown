@@ -37,7 +37,7 @@ def application(environ, start_response):
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 5
+    DEBUG = 0
 
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -551,10 +551,10 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             if len(url_arguments) > 1:
                 for cookie_key, arg_list in url_arguments.items():
                     if cookie_key != 'verification_id':
-                        if arg_list[0] in ('yes', 'no', 'unverified'):
-                            if arg_list[0] == 'yes':
+                        if arg_list[0] in ('verified', 'blocked', 'unsure'):
+                            if arg_list[0] == 'verified':
                                 verify_device(cookie_key)
-                            elif arg_list[0] == 'no':
+                            elif arg_list[0] == 'blocked':
                                 block_device(cookie_key)
             # send response
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -604,11 +604,14 @@ select.status_drop {
                 if user.email == my_email:
                     id_list.append(ID)
             cookie_list = []
+            print(f'ID LIST: {id_list}')
             for cookie, secure in db.cookie_database.items():
                 ID = secure[0]
+                print(f'  ID: {ID}')
                 if ID in id_list:
-                    if cookie in db.device_info:
-                        cookie_list.append(cookie)
+                    print(f'    in (cookie {cookie})')
+                    cookie_list.append(cookie)
+            print(f'cookie list: {cookie_list}')
             def creation_date(user_obj):
                 earliest = datetime.datetime.now()
                 for active_date, user_activity in user_obj.activity.items():
@@ -622,9 +625,9 @@ select.status_drop {
                 self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{'THIS DEVICE: ' if cookie==self.my_cookies['code'].value else ''}{parsed_ua}</td><td class='status'>
 <select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
-<option id='{cookie}_True' value='yes'>logged in</option>
-<option id='{cookie}_None' value='unverified' disabled='true'>unverified</option>
-<option id='{cookie}_False' value='no'>logged out</option></select></td></tr>
+<option id='{cookie}_verified' value='verified'>verified</option>
+<option id='{cookie}_unsure' value='unsure' disabled='true'>unsure</option>
+<option id='{cookie}_blocked' value='blocked'>blocked</option></select></td></tr>
 </table>
 <script>
 document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
@@ -3675,11 +3678,11 @@ def verify_device(cookie_code):
     else:
         # verify my cookie
         def update_cookie_database():
-            db.cookie_database[cookie_code] = (my_account.user_ID, True)
+            db.cookie_database[cookie_code] = (my_account.user_ID, 'verified')
         run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
         
         # manual log activity showing my_account verified email
-        what = [cookie_code, True]
+        what = [cookie_code, 'verified']
         activity_unit = ['/verification'] + what + [datetime.datetime.now()]
         if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
@@ -3701,11 +3704,11 @@ def block_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
     # block my cookie
     def update_cookie_database():
-        db.cookie_database[cookie_code] = (my_account.user_ID, False)
+        db.cookie_database[cookie_code] = (my_account.user_ID, 'blocked')
     run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
     # manual log activity showing my_account verified email
-    what = [cookie_code, False]
+    what = [cookie_code, 'blocked']
     activity_unit = ['/verification'] + what + [datetime.datetime.now()]
     if datetime.date.today() in my_account.activity:
         my_account.activity[datetime.date.today()].append(tuple(activity_unit))
@@ -3764,7 +3767,7 @@ def main():
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_ids}')
         for this_user_ID, user in db.user_ids.items():
-            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.obselete})')
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, activity, {user.votes}, {user.obselete})')
 
         print(f'\n{db.cookie_database}')
         for cookie, this_secure in db.cookie_database.items():
@@ -3784,6 +3787,10 @@ def main():
         for this_date in sorted_calendar:
             ID_set = db.opinions_calendar[this_date]
             print(f'  {this_date} : {ID_set}')
+
+        print(f'\n{db.device_info}')
+        for cookie, info in db.device_info.items():
+            print(f'  {cookie} : {info}')
 
 
     logging.basicConfig(filename='UpDown.log', encoding='utf-8', level=logging.DEBUG)
