@@ -559,9 +559,20 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
     def verification_page(self):
+        my_account = self.identify_user(True)
         url_arguments = urllib.parse.parse_qs(self.query_string)
         verification_ID = url_arguments.get('verification_id', [None])[0]
         if verification_ID != None and verification_ID in db.verification_links:
+            if my_account == None:
+                # create new account
+                my_email = db.user_ids[db.verification_links[verification_ID]].email
+                new_cookie, new_id = create_account(my_email)
+                # set cookie
+                expiration = datetime.date.today() + datetime.timedelta(days=10)
+                self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
+                self.my_cookies['code'] = new_cookie
+            # verify the device
+            verify_device(new_cookie)
             # handle form submission
             if len(url_arguments) > 1:
                 for cookie_key, arg_list in url_arguments.items():
@@ -569,10 +580,9 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                         if arg_list[0] in ('yes', 'no', 'unverified'):
                             submitted_verification = None
                             if arg_list[0] == 'yes':
-                                submitted_verification = True
+                                verify_device(cookie_key)
                             elif arg_list[0] == 'no':
                                 submitted_verification = False
-                            verify_device(cookie_key, submitted_verification)
             # send response
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
