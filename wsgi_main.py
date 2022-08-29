@@ -515,42 +515,16 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             email_grad = user_email[:2]
             YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
             if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
-                def update_user_ids():
-                    new_id = str(len(db.user_ids))
-                    db.user_ids[new_id] = updown.User(user_email, new_id)
-                    new_cookie = uuid.uuid4().hex
-                    while new_cookie in db.cookie_database:
-                        new_cookie = uuid.uuid4().hex
+                # create new account
+                new_cookie, new_id, v_link = create_account(user_email)
 
-                    def update_verification_links():
-                        send_v_link = None
-                        repeat_email = False
-                        for v_link, this_user_ID in db.verification_links.items():
-                            if db.user_ids[this_user_ID].email == user_email:
-                                repeat_email = True
-                                send_v_link = v_link
+                # send verification email
+                self.send_email(user_email, v_link)
 
-                        if not repeat_email:
-                            send_v_link = uuid.uuid4().hex
-                            while send_v_link in db.verification_links:
-                                send_v_link = uuid.uuid4().hex
-                            db.verification_links[send_v_link] = new_id
+                expiration = datetime.date.today() + datetime.timedelta(days=10)
+                self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
+                self.my_cookies['code'] = new_cookie
 
-                        self.send_email(user_email, send_v_link)
-
-                    run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
-                    
-                    def update_cookie_database():
-                        db.cookie_database[new_cookie] = new_id
-                        
-                    run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
-
-                    expiration = datetime.date.today() + datetime.timedelta(days=10)
-                    self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
-                    self.my_cookies['code'] = new_cookie
-
-                run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
-                
                 #redirect to homepage so they can vote
                 self.log_activity()
             else:
@@ -566,13 +540,15 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
             if my_account == None:
                 # create new account
                 my_email = db.user_ids[db.verification_links[verification_ID]].email
-                new_cookie, new_id = create_account(my_email)
+                new_cookie, new_id, v_link = create_account(my_email)
                 # set cookie
                 expiration = datetime.date.today() + datetime.timedelta(days=10)
                 self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
+            else:
+                self.start_response('200 OK', [])
             # verify the device
-            verify_device(new_cookie)
+            verify_device(self.my_cookies['code'].value)
             # handle form submission
             if len(url_arguments) > 1:
                 for cookie_key, arg_list in url_arguments.items():
@@ -584,7 +560,6 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                             elif arg_list[0] == 'no':
                                 submitted_verification = False
             # send response
-            self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
@@ -3653,7 +3628,7 @@ def verify_device(cookie_code):
             run_and_sync(db.user_ids_lock,
                               update_user_activity,
                               db.user_ids)
-            logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')            
+            logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')            
         # if the account isn't verified then transfer the verification "pointer"
         else:
             def update_verification_links():
@@ -3709,6 +3684,41 @@ def verify_device(cookie_code):
     
     if MyWSGIHandler.DEBUG < 2:
         print(f'{my_account.email} just verified their email!')
+
+def create_account(user_email):
+    new_id = None
+    new_cookie = None
+    send_v_link = None
+    def update_user_ids():
+        new_id = str(len(db.user_ids))
+        db.user_ids[new_id] = updown.User(user_email, new_id)
+        new_cookie = uuid.uuid4().hex
+        while new_cookie in db.cookie_database:
+            new_cookie = uuid.uuid4().hex
+
+        def update_cookie_database():
+            db.cookie_database[new_cookie] = new_id
+
+        run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+
+        def update_verification_links():
+            send_v_link = None
+            repeat_email = False
+            for v_link, this_user_ID in db.verification_links.items():
+                if db.user_ids[this_user_ID].email == user_email:
+                    repeat_email = True
+                    send_v_link = v_link
+
+            if not repeat_email:
+                send_v_link = uuid.uuid4().hex
+                while send_v_link in db.verification_links:
+                    send_v_link = uuid.uuid4().hex
+                db.verification_links[send_v_link] = new_id
+
+        run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+    run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+    return new_cookie, new_id, send_v_link
+    
 
 def main():
     print('Student Change Web App... running...')
