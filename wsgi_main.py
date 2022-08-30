@@ -319,7 +319,7 @@ function close_menu() {
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')
+        logging.info(f'''ip: {self.client_address[0]}; email: {my_account.email}; cookie: {self.my_cookies['code'].value}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
         
     def load_image(self):
         image_type = os.path.splitext(self.path)[1][1:]
@@ -1901,13 +1901,13 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                     # update databases
                     opinion = db.opinions_database[opinion_ID]
                     if len(opinion.activity) == 1:
-                        opinion.activity.append([(my_account.email, my_vote, datetime.datetime.now())])
+                        opinion.activity.append([(self.my_cookies['code'].value, my_vote, datetime.datetime.now())])
                         if my_vote == 'yes':
                             opinion.approved = True
                         else:
                             opinion.approved = False
                     else:
-                        opinion.activity[1].append((my_account.email, my_vote, datetime.datetime.now()))
+                        opinion.activity[1].append((self.my_cookies['code'].value, my_vote, datetime.datetime.now()))
 
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
@@ -2315,9 +2315,9 @@ function update_unselected(element) {{
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = True
                     if len(opinion.activity) == 2:
-                        opinion.activity.append([(my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now())])
+                        opinion.activity.append([(self.my_cookies['code'].value, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now())])
                     else:
-                        opinion.activity[2].append((my_account.email, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now()))
+                        opinion.activity[2].append((self.my_cookies['code'].value, True, datetime.datetime.strptime(this_date, '%Y-%m-%d').date(), datetime.datetime.now()))
 
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
@@ -2363,7 +2363,7 @@ function update_unselected(element) {{
                     opinion = db.opinions_database[opinion_ID]
                     opinion.scheduled = False
                     assert len(opinion.activity) == 3, f'{len(opinion.activity)}'
-                    opinion.activity[2].append((my_account.email, False, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
+                    opinion.activity[2].append((self.my_cookies['code'].value, False, datetime.datetime.strptime(this_date, '%Y-%m-%d'), datetime.datetime.now()))
 
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
@@ -3323,9 +3323,9 @@ function editBill(mark_resolved) {{
                 if opinion_ID != '':
                     opinion = db.opinions_database[opinion_ID]
                     if len(opinion.activity) == 3:
-                        opinion.activity.append([(my_account.email, committee, datetime.datetime.now())])
+                        opinion.activity.append([(self.my_cookies['code'].value, committee, datetime.datetime.now())])
                     else:
-                        opinion.activity[3].append((my_account.email, committee, datetime.datetime.now()))
+                        opinion.activity[3].append((self.my_cookies['code'].value, committee, datetime.datetime.now()))
 
                     opinion.reserved_for = committee
                     def update_opinions_database():
@@ -3570,7 +3570,8 @@ def verify_device_old(cookie_code):
             run_and_sync(db.user_ids_lock,
                               update_user_activity,
                               db.user_ids)
-            logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')            
+            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
+
         # if the account isn't verified then transfer the verification "pointer"
         else:
             def update_verification_links():
@@ -3598,7 +3599,7 @@ def verify_device_old(cookie_code):
             run_and_sync(db.user_ids_lock,
                               update_user_activity,
                               db.user_ids)
-            logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')
+            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
 
     # if my account is the original account, verify the email
     else:
@@ -3622,10 +3623,10 @@ def verify_device_old(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-        logging.info(f'ip {self.client_address[0]} with {my_account.email} with {my_account.user_ID} did {activity_unit}')        
+            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
     
     if MyWSGIHandler.DEBUG < 2:
-        print(f'{my_account.email} just verified their email!')
+        print(f'{cookie_code} just verified their email!')
 
 def verify_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
@@ -3667,7 +3668,8 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-        logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')            
+            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
+
     # if there are no verified cookies, then make my account verified
     else:
         # verify my cookie
@@ -3689,10 +3691,10 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-        logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')        
+            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
     
     if MyWSGIHandler.DEBUG < 2:
-        print(f'{my_account.email} just verified their email!')
+        print(f'{cookie_code} just verified their email!')
 
 def block_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
@@ -3715,8 +3717,7 @@ def block_device(cookie_code):
     run_and_sync(db.user_ids_lock,
                       update_user_activity,
                       db.user_ids)
-    logging.info(f'{my_account.email} with {my_account.user_ID} did {activity_unit}')
-    
+            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')    
         
 def create_account(user_email):
     global new_id
