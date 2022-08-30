@@ -421,7 +421,7 @@ article {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
+        YOGS = valid_yogs()
         self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
 Enter your email to vote:<br />
 <input id='email' type='email' name='email' /><br />
@@ -505,7 +505,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
         if 'email' in url_arguments:
             user_email = url_arguments['email'][0]
             email_grad = user_email[:2]
-            YOGS = [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
+            YOGS = valid_yogs()
             if (user_email.endswith('@lexingtonma.org') and email_grad in YOGS) or user_email in local.EXCEPTION_EMAILS:
                 # create new account
                 new_cookie, new_id, v_link = create_account(user_email)
@@ -3759,6 +3759,13 @@ def create_account(user_email):
 def calc_expiration(yog):
     century = (datetime.date.today().year // 100) * 100
     return datetime.date(year=century + yog, month=8, day=1)
+
+def valid_yogs():
+    if datetime.date.today().month >= 8:
+        return [str(x)[-2:] for x in range(int(datetime.date.today().year + 1), int(datetime.date.today().year + 5))]
+    else:
+        return [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
+
 
 def main():
     print('Student Change Web App... running...')
