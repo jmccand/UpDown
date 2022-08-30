@@ -3623,7 +3623,7 @@ def verify_device_old(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
+        logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
     
     if MyWSGIHandler.DEBUG < 2:
         print(f'{cookie_code} just verified their email!')
@@ -3668,7 +3668,7 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
+        logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
 
     # if there are no verified cookies, then make my account verified
     else:
@@ -3691,7 +3691,7 @@ def verify_device(cookie_code):
         run_and_sync(db.user_ids_lock,
                           update_user_activity,
                           db.user_ids)
-            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
+        logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
     
     if MyWSGIHandler.DEBUG < 2:
         print(f'{cookie_code} just verified their email!')
@@ -3717,7 +3717,7 @@ def block_device(cookie_code):
     run_and_sync(db.user_ids_lock,
                       update_user_activity,
                       db.user_ids)
-            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')    
+    logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')    
         
 def create_account(user_email):
     global new_id
