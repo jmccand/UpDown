@@ -62,13 +62,8 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 
         self.path_root = '/'
         if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
-            url_arguments = urllib.parse.parse_qs(self.query_string)
-            if self.path == '/' and 'cookie_code' in url_arguments:
-                self.path_root = '/'
-                self.opinions_page()
-            else:
-                self.path_root = '/get_email'
-                self.get_email()
+            self.path_root = '/get_email'
+            self.get_email()
         else:
             try:
                 #self.path_root = '/'
