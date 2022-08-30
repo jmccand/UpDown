@@ -361,11 +361,11 @@ function close_menu() {
 	    "type": "image/png"
 	}
     ],
-    "start_url": "/?cookie_code=%s",
+    "start_url": "/",
     "background_color": "#f1c232",
     "theme_color": "#1155cc",
     "display": "standalone"
-}''' % (my_account.cookie_code)
+}'''
         self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(manifest)))])
         self.wfile.write(manifest.encode('utf8'))
         self.log_activity()
