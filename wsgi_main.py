@@ -254,7 +254,7 @@ header {
 
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
-        verified_result = False
+        verified_result = 'blocked'
         if my_account != None:
             verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         title = ''
@@ -285,15 +285,15 @@ header {
 <img id='logo' src='favicon.ico'/>'''.encode('utf8'))
         self.wfile.write('''<div id='menu'>'''.encode('utf8'))
         self.wfile.write('''<div onclick='close_menu();'><img id='x_menu' src='hamburger.png'/></div>'''.encode('utf8'))
-        if my_account != None:
+        if verified_result == 'verified':
             self.wfile.write('''<a href='/'>Ballot</a>
 <a href='/submit_opinions'>Submit</a>
 <a href='/leaderboard'>Leaderboard</a>
 <a href='/senate'>The Senate</a>'''.encode('utf8'))
-            if my_account.email in local.MODERATORS and verified_result == True:
+            if my_account.email in local.MODERATORS:
                 self.wfile.write('''<a href='/approve_opinions'>Approve</a>'''.encode('utf8'))
             for committee, members in local.COMMITTEE_MEMBERS.items():
-                if my_account.email in members and verified_result == True:
+                if my_account.email in members:
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
