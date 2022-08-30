@@ -513,7 +513,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 # send verification email
                 self.send_email(user_email, v_link)
 
-                expiration = datetime.date.today() + datetime.timedelta(days=10)
+                expiration = calc_expiration(int(email_grad))
                 self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
 
@@ -534,7 +534,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 my_email = db.verification_links[verification_ID]
                 new_cookie, new_id, v_link = create_account(my_email)
                 # set cookie
-                expiration = datetime.date.today() + datetime.timedelta(days=10)
+                expiration = calc_expiration(int(my_account.email[:2]))
                 self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
             else:
@@ -3755,6 +3755,10 @@ def create_account(user_email):
         run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
     run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
     return new_cookie, new_id, send_v_link
+
+def calc_expiration(yog):
+    century = (datetime.date.today().year // 100) * 100
+    return datetime.date(year=century + yog, month=8, day=1)
 
 def main():
     print('Student Change Web App... running...')
