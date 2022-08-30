@@ -443,11 +443,12 @@ That said, everything on UpDown is moderated to ensure that opinions don't get o
 <script>
 const exceptionEmails = {list(local.EXCEPTION_EMAILS)};
 const YOGS = {YOGS};
+const re = /{local.EMAIL_MATCH_RE}/;
 setTimeout(checkEmail, 1000);
 function checkEmail() {{
     current_email = document.getElementById('email').value;
     console.log('email: ' + current_email);
-    if (current_email.endsWith('@lexingtonma.org') && YOGS.indexOf(current_email[0] + current_email[1]) != -1) {{
+    if (re.test(current_email) && YOGS.indexOf(current_email[0] + current_email[1]) != -1) {{
         console.log('PROPER EMAIL');
         document.getElementById('submit').disabled = false;
     }}
@@ -3766,6 +3767,8 @@ def valid_yogs():
     else:
         return [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
 
+def email_is_valid(email):
+    return re.match(email, local.EMAIL_MATCH_RE)
 
 def main():
     print('Student Change Web App... running...')
