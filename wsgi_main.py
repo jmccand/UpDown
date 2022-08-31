@@ -538,6 +538,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 expiration = calc_expiration(int(my_email[:2]))
                 self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
+                self.update_device_info()
             else:
                 self.start_response('200 OK', [])
             # verify the device
