@@ -1843,7 +1843,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             opinion_ID = len(db.opinions_database)
             assert str(opinion_ID) not in db.opinions_database
             def update_opinions_database():
-                db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(my_account.user_ID, datetime.datetime.now())])
+                db.opinions_database[str(opinion_ID)] = updown.Opinion(opinion_ID, opinion_text, [(self.my_cookies['code'].value, datetime.datetime.now())])
             run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             search_index_add_opinion(db.opinions_database[str(opinion_ID)])
             if start_response:
@@ -3676,7 +3676,7 @@ def main():
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_ids}')
         for this_user_ID, user in db.user_ids.items():
-            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, activity, {user.votes}, {user.obselete})')
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.obselete})')
 
         print(f'\n{db.cookie_database}')
         for cookie, this_secure in db.cookie_database.items():
