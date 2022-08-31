@@ -535,7 +535,7 @@ Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{lo
                 my_email = db.verification_links[verification_ID]
                 new_cookie, new_id, v_link = create_account(my_email)
                 # set cookie
-                expiration = calc_expiration(int(my_account.email[:2]))
+                expiration = calc_expiration(int(my_email[:2]))
                 self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
             else:
