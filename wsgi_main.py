@@ -137,7 +137,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         #print('identify user function called!')
         if 'code' in self.my_cookies:
             my_code = self.my_cookies['code'].value
-            if my_code in db.cookie_database:
+            if my_code in db.cookie_database and db.cookie_database[my_code][1] != 'blocked':
                 self.update_device_info()
                 return db.user_ids[db.cookie_database[my_code][0]]
             elif nocookie:
