@@ -3529,112 +3529,11 @@ def reserve_count(committee):
             cur_count += 1
     return cur_count
 
-def verify_device_old(cookie_code):
-    my_account = db.user_ids[db.cookie_database[cookie_code][0]]
-    verified_account = None
-    verified_link = None
-    for verification_ID, account_ID in db.verification_links.items():
-        this_account = db.user_ids[account_ID]
-        if this_account.email == my_account.email:
-            verified_account = this_account
-            verified_link = verification_ID
-    assert verified_account != None and verified_link != None
-    # if my account is not the original account, reconfigure to point to verified
-    if my_account != verified_account:
-        # if the account is verified then transfer the account pointer
-        if verified_account.verified_result == 'verified':
-            def update_cookie_database():
-                db.cookie_database[cookie_code] = verified_account.user_ID
-            run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
-
-            def update_user_ids():
-                my_account.obselete = True
-                db.user_ids[my_account.user_ID] = my_account
-
-            run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
-
-            # manual log activity showing my_account verified email
-            what = [cookie_code]
-            activity_unit = ['/verification'] + what + [datetime.datetime.now()]
-            if datetime.date.today() in my_account.activity:
-                my_account.activity[datetime.date.today()].append(tuple(activity_unit))
-            else:
-                my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
-            if datetime.date.today() in verified_account.activity:
-                verified_account.activity[datetime.date.today()].append(tuple(activity_unit))
-            else:
-                verified_account.activity[datetime.date.today()] = [tuple(activity_unit)]
-
-            def update_user_activity():
-                db.user_ids[my_account.user_ID] = my_account
-                db.user_ids[verified_account.user_ID] = verified_account
-
-            run_and_sync(db.user_ids_lock,
-                              update_user_activity,
-                              db.user_ids)
-            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
-
-        # if the account isn't verified then transfer the verification "pointer"
-        else:
-            def update_verification_links():
-                db.verification_links[link_uuid] = my_account.user_ID
-
-            run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
-
-            def update_user_ids():
-                my_account.verified_result = True
-                db.user_ids[my_account.user_ID] = my_account
-
-            run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
-            
-            # manual log activity showing my_account verified email
-            what = [cookie_code]
-            activity_unit = ['/verification'] + what + [datetime.datetime.now()]
-            if datetime.date.today() in my_account.activity:
-                my_account.activity[datetime.date.today()].append(tuple(activity_unit))
-            else:
-                my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
-
-            def update_user_activity():
-                db.user_ids[my_account.user_ID] = my_account
-
-            run_and_sync(db.user_ids_lock,
-                              update_user_activity,
-                              db.user_ids)
-            logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
-
-    # if my account is the original account, verify the email
-    else:
-        def update_user_ids():
-            my_account.verified_result = True
-            db.user_ids[my_account.user_ID] = my_account
-
-        run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
-
-        # manual log activity showing my_account verified email
-        what = [cookie_code]
-        activity_unit = ['/verification'] + what + [datetime.datetime.now()]
-        if datetime.date.today() in my_account.activity:
-            my_account.activity[datetime.date.today()].append(tuple(activity_unit))
-        else:
-            my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
-
-        def update_user_activity():
-            db.user_ids[my_account.user_ID] = my_account
-
-        run_and_sync(db.user_ids_lock,
-                          update_user_activity,
-                          db.user_ids)
-        logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
-    
-    if MyWSGIHandler.DEBUG < 2:
-        print(f'{cookie_code} just verified their email!')
-
 def verify_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
     verified_cookie = None
     for this_cookie, this_secure in db.cookie_database.items():
-        if this_secure[1] == True:
+        if this_secure[1] == 'verified':
             verified_cookie = this_cookie
             break
     # if there is already a verified cookie, fix my cookie to point to the same verified account
