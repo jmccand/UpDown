@@ -1290,7 +1290,7 @@ function updateSearch() {
     def approve_opinions_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -1893,7 +1893,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
     def approve(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'opinion_ID' in url_arguments and 'my_vote' in url_arguments:
                 opinion_ID = url_arguments['opinion_ID'][0]
@@ -1934,7 +1934,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         url_arguments = urllib.parse.parse_qs(self.query_string)
         see_month_str = url_arguments.get('month', [datetime.date.today().strftime('%Y-%m')])[0]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             self.start_response('200 OK', [])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -2175,7 +2175,7 @@ function close_pop() {
     def schedule_date_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2303,7 +2303,7 @@ function update_unselected(element) {{
     def schedule(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2351,7 +2351,7 @@ function update_unselected(element) {{
     def unschedule(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments and 'opinion_ID' in url_arguments:
                 this_date = url_arguments["date"][0]
@@ -2606,7 +2606,7 @@ function updateStats(element) {{
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         isSenator = False
-        if verified_result == True:
+        if verified_result == 'verified':
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members:
                     isSenator = True
@@ -3049,7 +3049,7 @@ function reserve(element) {
         url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments['committee'][0]
         if committee in local.COMMITTEE_MEMBERS.keys():
-            if my_account.email in local.COMMITTEE_MEMBERS[committee] and verified_result == True:
+            if my_account.email in local.COMMITTEE_MEMBERS[committee] and verified_result == 'verified':
                 self.start_response('200 OK', [])
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
@@ -3251,7 +3251,7 @@ function editBill(mark_resolved) {{
     def already_scheduled(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
-        if my_account.email in local.ADMINS and verified_result == True:
+        if my_account.email in local.ADMINS and verified_result == 'verified':
             url_arguments = urllib.parse.parse_qs(self.query_string)
             if 'date' in url_arguments:
                 see_date = url_arguments['date'][0]
@@ -3286,7 +3286,7 @@ function editBill(mark_resolved) {{
                     
                 # dropdown
                 isSenator = False
-                if verified_result == True:
+                if verified_result == 'verified':
                     for committee, members in local.COMMITTEE_MEMBERS.items():
                         if my_account.email in members:
                             isSenator = True
@@ -3346,7 +3346,7 @@ function editBill(mark_resolved) {{
         mark_resolved = url_arguments.get('mark_resolved', [''])[0]
         if opinion_ID != '' and new_bill != None and mark_resolved in ('yes', 'no'):
             opinion = db.opinions_database[opinion_ID]
-            if my_account.email in local.COMMITTEE_MEMBERS[opinion.reserved_for] and verified_result == True:
+            if my_account.email in local.COMMITTEE_MEMBERS[opinion.reserved_for] and verified_result == 'verified':
                 opinion.bill = new_bill
                 if len(opinion.activity) == 4:
                     opinion.activity.append([(my_account.user_ID, new_bill, datetime.datetime.now())])
@@ -3541,7 +3541,7 @@ def verify_device_old(cookie_code):
     # if my account is not the original account, reconfigure to point to verified
     if my_account != verified_account:
         # if the account is verified then transfer the account pointer
-        if verified_account.verified_result == True:
+        if verified_account.verified_result == 'verified':
             def update_cookie_database():
                 db.cookie_database[cookie_code] = verified_account.user_ID
             run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
