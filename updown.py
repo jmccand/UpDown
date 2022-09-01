@@ -36,6 +36,7 @@ class Opinion:
         down_votes = 0
         abstains = 0
         for this_user_id in verified_accounts:
+            user = db.user_ids[this_user_id]
             if str(self.ID) in user.votes:
                 this_vote = user.votes[str(self.ID)][-1][0]
                 if this_vote == 'up':
@@ -47,7 +48,7 @@ class Opinion:
                 else:
                     raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
         return up_votes, down_votes, abstains
-
+    
     def care_agree_percent(self):
         up, down, abstain = self.count_votes()
         care = 0
