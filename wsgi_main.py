@@ -3319,17 +3319,19 @@ function editBill(mark_resolved) {{
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
         committee = url_arguments.get('committee', [''])[0]
-        if my_account.email in local.COMMITTEE_MEMBERS.get(committee, set()):
-            if reserve_count(committee) < 2:
-                opinion_ID = url_arguments.get('opinion_ID', [''])[0]
-                if opinion_ID != '':
-                    opinion = db.opinions_database[opinion_ID]
+        opinion_ID = url_arguments.get('opinion_ID', [''])[0]
+        if opinion_ID != '':
+            opinion = db.opinions_database[opinion_ID]
+            if my_account.email in local.COMMITTEE_MEMBERS.get(committee, set()) or (committee == 'unreserved' and my_account.email in local.COMMITTEE_MEMBERS[opinion.reserved_for]):
+                if reserve_count(committee) < 2:
                     if len(opinion.activity) == 3:
                         opinion.activity.append([(self.my_cookies['code'].value, committee, datetime.datetime.now())])
                     else:
                         opinion.activity[3].append((self.my_cookies['code'].value, committee, datetime.datetime.now()))
-
-                    opinion.reserved_for = committee
+                    if committee == 'unreserved':
+                        opinion.reserved_for = None
+                    else:
+                        opinion.reserved_for = committee
                     def update_opinions_database():
                         db.opinions_database[opinion_ID] = opinion
                     run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
@@ -3676,7 +3678,8 @@ def main():
     if MyWSGIHandler.DEBUG == 0:
         print(f'\n{db.user_ids}')
         for this_user_ID, user in db.user_ids.items():
-            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.obselete})')
+            # print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, {user.activity}, {user.votes}, {user.obselete})')
+            print(f'  {this_user_ID} : User({user.email}, {user.user_ID}, activity, {user.votes}, {user.obselete})')
 
         print(f'\n{db.cookie_database}')
         for cookie, this_secure in db.cookie_database.items():
