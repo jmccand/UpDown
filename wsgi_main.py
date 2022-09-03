@@ -3432,7 +3432,7 @@ def search(input_text):
     return ordered_results
 
 def is_matching(text1, text2):
-    print(f'{(set(simplify_text(text1)) & set(simplify_text(text2))) != set()=}')
+    # print(f'{(set(simplify_text(text1)) & set(simplify_text(text2))) != set()}')
     return text1 == '' or text2 == '' or (set(simplify_text(text1)) & set(simplify_text(text2))) != set()
 
 # poached from Lucene’s EnglishMinimalStemmer, Apache Software License v2
