@@ -61,7 +61,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png', '/manifest.json'):
             self.path_root = '/get_email'
             self.get_email()
         else:
@@ -335,7 +335,6 @@ function close_menu() {
             self.wfile.write(file_data)
 
     def handle_manifest(self):
-        my_account = self.identify_user()
         manifest = '''{
     "short_name": "UpDown",
     "name": "UpDown",
@@ -363,7 +362,6 @@ function close_menu() {
 }'''
         self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(manifest)))])
         self.wfile.write(manifest.encode('utf8'))
-        self.log_activity()
 
     def get_email(self):
         self.start_response('200 OK', [])
@@ -655,7 +653,7 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
-            self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
+            self.wfile.write('''<link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
