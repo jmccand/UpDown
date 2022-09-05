@@ -471,14 +471,14 @@ function checkEmail() {{
         msg['Subject'] = "Add your votes to the count?"
         msg['From'] = local.FROM_EMAIL
         msg['To'] = to_email
-        text = f'Welcome to the Student Representation App for LHS! Your votes will NOT count until you click on the link below:\n{local.DOMAIN_NAME}/verification?verification_id={v_uuid}'
+        text = f'Welcome to UpDown LHS! Use the link below to verify your devices:\n{local.DOMAIN_NAME}/verification?verification_id={v_uuid}'
         html = f'''<html>
 <body>
 <p>
-Welcome to the Student Representation App for LHS!
+Welcome to UpDown LHS!
 <br />
 <br />
-Your votes will NOT count until you click on <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verification_id={v_uuid}'>this link</a>.
+Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verification_id={v_uuid}'>this link</a> to verify your devices.
 </p>
 </body>
 </html>'''
