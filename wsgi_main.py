@@ -356,8 +356,8 @@ function close_menu() {
 	}
     ],
     "start_url": "/",
-    "background_color": "#6d9eeb",
-    "theme_color": "#1155cc",
+    "background_color": "#6d9eebff",
+    "theme_color": "#6d9eebff",
     "display": "standalone"
 }'''
         self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(manifest)))])
