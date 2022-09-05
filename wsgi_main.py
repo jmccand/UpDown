@@ -366,6 +366,8 @@ function close_menu() {
     def get_email(self):
         self.start_response('200 OK', [])
         self.wfile.write('<html><head>'.encode('utf8'))
+        self.wfile.write('''<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
 form#email_form {
@@ -461,7 +463,6 @@ function checkEmail() {{
     setTimeout(checkEmail, 1000);
 }}
 </script>
-
 </body>
 </html>'''.encode('utf8'))
         
@@ -1162,15 +1163,6 @@ if ('serviceWorker' in navigator) {{
 }} else {{
   console.log('service worker is not supported');
 }}
-self.addEventListener('install', function() {{
-  console.log('Install!');
-}});
-self.addEventListener("activate", event => {{
-  console.log('Activate!');
-}});
-self.addEventListener('fetch', function(event) {{
-  console.log('Fetch!', event.request);
-}});
 </script>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
