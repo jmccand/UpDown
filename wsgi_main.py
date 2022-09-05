@@ -356,7 +356,7 @@ function close_menu() {
 	}
     ],
     "start_url": "/",
-    "background_color": "#f1c232",
+    "background_color": "#6d9eebff",
     "theme_color": "#1155cc",
     "display": "standalone"
 }'''
