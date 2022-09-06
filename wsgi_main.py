@@ -512,8 +512,12 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
 
                 # send verification email
                 self.send_email(user_email, v_link)
-
-                expiration = calc_expiration(int(email_grad))
+                expiration = None
+                try:
+                    expiration = calc_expiration(int(email_grad))
+                except ValueError:
+                    today_date = datetime.date.today()
+                    expiration = datetime.date(year=today_date.year + 4, month=today_date.month, day=today_date.day)
                 self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
 
@@ -534,7 +538,12 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
                 my_email = db.verification_links[verification_ID]
                 new_cookie, new_id, v_link = create_account(my_email)
                 # set cookie
-                expiration = calc_expiration(int(my_email[:2]))
+                expiration = None
+                try:
+                    expiration = calc_expiration(int(email_grad))
+                except ValueError:
+                    today_date = datetime.date.today()
+                    expiration = datetime.date(year=today_date.year + 4, month=today_date.month, day=today_date.day)
                 self.start_response('200 OK', [('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
                 self.update_device_info()
