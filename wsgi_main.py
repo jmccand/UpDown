@@ -536,6 +536,7 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
             if my_account == None:
                 # create new account
                 my_email = db.verification_links[verification_ID]
+                email_grad = my_email[:2]                
                 new_cookie, new_id, v_link = create_account(my_email)
                 # set cookie
                 expiration = None
