@@ -3305,9 +3305,13 @@ function editBill(mark_resolved) {{
                 care_r, agree_r, overall_r = opinion.rankings()
                 response.extend([[care_p, care_r], [agree_p, agree_r], [overall_p, overall_r]])
                 # similar opinion
-                similar_opinion_ID = list(filter(lambda x: x != opinion.ID, search(opinion.text)))[0]
-                similar_opinion_text = db.opinions_database[str(similar_opinion_ID)].text
-                response.append([similar_opinion_ID, similar_opinion_text])
+                similar_opinions = list(filter(lambda x: x != opinion.ID, search(opinion.text)))
+                if len(similar_opinions) != 0:
+                    similar_opinion_ID = similar_opinions[0]
+                    similar_opinion_text = db.opinions_database[str(similar_opinion_ID)].text
+                    response.append([similar_opinion_ID, similar_opinion_text])
+                else:
+                    response.append([opinion_ID, ''])
                 self.start_response('200 OK', [])
                 self.wfile.write(json.dumps(response).encode('utf8'))
             else:
