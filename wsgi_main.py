@@ -3382,7 +3382,8 @@ class invalidCookie(ValueError):
 def run_and_sync(lock_needed, change, database):
     lock_needed.acquire()
     try:
-        change()
+        returns = change()
+        return returns
     finally:
         lock_needed.release()
             
@@ -3627,12 +3628,7 @@ def block_device(cookie_code):
     logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')    
         
 def create_account(user_email):
-    global new_id
-    global new_cookie
-    global send_v_link
     def update_user_ids():
-        global new_id
-        global new_cookie
         new_id = str(len(db.user_ids))
         db.user_ids[new_id] = updown.User(user_email, new_id)
         new_cookie = uuid.uuid4().hex
@@ -3645,7 +3641,6 @@ def create_account(user_email):
         run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
 
         def update_verification_links():
-            global send_v_link
             send_v_link = None
             repeat_email = False
             for v_link, v_email in db.verification_links.items():
@@ -3658,10 +3653,11 @@ def create_account(user_email):
                 while send_v_link in db.verification_links:
                     send_v_link = uuid.uuid4().hex
                 db.verification_links[send_v_link] = user_email
+            return send_v_link
 
-        run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
-    run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
-    return new_cookie, new_id, send_v_link
+        send_v_link = run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+        return new_cookie, new_id, send_v_link
+    return run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
 
 def calc_expiration(yog):
     century = (datetime.date.today().year // 100) * 100
