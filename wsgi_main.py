@@ -3542,7 +3542,7 @@ def verify_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
     verified_cookie = None
     for this_cookie, this_secure in db.cookie_database.items():
-        if this_secure[0] == my_account.user_ID and this_secure[1] == 'verified':
+        if db.user_ids[this_secure[0]].email == my_account.email and this_secure[1] == 'verified':
             verified_cookie = this_cookie
             break
     # if there is already a verified cookie, fix my cookie to point to the same verified account
