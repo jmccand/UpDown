@@ -152,7 +152,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 parsed_ua = user_agents.parse(self.http_user_agent)
                 def update_device_info():
                     db.device_info[my_code] = [self.client_address, parsed_ua]
-                run_and_sync(db.device_info_lock, update_device_info, db.device_info)
+                run_and_sync(db.device_info_lock, update_device_info, db.device_info, False)
 
     def send_links_head(self):
         self.wfile.write('''<meta charset="utf-8">
@@ -3379,10 +3379,12 @@ class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
 
-def run_and_sync(lock_needed, change, database):
+def run_and_sync(lock_needed, change, database, check_corrupt=True):
     lock_needed.acquire()
     try:
         returns = change()
+        if check_corrupt:
+            check_corruption()
         return returns
     finally:
         lock_needed.release()
@@ -3638,7 +3640,7 @@ def create_account(user_email):
         def update_cookie_database():
             db.cookie_database[new_cookie] = (new_id, 'unsure')
 
-        run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database)
+        run_and_sync(db.cookie_database_lock, update_cookie_database, db.cookie_database, False)
 
         def update_verification_links():
             send_v_link = None
@@ -3655,9 +3657,9 @@ def create_account(user_email):
                 db.verification_links[send_v_link] = user_email
             return send_v_link
 
-        send_v_link = run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links)
+        send_v_link = run_and_sync(db.verification_links_lock, update_verification_links, db.verification_links, check_corrupt=False)
         return new_cookie, new_id, send_v_link
-    return run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids)
+    return run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids, check_corrupt=False)
 
 def calc_expiration(yog):
     century = (datetime.date.today().year // 100) * 100
@@ -3671,6 +3673,20 @@ def valid_yogs():
 
 def email_is_valid(email):
     return re.match(email, local.EMAIL_MATCH_RE)
+
+def check_corruption():
+    for cookie, secure in db.cookie_database.items():
+        if not secure[0] in db.user_ids:
+            raise ValueError('DATABASE CORRUPTED!!! Cookie exists with no account!')
+        if not cookie in db.device_info:
+            raise ValueError('DATABASE CORRUPTED!!! Cookie exists with no device info!')
+    u_emails = set()
+    for u_id, u_account in db.user_ids.items():
+        u_emails.add(u_account.email)
+    for v_link, u_email in db.verification_links.items():
+        if u_email not in u_emails:
+            raise ValueError('DATABASE CORRUPTED!!! Verification link exists with no user account!')
+    print(f'database is healthy as of {datetime.datetime.now()}')
 
 def main():
     print('Student Change Web App... running...')
