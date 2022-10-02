@@ -3,6 +3,7 @@ import local
 local.redo_paths(sys.argv[1])
 import db
 from wsgi_main import *
+import db_corruption
 
 print(f'\nUSER IDS:\n{db.user_ids}')
 for this_user_ID, user in db.user_ids.items():
@@ -31,3 +32,5 @@ for this_date in sorted_calendar:
 print(f'\nDEVICE INFO:\n{db.device_info}')
 for cookie, info in db.device_info.items():
     print(f'  {cookie} : {info}')
+
+db_corruption.check_corruption()
