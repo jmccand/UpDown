@@ -24,6 +24,7 @@ import shutil
 import user_agents
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import db_corruption
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -3384,7 +3385,7 @@ def run_and_sync(lock_needed, change, database, check_corrupt=True):
     try:
         returns = change()
         if check_corrupt:
-            check_corruption()
+            db_corruption.check_corruption()
         return returns
     finally:
         lock_needed.release()
@@ -3673,20 +3674,6 @@ def valid_yogs():
 
 def email_is_valid(email):
     return re.match(email, local.EMAIL_MATCH_RE)
-
-def check_corruption():
-    for cookie, secure in db.cookie_database.items():
-        if not secure[0] in db.user_ids:
-            raise ValueError('DATABASE CORRUPTED!!! Cookie exists with no account!')
-        if not cookie in db.device_info:
-            raise ValueError('DATABASE CORRUPTED!!! Cookie exists with no device info!')
-    u_emails = set()
-    for u_id, u_account in db.user_ids.items():
-        u_emails.add(u_account.email)
-    for v_link, u_email in db.verification_links.items():
-        if u_email not in u_emails:
-            raise ValueError('DATABASE CORRUPTED!!! Verification link exists with no user account!')
-    print(f'database is healthy as of {datetime.datetime.now()}')
 
 def main():
     print('Student Change Web App... running...')
