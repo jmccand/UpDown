@@ -7,6 +7,7 @@ import re
 import json
 import uuid
 import db
+db.init()
 import local
 import datetime
 import smtplib
@@ -3708,10 +3709,10 @@ def main():
             print(f'  {cookie} : {info}')
 
 
-    logging.basicConfig(filename='UpDown.log', encoding='utf-8', level=logging.DEBUG)
-
     httpd = make_server('10.17.4.17', 8888, application)
     httpd.serve_forever()
+
+logging.basicConfig(filename='UpDown.log', encoding='utf-8', level=logging.DEBUG)
 
 SEARCH_INDEX = {}
 search_index_lock = threading.RLock()
