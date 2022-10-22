@@ -1,8 +1,7 @@
 import sys
 import local
-local.redo_paths(sys.argv[1])
 import db
-from wsgi_main import *
+db.init(sys.argv[1], 'r')
 import db_corruption
 
 print(f'\nUSER IDS:\n{db.user_ids}')
@@ -33,4 +32,8 @@ print(f'\nDEVICE INFO:\n{db.device_info}')
 for cookie, info in db.device_info.items():
     print(f'  {cookie} : {info}')
 
-db_corruption.check_corruption()
+try:
+    db_corruption.check_corruption((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
+except ValueError as e:
+    print(e)
+    print(f'last healthy on backup {db_corruption.last_healthy()}')

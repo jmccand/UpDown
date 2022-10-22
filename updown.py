@@ -1,4 +1,5 @@
 import db
+db.init()
 import datetime
 
 class User:
