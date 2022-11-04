@@ -1,4 +1,5 @@
 import urllib.parse
+import sys
 import socket
 from http.cookies import SimpleCookie
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
