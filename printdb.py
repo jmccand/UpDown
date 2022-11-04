@@ -36,4 +36,8 @@ try:
     db_corruption.check_corruption((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
 except ValueError as e:
     print(e)
-    print(f'last healthy on backup {db_corruption.last_healthy()}')
+    if len(sys.argv) > 2:
+        if sys.argv[2] == 'last_healthy':
+            print(f'last healthy on backup {db_corruption.last_healthy()}')
+        else:
+            raise ValueError(f'sys.argv[2] is {sys.argv[2]}, should be last_healthy')
