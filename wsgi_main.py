@@ -3386,7 +3386,7 @@ def run_and_sync(lock_needed, change, database, check_corrupt=True):
     try:
         returns = change()
         if check_corrupt:
-            db_corruption.check_corruption()
+            db_corruption.check_corruption((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
         return returns
     finally:
         lock_needed.release()
