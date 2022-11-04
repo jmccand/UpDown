@@ -3729,5 +3729,7 @@ schedule_thread.daemon = True
 schedule_thread.start()
 print('schedule thread started!')
 
+print(str(sys.version))
+
 if __name__ == '__main__':
     main()
