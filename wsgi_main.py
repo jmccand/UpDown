@@ -27,6 +27,7 @@ import user_agents
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import db_corruption
+import math
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -130,6 +131,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path.startswith('/edit_bill'):
                     self.path_root = '/edit_bill'
                     self.edit_bill()
+                elif self.path == '/community_service':
+                    self.path_root = '/community_service'
+                    self.community_service()
             except ValueError as error:
                 print(str(error))
                 traceback.print_exc()
@@ -3375,7 +3379,68 @@ function editBill(mark_resolved) {{
                 self.log_activity()
 
                 self.start_response('200 OK', [])
-                        
+
+    def community_service(self):
+        my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
+        if (my_account.email in local.BETA_TESTERS and verified_result == 'verified') or (my_account.email in local.COMMUNITY_SERVICE and verified_result == 'verified'):
+            hour_counts = {}
+            for user_id, user_account in db.user_ids.items():
+                if not user_account.email in hour_counts:
+                    hour_counts[user_account.email] = datetime.timedelta(minutes=0)
+                sorted_activity = list(user_account.activity.items())
+                sorted_activity.sort(key=lambda x: x[0])
+                for day, activity_list in sorted_activity:
+                    for index, activity_unit in enumerate(activity_list):
+                        if len(activity_list) > index + 1:
+                            if activity_list[index+1][-1] - activity_unit[-1] >= datetime.timedelta(minutes=3):
+                                hour_counts[user_account.email] += datetime.timedelta(minutes=3)
+                            else:
+                                hour_counts[user_account.email] += activity_list[index+1][-1] - activity_unit[-1]
+            self.start_response('200 OK', [])
+            self.wfile.write('''<html><head>'''.encode('utf8'))
+            self.send_links_head()
+            self.wfile.write('''<style>
+span#note {
+  position: absolute;
+  top: 80px;
+  right: 5px;
+  font-size: 18px;
+}
+table#cs {
+  position: absolute;
+  top: 120px;
+  border: 3px solid black;
+  width: 100%;
+  box-sizing: border-box;
+  left: 0;
+  font-size: 18px;
+}
+td {
+  padding-bottom: 15px;
+}
+</style>'''.encode('utf8'))
+            self.wfile.write('</head><body>'.encode('utf8'))
+            self.send_links_body()
+            self.wfile.write('''<span id='note'>hour:minute:second --> total hours rounded up</span>'''.encode('utf8'))
+            self.wfile.write('''<table id='cs'>'''.encode('utf8'))
+            if my_account.email in local.COMMUNITY_SERVICE and verified_result == 'verified':
+                for user_email, hour_count in hour_counts.items():
+                    t_secs = hour_count.total_seconds()
+                    t_hours = t_secs / 3600
+                    self.wfile.write(f'''<tr><td>{user_email}</td><td>{int(t_secs//3600)}:{int(t_secs//60)}:{int(t_secs%60)} --> {math.ceil(t_hours)}</td></tr>'''.encode('utf8'))
+            else:
+                hour_count = hour_counts[my_account.email]
+                t_secs = hour_count.total_seconds()
+                t_hours = t_secs / 3600
+                self.wfile.write(f'''<tr><td>{my_account.email}</td><td>{int(t_secs//3600)}:{int(t_secs//60)}:{int(t_secs%60)} --> {math.ceil(t_hours)}</td></tr>'''.encode('utf8'))
+                
+            self.wfile.write('</table>'.encode('utf8'))
+            self.wfile.write('</body></html>'.encode('utf8'))
+            self.log_activity()
+        else:
+            self.start_response('400 BAD REQUEST', [])
+                                
 
                     
 class invalidCookie(ValueError):
