@@ -188,7 +188,7 @@ header {
   border-bottom: 2px solid black;
   box-sizing: border-box;
 }'''.encode('utf8'))
-        if self.path_root == '/leaderboard':
+        if self.path_root in ('/leaderboard', '/community_service'):
             self.wfile.write('''#title {
   position: absolute;
   top: 0;
@@ -281,6 +281,8 @@ header {
                     title = 'Approve'
                 elif self.path_root == '/leaderboard':
                     title = 'Leaderboard'
+                elif self.path_root == '/community_service':
+                    title = 'Cmty. Service'
                 elif self.path_root == '/view_committee':
                     url_arguments = urllib.parse.parse_qs(self.query_string)
                     title = url_arguments['committee'][0]
@@ -302,6 +304,8 @@ header {
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members and verified_result == 'verified':
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
+            if my_account.email in local.BETA_TESTERS and verified_result == 'verified':
+                self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
