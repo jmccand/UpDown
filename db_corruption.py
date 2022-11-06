@@ -90,24 +90,59 @@ def unverify_all(db_files):
             unverify_count += 1
     cookies_db.sync()
     print(f'unverified {unverify_count} users')
+    
+def rewind_verification(db_files):
+    ids_db, opinions_db, cookies_db, verification_db, calendar_db, device_db = db_files
+    rewind_count = 0
+    for u_id, u_account in ids_db.items():
+        for day, activity_list in u_account.activity.items():
+            for index, activity_unit in enumerate(activity_list):
+                if activity_unit[0] == '/verification':
+                    this_secure = cookies_db[activity_unit[1]]
+                    if not ids_db[this_secure[0]].user_ID == u_account.user_ID:
+                        cookies_db[activity_unit[1]] = (u_account.user_ID, this_secure[1])
+                        ids_db[u_account.user_ID].obselete = False
+                        rewind_count += 1
+    cookies_db.sync()
+    ids_db.sync()
+    print(f'rewinded {rewind_count} users to previous accounts')
+    taken = set()
+    for cookie, secure in cookies_db.items():
+        if secure[0] in taken:
+            raise ValueError(f'repeat of {secure[0]}')
+        else:
+            taken.add(secure[0])
 
 def main():
     db.init(sys.argv[1])
-    if sys.argv[2] == 'check':
-        check_corruption((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
-    elif sys.argv[2] == 'excise':
-        print('EXCISING DATABASE after 10 secs... make sure you have a backup. ctrl-c ctrl-c to cancel')
-        for count in range(10, 0, -1):
-            print(f'{count} secs...')
-            time.sleep(1)
-        excise_corrupted((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
-    elif sys.argv[2] == 'unverify':
-        print('UNVERIFYING ALL USERS after 10 secs... make sure you have a basckup. ctrl-c ctrl-c to cancel')
-        for count in range(10, 0, -1):
-            print(f'{count} secs...')
-            time.sleep(1)
-        unverify_all((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
-
+    if len(sys.argv) > 2:
+        if sys.argv[2] == 'check':
+            check_corruption((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
+        elif sys.argv[2] == 'excise':
+            print('EXCISING DATABASE after 10 secs... make sure you have a backup. ctrl-c ctrl-c to cancel')
+            for count in range(10, 0, -1):
+                print(f'{count} secs...')
+                time.sleep(1)
+            excise_corrupted((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
+        elif sys.argv[2] == 'unverify':
+            print('UNVERIFYING ALL USERS after 10 secs... make sure you have a basckup. ctrl-c ctrl-c to cancel')
+            for count in range(10, 0, -1):
+                print(f'{count} secs...')
+                time.sleep(1)
+            unverify_all((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
+        elif sys.argv[2] == 'rewind':
+            if len(sys.argv) > 3:
+                if sys.argv[3] == 'verification':
+                    print('REWINDING VERIFICATION ON ALL USERS after 10 secs... make sure you have a basckup. ctrl-c ctrl-c to cancel')
+                    for count in range(10, 0, -1):
+                        print(f'{count} secs...')
+                        time.sleep(1)
+                    rewind_verification((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
+            else:
+                raise ValueError(f'rewind expected another argument (verification, etc.) to specify what data you want to rewind.')
+    else:
+        raise ValueError(f'db corruption expected another argument (check, unverify, rewind, etc.) to specify what function you want to run.')
+                        
 
 if __name__ == '__main__':
     main()
