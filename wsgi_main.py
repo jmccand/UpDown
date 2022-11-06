@@ -318,7 +318,7 @@ function close_menu() {
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
-        activity_unit = [self.path_root] + what + [datetime.datetime.now()]
+        activity_unit = [self.path_root, self.my_cookies['code'].value] + what + [datetime.datetime.now()]
         if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
         else:
