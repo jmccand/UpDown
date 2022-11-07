@@ -90,18 +90,31 @@ def unverify_all(db_files):
             unverify_count += 1
     cookies_db.sync()
     print(f'unverified {unverify_count} users')
-    
+
 def rewind_verification(db_files):
     ids_db, opinions_db, cookies_db, verification_db, calendar_db, device_db = db_files
+    pointer_counts = {}
+    for u_cookie, secure in cookies_db.items():
+        if secure[0] in pointer_counts:
+            pointer_counts[secure[0]] += 1
+        else:
+            pointer_counts[secure[0]] = 1
+    print(f'pointer counts: {pointer_counts}')
+    verified_accounts = {}
+    for pointer_to, count in pointer_counts.items():
+        if count > 1:
+            assert ids_db[pointer_to].email not in verified_accounts
+            verified_accounts[ids_db[pointer_to].email] = pointer_to
     rewind_count = 0
     for u_id, u_account in ids_db.items():
         for day, activity_list in u_account.activity.items():
             for index, activity_unit in enumerate(activity_list):
                 if activity_unit[0] == '/verification':
                     this_secure = cookies_db[activity_unit[1]]
-                    if not ids_db[this_secure[0]].user_ID == u_account.user_ID:
+                    if (u_account.email not in verified_accounts) or (not u_account.user_ID == verified_accounts[u_account.email]):
                         cookies_db[activity_unit[1]] = (u_account.user_ID, this_secure[1])
-                        ids_db[u_account.user_ID].obselete = False
+                        u_account.obselete = False
+                        ids_db[u_account.user_ID] = u_account
                         rewind_count += 1
     cookies_db.sync()
     ids_db.sync()
@@ -112,7 +125,7 @@ def rewind_verification(db_files):
             raise ValueError(f'repeat of {secure[0]}')
         else:
             taken.add(secure[0])
-
+    
 def main():
     db.init(sys.argv[1])
     if len(sys.argv) > 2:
