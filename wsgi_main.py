@@ -258,7 +258,6 @@ header {
   z-index: 2;
 }
 </style>'''.encode('utf8'))
-
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
         verified_result = 'blocked'
@@ -304,7 +303,7 @@ header {
             for committee, members in local.COMMITTEE_MEMBERS.items():
                 if my_account.email in members and verified_result == 'verified':
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
-            if my_account.email in local.BETA_TESTERS and verified_result == 'verified':
+            if ((my_account.email in local.BETA_TESTERS) or (my_account.email in local.COMMUNITY_SERVICE)) and verified_result == 'verified':
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
         self.wfile.write('''<script>
