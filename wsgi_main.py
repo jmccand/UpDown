@@ -3431,7 +3431,7 @@ td {
                 for user_email, hour_count in hour_counts.items():
                     t_secs = hour_count.total_seconds()
                     t_hours = t_secs / 3600
-                    self.wfile.write(f'''<tr><td>{user_email}</td><td>{int(t_secs//3600)}:{int(t_secs//60)%60:02d}:{int(t_secs%60):02d} --> {math.ceil(t_hours):02d}</td></tr>'''.encode('utf8'))
+                    self.wfile.write(f'''<tr><td>{user_email}</td><td>{int(t_secs//3600):02d}:{int(t_secs//60)%60:02d}:{int(t_secs%60):02d} --> {math.ceil(t_hours)}</td></tr>'''.encode('utf8'))
             else:
                 hour_count = hour_counts[my_account.email]
                 t_secs = hour_count.total_seconds()
