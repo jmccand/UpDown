@@ -3577,6 +3577,16 @@ def auto_schedule():
             if len(compiled_set) + len(ages) <= 10:
                 for age_secs, opinion_ID in ages:
                     compiled_set.add(opinion_ID)
+                while len(compiled_set) < 10:
+                    new_random = random.choice(list(db.opinions_database.keys()))
+                    copy_opinion = db.opinions_database[new_random]
+                    if new_random not in compiled_set and new_random.approved == True:
+                        def update_opinions_database():
+                            new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
+                            db.opinions_database[new_opinion.ID] = new_opinion
+                            return new_opinion.ID
+                        new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
+                        compiled_set.add(new_opinion_id)
             else:
                 while len(compiled_set) < 10:
                     remaining = random.random()
@@ -3744,6 +3754,9 @@ def valid_yogs():
 
 def email_is_valid(email):
     return re.match(email, local.EMAIL_MATCH_RE)
+
+def random_fill_calendar():
+    assert db.opinions_calendar
 
 def main():
     print('Student Change Web App... running...')
