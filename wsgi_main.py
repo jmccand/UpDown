@@ -3566,33 +3566,39 @@ def auto_schedule():
         if datetime.datetime.now() + datetime.timedelta(seconds=0.5) > next_due_time:
             ages = []
             seconds_sum = 0
+            approved_count = 0
             for opinion_ID, opinion in db.opinions_database.items():
-                if opinion.approved == True and not opinion.scheduled:
-                    creation_date = opinion.activity[0][-1]
-                    seconds_passed = (datetime.datetime.now() - creation_date).total_seconds()
-                    seconds_sum += seconds_passed
-                    ages.append((seconds_passed, opinion_ID))
+                if opinion.approved:
+                    approved_count += 1
+                    if not opinion.scheduled:
+                        creation_date = opinion.activity[0][-1]
+                        seconds_passed = (datetime.datetime.now() - creation_date).total_seconds()
+                        seconds_sum += seconds_passed
+                        ages.append((seconds_passed, opinion_ID))
             compiled_set = db.opinions_calendar.get(str(next_due_date), set())
 
             if len(compiled_set) + len(ages) <= 10:
                 for age_secs, opinion_ID in ages:
                     compiled_set.add(opinion_ID)
-                while len(compiled_set) < 10:
-                    new_random = random.choice(list(db.opinions_database.keys()))
-                    copy_opinion = db.opinions_database[new_random]
-                    if new_random not in compiled_set and new_random.approved == True:
-                        def update_opinions_database():
-                            new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
-                            db.opinions_database[new_opinion.ID] = new_opinion
-                            return new_opinion.ID
-                        new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
-                        compiled_set.add(new_opinion_id)
+                # make sure no infinite loop
+                if approved_count >= 10:
+                    while len(compiled_set) < 10:
+                        new_random = random.choice(list(db.opinions_database.keys()))
+                        copy_opinion = db.opinions_database[new_random]
+                        if new_random not in compiled_set and new_random.approved == True:
+                            def update_opinions_database():
+                                new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
+                                db.opinions_database[new_opinion.ID] = new_opinion
+                                return new_opinion.ID
+                            new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
+                            compiled_set.add(new_opinion_id)
             else:
                 while len(compiled_set) < 10:
+                    # reset remaining count
                     remaining = random.random()
                     remaining *= seconds_sum
                     opinion_index = 0
-                    while remaining > 0:
+                    while remaining > 0 and opinion_index < len(ages):
                         remaining -= ages[opinion_index][0]
                         opinion_index += 1
                     if ages[opinion_index - 1][1] not in compiled_set:
@@ -3754,9 +3760,6 @@ def valid_yogs():
 
 def email_is_valid(email):
     return re.match(email, local.EMAIL_MATCH_RE)
-
-def random_fill_calendar():
-    assert db.opinions_calendar
 
 def main():
     print('Student Change Web App... running...')
