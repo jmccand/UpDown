@@ -176,7 +176,7 @@ header {
   top: 0;
   width: 100%;
   height: 70px;
-  z-index: 3;
+  z-index: 4;
 }
 #hamburger {
   position: absolute;
@@ -263,7 +263,7 @@ header {
   left: 50%;
   transform: translate(-50%, 0);
   height: 50px;
-  z-index: 4;
+  z-index: 3;
 }
 #help_box {
   position: fixed;
@@ -276,7 +276,7 @@ header {
   border-radius: 10px;
   padding: 2%;
   display: none;  
-  z-index: 4;
+  z-index: 3;
   text-align: center;
   font-size: 20px;
 }
