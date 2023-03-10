@@ -73,7 +73,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png'):
+                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/speed_right.png', '/speed_left.png', '/arrow_right.png', '/arrow_left.png', '/help.png'):
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -257,7 +257,31 @@ header {
   height: 70px;
   z-index: 2;
 }
+#help {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  height: 50px;
+  z-index: 4;
+}
+#help_box {
+  position: fixed;
+  bottom: 65px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 92%;
+  background-color: white;
+  border: 3px solid black;
+  border-radius: 10px;
+  padding: 2%;
+  display: none;  
+  z-index: 4;
+  text-align: center;
+  font-size: 18px;
+}
 </style>'''.encode('utf8'))
+        
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
         verified_result = 'blocked'
@@ -306,12 +330,24 @@ header {
             if ((my_account.email in local.BETA_TESTERS) or (my_account.email in local.COMMUNITY_SERVICE)) and verified_result == 'verified':
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('''</div></header>'''.encode('utf8'))
+        self.wfile.write('''<img id='help' src='help.png' onclick='help()'/>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
     let menu = document.getElementById('menu').style.width = '250px';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
+}
+let help_open = false;
+function help() {
+    if (help_open) {
+        document.getElementById('help_box').style.display = 'none';
+        help_open = false;
+    }
+    else {
+        document.getElementById('help_box').style.display = 'initial';
+        help_open = true;
+    }
 }
 </script>'''.encode('utf8'))
 
@@ -752,6 +788,7 @@ section p {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
+            self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up to vote up, swipe down to vote down. Swipe left or right to move between opinions.</div>'''.encode('utf8'))
             self.wfile.write('''<article id='opinion'>
 <div id='highlight_title'>
 </div>
@@ -3794,7 +3831,7 @@ def main():
             print(f'  {cookie} : {info}')
 
 
-    httpd = make_server('10.17.4.17', 8888, application)
+    httpd = make_server('10.17.4.226', 8888, application)
     httpd.serve_forever()
 
 logging.basicConfig(filename='UpDown.log', level=logging.DEBUG)
