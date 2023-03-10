@@ -278,7 +278,7 @@ header {
   display: none;  
   z-index: 4;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
 }
 </style>'''.encode('utf8'))
         
@@ -788,7 +788,7 @@ section p {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up to vote up, swipe down to vote down. Swipe left or right to move between opinions.</div>'''.encode('utf8'))
+            self.wfile.write('''<div id='help_box'>Wednesdays are "off days" as the ballot rotates. On Wednesdays, you get the opportunity to check back in on the week's opinions. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
             self.wfile.write('''<article id='opinion'>
 <div id='highlight_title'>
 </div>
@@ -1043,6 +1043,7 @@ div#banner {
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
+            self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
             self.wfile.write(f'''<article id='ballot_label'>
 Ballot {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
 </article>
