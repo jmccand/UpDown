@@ -1288,6 +1288,7 @@ section {
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
+        self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
         self.wfile.write('''<form method='GET' action='/submit_opinions'>
 Enter your opinion below:<br />
 <input type='text' id='opinion' name='opinion_text'/>
@@ -1426,6 +1427,7 @@ footer {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
+            self.wfile.write('''<div id='help_box'>You use this page to approve opinions. Swipe up/down starting on the lock to approve/reject opinions. Think before you swipe!</div>'''.encode('utf8'))
             unapproved_list = []
             for opinion_ID, opinion in db.opinions_database.items():
                 if opinion.approved == None:
@@ -1592,6 +1594,7 @@ article {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
+        self.wfile.write('''<div id='help_box'>Use this page to check out our school Senate!</div>'''.encode('utf8'))
         self.wfile.write('''<div id='back_to_top'><a href='/senate#TOC'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<article>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
@@ -2886,6 +2889,7 @@ div#similar_text {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
+        self.wfile.write('''<div id='help_box'>Use this page to track prior opinions and check out statistics about each opinion! You can change what you sort by to check out the most popular opinions in UpDown history!</div>'''.encode('utf8'))
 
         keywords = url_arguments.get('words', [''])[0]
         sort_method = url_arguments.get('sort', ['overall'])[0]
@@ -3203,6 +3207,7 @@ button.savebtn {
 </head>
 <body>'''.encode('utf8'))
                 self.send_links_body()
+                self.wfile.write('''<div id='help_box'>This page is dedicated to a specific committee. This is where you can view current opinions your committee has reserved and submit updated bills.</div>'''.encode('utf8'))
 
                 data = []
                 for opinion_ID, opinion in db.opinions_database.items():
@@ -3463,6 +3468,7 @@ td {
 </style>'''.encode('utf8'))
             self.wfile.write('</head><body>'.encode('utf8'))
             self.send_links_body()
+            self.wfile.write('''<div id='help_box'>This is where you can view your current community service hours. They always round up!</div>'''.encode('utf8'))
             self.wfile.write('''<span id='note'>hour:minute:second --> total hours rounded up</span>'''.encode('utf8'))
             self.wfile.write('''<table id='cs'>'''.encode('utf8'))
             if my_account.email in local.COMMUNITY_SERVICE and verified_result == 'verified':
