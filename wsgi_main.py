@@ -280,6 +280,18 @@ header {
   text-align: center;
   font-size: 20px;
 }
+#unverified_warning {
+  position: fixed;
+  top: 70px;
+  width: 100%;
+  left: 0;
+  padding: 5px;
+  box-sizing: border-box;
+  text-align: center;
+  background-color: red;
+  z-index: 1;
+  border-bottom: 2px solid black;
+}
 </style>'''.encode('utf8'))
         
     def send_links_body(self):
@@ -329,7 +341,10 @@ header {
                     self.wfile.write(f'''<a href='/view_committee?committee={committee}'>{committee}</a>'''.encode('utf8'))
             if ((my_account.email in local.BETA_TESTERS) or (my_account.email in local.COMMUNITY_SERVICE)) and verified_result == 'verified':
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
-        self.wfile.write('''</div></header>'''.encode('utf8'))
+        self.wfile.write('</div>'.encode('utf8'))
+        if verified_result != 'verified':
+            self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
+        self.wfile.write('</header>'.encode('utf8'))
         self.wfile.write('''<img id='help' src='help.png' onclick='help()'/>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
