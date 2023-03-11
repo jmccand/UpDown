@@ -275,7 +275,7 @@ header {
   border: 3px solid black;
   border-radius: 10px;
   padding: 2%;
-  display: none;  
+  display: none;
   z-index: 3;
   text-align: center;
   font-size: 20px;
@@ -3644,13 +3644,24 @@ def auto_schedule():
                     while len(compiled_set) < 10:
                         new_random = random.choice(list(db.opinions_database.keys()))
                         copy_opinion = db.opinions_database[new_random]
-                        if new_random not in compiled_set and new_random.approved == True:
+                        if new_random not in compiled_set and copy_opinion.approved == True:
                             def update_opinions_database():
                                 new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
                                 db.opinions_database[new_opinion.ID] = new_opinion
                                 return new_opinion.ID
                             new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
                             compiled_set.add(new_opinion_id)
+                else:
+                    for opinion_ID in list(db.opinions_database.keys()):
+                        copy_opinion = db.opinions_database[opinion_ID]
+                        if opinion_ID not in compiled_set and copy_opinion.approved == True:
+                            def update_opinions_database():
+                                new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
+                                db.opinions_database[new_opinion.ID] = new_opinion
+                                return new_opinion.ID
+                            new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
+                            compiled_set.add(new_opinion_id)
+                    
             else:
                 while len(compiled_set) < 10:
                     # reset remaining count
