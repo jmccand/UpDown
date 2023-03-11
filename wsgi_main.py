@@ -1479,6 +1479,7 @@ setInterval(updateSearch, 1000);
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('keydown', handleKeyDown, false);
 
 var xStart = null;
 var yStart = null;
@@ -1527,6 +1528,16 @@ function handleTouchMove(evt) {{
     xStart = null;
     yStart = null;
     unlocked = false;
+}}
+function handleKeyDown(evt) {{
+    let key_pressed = event.key;
+    const keyDict = {{
+        'ArrowUp': 'yes',
+        'ArrowDown': 'no',
+    }};
+    if (keyDict[key_pressed] != null) {{
+        vote(keyDict[key_pressed]);
+    }}
 }}
 function vote(my_vote) {{
     if (opinionList.length > 0) {{
