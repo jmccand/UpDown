@@ -971,7 +971,7 @@ function highlight(info) {{
             self.send_links_head()
             self.wfile.write('''<style>
 article#ballot_label {
-  position: absolute;
+  position: fixed;
   top: 120px;
   font-size: 25px;
   padding: 10px;
@@ -984,7 +984,7 @@ article#ballot_label {
   background-color: #ffef90ff;
 }
 article#opinion {
-  position: absolute;
+  position: fixed;
   top: 220px;
   width: 96%;
   left: 2%;
