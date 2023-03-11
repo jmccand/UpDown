@@ -3622,13 +3622,20 @@ def auto_schedule():
                 next_due_date = see_day + datetime.timedelta(days=3)
             # convert next due date to datetime
         next_due_time = datetime.datetime.combine(next_due_date, datetime.datetime.min.time())
+
+        def smart_opinion_in(collection, opinion_ID):
+            for check_ID in collection:
+                if db.opinions_database[check_ID].text == db.opinions_database[opinion_ID].text:
+                    return True
+            return False
+        
         if datetime.datetime.now() + datetime.timedelta(seconds=0.5) > next_due_time:
             ages = []
             seconds_sum = 0
-            approved_count = 0
+            approved_set = set()
             for opinion_ID, opinion in db.opinions_database.items():
-                if opinion.approved:
-                    approved_count += 1
+                if not smart_opinion_in(approved_set, opinion_ID):
+                    approved_set.add(opinion_ID)
                     if not opinion.scheduled:
                         creation_date = opinion.activity[0][-1]
                         seconds_passed = (datetime.datetime.now() - creation_date).total_seconds()
@@ -3640,7 +3647,7 @@ def auto_schedule():
                 for age_secs, opinion_ID in ages:
                     compiled_set.add(opinion_ID)
                 # make sure no infinite loop
-                if approved_count >= 10:
+                if len(approved_set) > 10:
                     while len(compiled_set) < 10:
                         new_random = random.choice(list(db.opinions_database.keys()))
                         copy_opinion = db.opinions_database[new_random]
@@ -3654,7 +3661,7 @@ def auto_schedule():
                 else:
                     for opinion_ID in list(db.opinions_database.keys()):
                         copy_opinion = db.opinions_database[opinion_ID]
-                        if opinion_ID not in compiled_set and copy_opinion.approved == True:
+                        if not smart_opinion_in(compiled_set, opinion_ID) and copy_opinion.approved == True:
                             def update_opinions_database():
                                 new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
                                 db.opinions_database[new_opinion.ID] = new_opinion
