@@ -343,7 +343,7 @@ header {
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('</div>'.encode('utf8'))
         if verified_result != 'verified':
-            self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
+            self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
         self.wfile.write('</header>'.encode('utf8'))
         self.wfile.write('''<img id='help' src='help.png' onclick='help()'/>'''.encode('utf8'))
         self.wfile.write('''<script>
@@ -708,6 +708,7 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
                 self.my_cookies['code'] = url_arguments['cookie_code'][0]
                 reset_cookie = True
         my_account = self.identify_user()
+        verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         
         if reset_cookie:
             self.start_response('200 OK', [('Set-Cookie', f'code={url_arguments["cookie_code"][0]}; path=/')])
@@ -971,14 +972,18 @@ function highlight(info) {{
             self.send_links_head()
             self.wfile.write('''<style>
 article#ballot_label {
-  position: fixed;
-  top: 120px;
-  font-size: 25px;
+  position: fixed;'''.encode('utf8'))
+            if verified_result == 'verified':
+                self.wfile.write('  top: 70px;'.encode('utf8'))
+            else:
+                self.wfile.write('  top: 105px;'.encode('utf8'))
+            self.wfile.write('''  font-size: 25px;
   padding: 10px;
   width: 96%;
   left: 2%;
   border: 2px solid black;
-  border-radius: 25px;
+  border-top: 0px;
+  border-radius: 0px 0px 25px 25px;
   box-sizing: border-box;
   text-align: center;
   background-color: #ffef90ff;
@@ -991,7 +996,7 @@ article#opinion {
   bottom: 25%;
   z-index: 1;
   overflow: scroll;
-  border-radius: 6px;
+  border-radius: 30px;
   border: 3px solid black;
   background-color: #ffef90ff;
   box-sizing: border-box;
@@ -1010,16 +1015,17 @@ section#opinion_text {
   top: 41px;
   bottom: 0;
   width: 100%;
-  padding: 15px;
   position: absolute;
   background-color: white;
   box-sizing: border-box;
   font-size: 30px;
   border: 2px solid black;
+  border-radius: 0px 0px 27px 27px;
 }
 p#opinion_p {
   margin: 0;
   position: absolute;
+  padding: 10px;
   top: 50%;
   left: 50%;
   margin-right: -50%;
@@ -1060,7 +1066,7 @@ div#banner {
                     my_votes.append('abstain')
             self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
             self.wfile.write(f'''<article id='ballot_label'>
-Ballot {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
+{see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
 </article>
 <article id='opinion'>
 <div id='counter'>
