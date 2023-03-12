@@ -3674,10 +3674,10 @@ def auto_schedule():
                         copy_opinion = db.opinions_database[opinion_ID]
                         if not smart_opinion_in(compiled_set, opinion_ID) and copy_opinion.approved == True:
                             def update_opinions_database():
-                                new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
+                                new_opinion = updown.Opinion(str(len(db.opinions_database)), copy_opinion.text, [(-1, datetime.datetime.now())], approved=copy_opinion.approved, scheduled=True)
                                 db.opinions_database[new_opinion.ID] = new_opinion
                                 return new_opinion.ID
-                            new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
+                            new_opinion_id = run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
                             compiled_set.add(new_opinion_id)
                     
             else:
