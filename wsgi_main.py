@@ -1158,6 +1158,8 @@ function handleTouchEnd(evt) {{
     document.getElementById('opinion').style.transform = 'translateX(0px)';
     xStart = null;
     yStart = null;
+    xEnd = null;
+    yEnd = null;
 }}
 function handleTouchMove(evt) {{
     if (xStart == null || yStart == null) {{
