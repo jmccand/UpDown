@@ -1136,19 +1136,23 @@ function handleTouchEnd(evt) {{
     var yDiff = yStart - yEnd;
 
     if (Math.abs(xDiff) > Math.abs(yDiff)) {{
-        if (xDiff > 0) {{
-            change(1);
-        }}
-        else {{
-            change(-1);
+        if (Math.abs(xDiff) > 30) {{
+            if (xDiff > 0) {{
+                change(1);
+            }}
+            else {{
+                change(-1);
+            }}
         }}
     }}
     else {{
-        if (yDiff > 0) {{
-            vote('up');
-        }}
-        else {{ 
-            vote('down');
+        if (Math.abs(yDiff) > 30) {{
+            if (yDiff > 0) {{
+                vote('up');
+            }}
+            else {{ 
+                vote('down');
+            }}
         }}
     }}
     document.getElementById('opinion').style.transform = 'translateX(0px)';
