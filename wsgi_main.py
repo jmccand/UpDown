@@ -65,7 +65,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png'):
             self.path_root = '/get_email'
             self.get_email()
         else:
@@ -73,7 +73,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png'):
+                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png'):
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -808,7 +808,7 @@ section p {
             self.wfile.write('''<article id='opinion'>
 <div id='highlight_title'>
 </div>
-<section>
+<section id='opinion_box'>
 <p id='opinion_text'>
 </p>
 </section>
@@ -868,6 +868,7 @@ let current_index = 0;
 let timeElapsed = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchend', handleTouchEnd, false);
 document.addEventListener('touchmove', handleTouchMove, false);
 document.addEventListener('keydown', handleKeyDown, false);
 
@@ -899,6 +900,26 @@ function handleTouchMove(evt) {{
     var yDiff = yStart - yEnd;
 
     if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        document.getElementById('opinion_box').style.transform = 'translateX(' + xDiff + 'px)';
+    }}
+    else {{
+        return;
+    }}
+
+}}
+
+function handleTouchEnd(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    var xEnd = evt.touches[0].clientX;
+    var yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
         if (xDiff > 0) {{
             change(1);
         }}
@@ -909,6 +930,7 @@ function handleTouchMove(evt) {{
     else {{
         return;
     }}
+    document.getElementById('opinion_box').style.transform = 'translateX(0px)';
     xStart = null;
     yStart = null;
 }}
@@ -1082,14 +1104,17 @@ let votes = {my_votes};
 let current_index = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchend', handleTouchEnd, false);
 document.addEventListener('touchmove', handleTouchMove, false);
 document.addEventListener('dblclick', handleDoubleClick, false);
 document.addEventListener('keydown', handleKeyDown, false);
 
 change(0);
 
-var xStart = null;
-var yStart = null;
+let xStart = null;
+let yStart = null;
+let xEnd = null;
+let yEnd = null;
 
 function getTouches(evt) {{
   return evt.touches ||
@@ -1102,13 +1127,10 @@ function handleTouchStart(evt) {{
     yStart = start.clientY;
 }}
 
-function handleTouchMove(evt) {{
-    if (xStart == null || yStart == null) {{
+function handleTouchEnd(evt) {{
+    if (xStart == null || yStart == null || xEnd == null || yEnd == null) {{
         return;
     }}
-
-    var xEnd = evt.touches[0].clientX;
-    var yEnd = evt.touches[0].clientY;
 
     var xDiff = xStart - xEnd;
     var yDiff = yStart - yEnd;
@@ -1129,8 +1151,28 @@ function handleTouchMove(evt) {{
             vote('down');
         }}
     }}
+    document.getElementById('opinion').style.transform = 'translateX(0px)';
     xStart = null;
     yStart = null;
+}}
+function handleTouchMove(evt) {{
+    if (xStart == null || yStart == null) {{
+        return;
+    }}
+
+    xEnd = evt.touches[0].clientX;
+    yEnd = evt.touches[0].clientY;
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        document.getElementById('opinion').style.transform = 'translateX(' + -xDiff/3 + 'px)';
+    }}
+    else {{
+        return;
+    }}
+
 }}
 function handleDoubleClick(evt) {{
     vote('abstain');
