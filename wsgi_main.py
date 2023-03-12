@@ -1249,7 +1249,7 @@ function change(i) {{
     if (current_index + i < page_IDs.length && current_index + i >= 0) {{
         current_index += i;
         opinion_text.innerHTML = opinion_texts[current_index];
-        counter.innerHTML = current_index + 1 + '/' + page_IDs.length;
+        counter.innerHTML = 'Opinion #' + (current_index + 1);
         if (votes[current_index] == 'up') {{
             opinion_box.style.borderColor = '#00ff00ff';
         }}
