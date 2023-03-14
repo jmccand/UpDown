@@ -126,6 +126,22 @@ def rewind_verification(db_files):
         else:
             taken.add(secure[0])
     
+def amend_opinions(db_files):
+    ids_db, opinions_db, cookies_db, verification_db, calendar_db, device_db = db_files
+    for opinion_ID, opinion_obj in opinions_db.items():
+        if str(opinion_obj.activity[0][0]) == '-1':
+            if opinion_obj.scheduled == True:
+                if len(opinion_obj.activity) == 1:
+                    opinion_obj.activity.append([(-1, 'yes', datetime.datetime.now())])
+                    found = False
+                    for date, scheduled_set in calendar_db.items():
+                        if opinion_ID in scheduled_set:
+                            assert not found
+                            opinion_obj.activity.append([(datetime.datetime.strptime(date, '%Y-%m-%d').date(), datetime.datetime.now())])
+                            found = True
+                    opinions_db[opinion_ID] = opinion_obj
+                    opinions_db.sync()
+
 def main():
     db.init(sys.argv[1])
     if len(sys.argv) > 2:
@@ -138,7 +154,7 @@ def main():
                 time.sleep(1)
             excise_corrupted((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
         elif sys.argv[2] == 'unverify':
-            print('UNVERIFYING ALL USERS after 10 secs... make sure you have a basckup. ctrl-c ctrl-c to cancel')
+            print('UNVERIFYING ALL USERS after 10 secs... make sure you have a backup. ctrl-c ctrl-c to cancel')
             for count in range(10, 0, -1):
                 print(f'{count} secs...')
                 time.sleep(1)
@@ -146,13 +162,19 @@ def main():
         elif sys.argv[2] == 'rewind':
             if len(sys.argv) > 3:
                 if sys.argv[3] == 'verification':
-                    print('REWINDING VERIFICATION ON ALL USERS after 10 secs... make sure you have a basckup. ctrl-c ctrl-c to cancel')
+                    print('REWINDING VERIFICATION ON ALL USERS after 10 secs... make sure you have a backup. ctrl-c ctrl-c to cancel')
                     for count in range(10, 0, -1):
                         print(f'{count} secs...')
                         time.sleep(1)
                     rewind_verification((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
             else:
                 raise ValueError(f'rewind expected another argument (verification, etc.) to specify what data you want to rewind.')
+        elif sys.argv[2] == 'amend':
+            print('AMENDING ALL OPINIONS after 10 secs... make sure you have a backup. ctrl-c ctrl-c to cancel')
+            for count in range(10, 0, -1):
+                print(f'{count} secs...')
+                time.sleep(1)
+            amend_opinions((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
     else:
         raise ValueError(f'db corruption expected another argument (check, unverify, rewind, etc.) to specify what function you want to run.')
                         
