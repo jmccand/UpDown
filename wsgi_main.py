@@ -1073,7 +1073,7 @@ div#banner {
 <body>'''.encode('utf8'))
             self.send_links_body()
             randomized = list(db.opinions_calendar[str(see_day)])
-            random.shuffle(randomized)
+            random.Random(int(my_account.user_ID)).shuffle(randomized)
             my_votes = []
             opinion_texts = []
             for opinion_ID in randomized:
