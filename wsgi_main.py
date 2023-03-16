@@ -750,7 +750,7 @@ article#ballot_label {
 div#opinion_holder {
   position: fixed;
   top: 220px;
-  width: 1000%;
+  width: 2000%;
   left: 0;
   bottom: 25%;
   z-index: 1;
@@ -758,7 +758,7 @@ div#opinion_holder {
 article.opinion {
   position: absolute;
   top: 0;
-  width: 9.6%;
+  width: 4.8%;
   bottom: 0;
   z-index: 1;
   overflow: scroll;
@@ -777,7 +777,7 @@ div#counter {
   box-sizing: border-box;
   text-align: center;
 }
-section#opinion_text {
+section.opinion_text {
   top: 41px;
   bottom: 0;
   width: 100%;
@@ -788,7 +788,7 @@ section#opinion_text {
   border: 2px solid black;
   border-radius: 0px 0px 27px 27px;
 }
-p#opinion_p {
+p.opinion_p {
   margin: 0;
   position: absolute;
   padding: 10px;
@@ -847,9 +847,8 @@ article#cover div {
 </table>
 </footer>'''.encode('utf8'))
 
-            highlights = []
-
             self.wfile.write('''<article id='cover'><div id='cover_div'>'''.encode('utf8'))
+            highlights = []
 
             if datetime.date.today().weekday() == 2:
                 self.wfile.write('''Middle Wednesday:<br />Ballot Recap'''.encode('utf8'))
@@ -858,7 +857,7 @@ article#cover div {
                 self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
                 highlights.append(('Off Day:<br />Ballot Recap',))
             self.wfile.write('''</div></article><div id='opinion_holder'>'''.encode('utf8'))
-            
+
             see_old_days = []
             check_day = see_day
             if check_day.weekday() not in (3, 6):
@@ -876,6 +875,8 @@ article#cover div {
             see_old_days = see_old_days[::-1]
             print(f'{see_old_days}')
 
+            opinion_count = 0
+
             for day in see_old_days:
                 def day_to_nice_string(d):
                     return d.strftime('%A %m/%d')
@@ -885,15 +886,16 @@ article#cover div {
                 this_list.sort(key=lambda x: -1 * x.care_agree_percent()[0] * x.care_agree_percent()[1])
                 for index, opinion in enumerate(this_list):
                     highlights.append((opinion.text,) + opinion.care_agree_percent())
-                    self.wfile.write(f'''<article class='opinion' style='left: {.2+10*index}%'>
+                    self.wfile.write(f'''<article class='opinion' style='left: {.1+5*opinion_count}%'>
 <div id='counter'>
 Opinion #{index + 1}
 </div>
-<section id='opinion_text'>
-<p id='opinion_p'>{opinion.text}</p>
+<section class='opinion_text'>
+<p class='opinion_p'>{opinion.text}</p>
 </section>
 </article>'''.encode('utf8'))
-                    print(f'left: {.2 + 10 * index}')
+                    opinion_count += 1
+                    print(f'left: {.1 + 5 * index}')
 
             # javascript doesn't have tuples
             highlights = [list(x) for x in highlights]
@@ -915,8 +917,8 @@ var xEnd = null;
 var yEnd = null;
 
 function setX(amount) {{
-    if (current_translation + amount < -screen.width * 10) {{
-        document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 10) + 'px)';
+    if (current_translation + amount < -screen.width * 20) {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 20) + 'px)';
     }}
     else if (current_translation + amount > 0) {{
         document.getElementById('opinion_holder').style.transform = '0px';
@@ -1030,18 +1032,19 @@ function change(i) {{
             }}
         }}
         console.log('opinion number: ' + opinion_number);
-        let target = opinion_number * screen.width;
+        let target = opinion_number * -screen.width;
         console.log('target: ' + target);
         if (current_translation < target) {{
             for (let currentX = current_translation; currentX < target; currentX++) {{
-                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
-                current_translation = currentX;
+                    console.log('currentx: ' + currentX);
+                    document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+                    current_translation = currentX;
             }}
         }}
         else if (current_translation > target) {{
             for (let currentX = current_translation; currentX > target; currentX--) {{
-                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
-                current_translation = currentX;
+                    document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+                    current_translation = currentX;
             }}
         }}
     }}
@@ -1052,7 +1055,6 @@ function cover(text) {{
     document.getElementById('cover').style.display = 'initial';
 }}
 function highlight(info) {{
-    document.getElementById('opinion_text').innerHTML = info[0];
     document.getElementById('care_per').innerHTML = info[1] + '%';
     document.getElementById('agree_per').innerHTML = info[2] + '%';
     document.getElementById('cover').style.display = 'none';
