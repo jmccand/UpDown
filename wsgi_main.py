@@ -730,12 +730,73 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
-article#opinion {
+article#ballot_label {
+  position: fixed;'''.encode('utf8'))
+            if verified_result == 'verified':
+                self.wfile.write('  top: 70px;'.encode('utf8'))
+            else:
+                self.wfile.write('  top: 105px;'.encode('utf8'))
+            self.wfile.write('''  font-size: 25px;
+  padding: 10px;
+  width: 96%;
+  left: 2%;
+  border: 2px solid black;
+  border-top: 0px;
+  border-radius: 0px 0px 25px 25px;
+  box-sizing: border-box;
+  text-align: center;
+  background-color: #ffef90ff;
+}
+div#opinion_holder {
+  position: fixed;
+  top: 220px;
+  width: 1000%;
+  left: 0;
+  bottom: 25%;
+  z-index: 1;
+}
+article.opinion {
   position: absolute;
-  top: 70px;
-  width: 100%;
-  bottom: 30%;
+  top: 0;
+  width: 9.6%;
+  bottom: 0;
+  z-index: 1;
   overflow: scroll;
+  border-radius: 30px;
+  border: 3px solid black;
+  background-color: #ffef90ff;
+  box-sizing: border-box;
+}
+div#counter {
+  position: absolute;
+  top: 0;
+  font-size: 25px;
+  padding: 5px;
+  border-bottom: 2px solid black;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+section#opinion_text {
+  top: 41px;
+  bottom: 0;
+  width: 100%;
+  position: absolute;
+  background-color: white;
+  box-sizing: border-box;
+  font-size: 30px;
+  border: 2px solid black;
+  border-radius: 0px 0px 27px 27px;
+}
+p#opinion_p {
+  margin: 0;
+  position: absolute;
+  padding: 10px;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 footer {
   position: absolute;
@@ -772,47 +833,13 @@ article#cover div {
   font-size: 40px;
   font-family: Georgia;
 }
-section {
-  top: 25%;
-  bottom: 35%;
-  width: 96%;
-  left: 2%;
-  padding: 15px;
-  position: fixed;
-  background-color: white;
-  border-radius: 6px;
-  border: 3px solid #595959;
-  color: black;
-  box-sizing: border-box;
-  font-size: 30px;
-  cursor: default;
-}
-article#opinion div {
-  font-size: 50px;
-}
-section p {
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-right: -50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-family: Verdana;
-}
 </style>
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write('''<div id='help_box'>Wednesdays are "off days" as the ballot rotates. On Wednesdays, you get the opportunity to check back in on the week's opinions. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
-            self.wfile.write('''<article id='opinion'>
-<div id='highlight_title'>
+            self.wfile.write('''<div id='highlight_title'>
 </div>
-<section id='opinion_box'>
-<p id='opinion_text'>
-</p>
-</section>
-</article>
 <footer>
 <table>
 <tr style='font-family: Garamond'><td id='care_per'>---%</td><td id='agree_per'>---%</td></tr>
@@ -830,7 +857,7 @@ section p {
             else:
                 self.wfile.write('''Off Day:<br />Ballot Recap'''.encode('utf8'))
                 highlights.append(('Off Day:<br />Ballot Recap',))
-            self.wfile.write('''</div></article>'''.encode('utf8'))
+            self.wfile.write('''</div></article><div id='opinion_holder'>'''.encode('utf8'))
             
             see_old_days = []
             check_day = see_day
@@ -856,16 +883,26 @@ section p {
                 highlights.append((f'{day_to_nice_string(day)} - {day_to_nice_string(end_date)}',))
                 this_list = [db.opinions_database[x] for x in db.opinions_calendar[str(day)]]
                 this_list.sort(key=lambda x: -1 * x.care_agree_percent()[0] * x.care_agree_percent()[1])
-                for opinion in this_list:
+                for index, opinion in enumerate(this_list):
                     highlights.append((opinion.text,) + opinion.care_agree_percent())
+                    self.wfile.write(f'''<article class='opinion' style='left: {.2+10*index}%'>
+<div id='counter'>
+Opinion #{index + 1}
+</div>
+<section id='opinion_text'>
+<p id='opinion_p'>{opinion.text}</p>
+</section>
+</article>'''.encode('utf8'))
+                    print(f'left: {.2 + 10 * index}')
 
             # javascript doesn't have tuples
             highlights = [list(x) for x in highlights]
                         
-            self.wfile.write(f'''<script>
+            self.wfile.write(f'''</div><script>
 let highlights = {highlights}
 let current_index = 0;
 let timeElapsed = 0;
+let current_translation = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
@@ -874,8 +911,21 @@ document.addEventListener('keydown', handleKeyDown, false);
 
 var xStart = null;
 var yStart = null;
+var xEnd = null;
+var yEnd = null;
 
-setInterval(increaseTimeElapsed, 200, 200);
+function setX(amount) {{
+    if (current_translation + amount < -screen.width * 10) {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 10) + 'px)';
+    }}
+    else if (current_translation + amount > 0) {{
+        document.getElementById('opinion_holder').style.transform = '0px';
+    }}
+    else {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
+    }}
+    
+}}
 
 function getTouches(evt) {{
   return evt.touches ||
@@ -888,51 +938,50 @@ function handleTouchStart(evt) {{
     yStart = start.clientY;
 }}
 
+function handleTouchEnd(evt) {{
+    if (xStart == null || yStart == null || xEnd == null || yEnd == null) {{
+        return;
+    }}
+
+    var xDiff = xStart - xEnd;
+    var yDiff = yStart - yEnd;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+        if (Math.abs(xDiff) > 30) {{
+            if (xDiff > 0) {{
+                change(1);
+            }}
+            else {{
+                change(-1);
+            }}
+        }}
+    }}
+    change(0);
+    xStart = null;
+    yStart = null;
+    xEnd = null;
+    yEnd = null;
+}}
 function handleTouchMove(evt) {{
     if (xStart == null || yStart == null) {{
         return;
     }}
 
-    var xEnd = evt.touches[0].clientX;
-    var yEnd = evt.touches[0].clientY;
+    xEnd = evt.touches[0].clientX;
+    yEnd = evt.touches[0].clientY;
 
     var xDiff = xStart - xEnd;
     var yDiff = yStart - yEnd;
 
-    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
-        document.getElementById('opinion_box').style.transform = 'translateX(' + xDiff + 'px)';
-    }}
-    else {{
-        return;
-    }}
-
-}}
-
-function handleTouchEnd(evt) {{
-    if (xStart == null || yStart == null) {{
-        return;
-    }}
-
-    var xEnd = evt.touches[0].clientX;
-    var yEnd = evt.touches[0].clientY;
-
-    var xDiff = xStart - xEnd;
-    var yDiff = yStart - yEnd;
-
-    if (Math.abs(xDiff) > Math.abs(yDiff)) {{
-        if (xDiff > 0) {{
-            change(1);
+    if (highlights[current_index].length == 3) {{
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {{
+            setX(-xDiff/3);
         }}
         else {{
-            change(-1);
+            return;
         }}
     }}
-    else {{
-        return;
-    }}
-    document.getElementById('opinion_box').style.transform = 'translateX(0px)';
-    xStart = null;
-    yStart = null;
+
 }}
 function handleKeyDown(evt) {{
     let key_pressed = event.key;
@@ -960,6 +1009,7 @@ function increaseTimeElapsed(time) {{
 }}
 function change(i) {{
     let newIndex = current_index + i;
+    console.log('new index: ' + newIndex);
     if (newIndex < 0) {{
         newIndex = 0;
     }}
@@ -972,8 +1022,30 @@ function change(i) {{
     else {{
         highlight(highlights[newIndex]);
     }}
+    if (highlights[current_index].length == 3) {{
+        let opinion_number = 0;
+        for (var index = 0; index < newIndex; index++) {{
+            if (highlights[index].length == 3) {{
+                opinion_number++;
+            }}
+        }}
+        console.log('opinion number: ' + opinion_number);
+        let target = opinion_number * screen.width;
+        console.log('target: ' + target);
+        if (current_translation < target) {{
+            for (let currentX = current_translation; currentX < target; currentX++) {{
+                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+                current_translation = currentX;
+            }}
+        }}
+        else if (current_translation > target) {{
+            for (let currentX = current_translation; currentX > target; currentX--) {{
+                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+                current_translation = currentX;
+            }}
+        }}
+    }}
     current_index = newIndex;
-    timeElapsed = 0;
 }}
 function cover(text) {{
     document.getElementById('cover_div').innerHTML = text;
@@ -1010,12 +1082,19 @@ article#ballot_label {
   text-align: center;
   background-color: #ffef90ff;
 }
-article#opinion {
+div#opinion_holder {
   position: fixed;
   top: 220px;
-  width: 96%;
-  left: 2%;
+  width: 1000%;
+  left: 0;
   bottom: 25%;
+  z-index: 1;
+}
+article.opinion {
+  position: absolute;
+  top: 0;
+  width: 9.6%;
+  bottom: 0;
   z-index: 1;
   overflow: scroll;
   border-radius: 30px;
@@ -1072,11 +1151,17 @@ div#banner {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
+            self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
+            self.wfile.write(f'''<article id='ballot_label'>
+{see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
+</article>
+<div id='opinion_holder'>'''.encode('utf8'))
+
             randomized = list(db.opinions_calendar[str(see_day)])
             random.Random(int(my_account.user_ID)).shuffle(randomized)
             my_votes = []
             opinion_texts = []
-            for opinion_ID in randomized:
+            for index, opinion_ID in enumerate(randomized):
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
@@ -1086,22 +1171,21 @@ div#banner {
                     my_votes.append(this_vote)
                 else:
                     my_votes.append('abstain')
-            self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
-            self.wfile.write(f'''<article id='ballot_label'>
-{see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
-</article>
-<article id='opinion'>
+                self.wfile.write(f'''<article class='opinion' style='left: {.2+10*index}%'>
 <div id='counter'>
+Opinion #{index + 1}
 </div>
 <section id='opinion_text'>
 <p id='opinion_p'>{db.opinions_database[randomized[0]].text}</p>
 </section>
 </article>'''.encode('utf8'))
-            self.wfile.write(f'''<script>
+
+            self.wfile.write(f'''</div><script>
 const page_IDs = {randomized};
 const opinion_texts = {opinion_texts};
 let votes = {my_votes};
 let current_index = 0;
+let current_translation = 0;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
@@ -1115,6 +1199,11 @@ let xStart = null;
 let yStart = null;
 let xEnd = null;
 let yEnd = null;
+
+function scrollX(amount) {{
+    document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
+    current_translation += amount;
+}}
 
 function getTouches(evt) {{
   return evt.touches ||
@@ -1155,7 +1244,7 @@ function handleTouchEnd(evt) {{
             }}
         }}
     }}
-    document.getElementById('opinion').style.transform = 'translateX(0px)';
+    change(0);
     xStart = null;
     yStart = null;
     xEnd = null;
@@ -1173,7 +1262,7 @@ function handleTouchMove(evt) {{
     var yDiff = yStart - yEnd;
 
     if (Math.abs(xDiff) > Math.abs(yDiff)) {{
-        document.getElementById('opinion').style.transform = 'translateX(' + -xDiff/3 + 'px)';
+        scrollX(-xDiff/3);
     }}
     else {{
         return;
@@ -1245,21 +1334,19 @@ function handleKeyDown(evt) {{
     }}
 }}
 function change(i) {{
-    let opinion_text = document.getElementById('opinion_p');
-    let opinion_box = document.getElementById('opinion_text');
-    let counter = document.getElementById('counter');
     if (current_index + i < page_IDs.length && current_index + i >= 0) {{
         current_index += i;
-        opinion_text.innerHTML = opinion_texts[current_index];
-        counter.innerHTML = 'Opinion #' + (current_index + 1);
-        if (votes[current_index] == 'up') {{
-            opinion_box.style.borderColor = '#00ff00ff';
+    }}
+    if (current_translation < target) {{
+        for (let currentX = current_translation; currentX < target; currentX++) {{
+            document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+            current_translation = currentX;
         }}
-        else if (votes[current_index] == 'down') {{
-            opinion_box.style.borderColor = '#ff0000ff';
-        }}
-        else {{
-            opinion_box.style.borderColor = '#595959';
+    }}
+    else if (current_translation > target) {{
+        for (let currentX = current_translation; currentX > target; currentX--) {{
+            document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+            current_translation = currentX;
         }}
     }}
 }}
