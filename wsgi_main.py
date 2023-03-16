@@ -1036,7 +1036,6 @@ function change(i) {{
         console.log('target: ' + target);
         if (current_translation < target) {{
             for (let currentX = current_translation; currentX < target; currentX++) {{
-                    console.log('currentx: ' + currentX);
                     document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
                     current_translation = currentX;
             }}
@@ -3796,6 +3795,7 @@ def auto_schedule():
                         seconds_sum += seconds_passed
                         ages.append((seconds_passed, opinion_ID))
             compiled_set = db.opinions_calendar.get(str(next_due_date), set())
+            compiled_set = list(str(x) for x in compiled_set)
 
             if len(compiled_set) + len(ages) <= 10:
                 for age_secs, opinion_ID in ages:
@@ -3808,20 +3808,20 @@ def auto_schedule():
                         if new_random not in compiled_set and copy_opinion.approved == True:
                             def update_opinions_database():
                                 new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
-                                db.opinions_database[new_opinion.ID] = new_opinion
+                                db.opinions_database[str(new_opinion.ID)] = new_opinion
                                 return new_opinion.ID
                             new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
-                            compiled_set.add(new_opinion_id)
+                            compiled_set.add(str(new_opinion_id))
                 else:
                     for opinion_ID in list(db.opinions_database.keys()):
                         copy_opinion = db.opinions_database[opinion_ID]
                         if not smart_opinion_in(compiled_set, opinion_ID) and copy_opinion.approved == True:
                             def update_opinions_database():
                                 new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
-                                db.opinions_database[new_opinion.ID] = new_opinion
+                                db.opinions_database[str(new_opinion.ID)] = new_opinion
                                 return new_opinion.ID
                             new_opinion_id = run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
-                            compiled_set.add(new_opinion_id)
+                            compiled_set.add(str(new_opinion_id))
                     
             else:
                 while len(compiled_set) < 10:
