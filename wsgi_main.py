@@ -1201,11 +1201,11 @@ let xEnd = null;
 let yEnd = null;
 
 function setX(amount) {{
-    if (current_translation + amount < -screen.width * 20) {{
-        document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 20) + 'px)';
+    if (current_translation + amount < -screen.width * 20 - 20) {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 20 - 20) + 'px)';
     }}
-    else if (current_translation + amount > 0) {{
-        document.getElementById('opinion_holder').style.transform = 'translateX(0px)';
+    else if (current_translation + amount > 20) {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(20px)';
     }}
     else {{
         document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
