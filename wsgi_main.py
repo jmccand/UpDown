@@ -1154,6 +1154,7 @@ img.stamp {
   width: 300px;
   transform: translate(-50%, -50%) rotate(-30deg);
   z-index: 2;
+  opacity: 0;
 }
 </style>
 </head>
@@ -1185,10 +1186,14 @@ Opinion #{index + 1}
 </div>
 <section id='opinion_text'>
 <p id='opinion_p'>{db.opinions_database[randomized[index]].text}</p>
-</section>
-<img id='{index} up' class='stamp' src='up_stamp.png'/>
-<img id='{index} down' class='stamp' src='down_stamp.png'/>
-</article>'''.encode('utf8'))
+</section>'''.encode('utf8'))
+                self.wfile.write(f"<img id='{index} up' class='stamp' src='up_stamp.png'".encode('utf8'))
+                if this_vote == 'up':
+                    self.wfile.write(" style='opacity: .4'".encode('utf8'))
+                self.wfile.write(f"/><img id='{index} down' class='stamp' src='down_stamp.png'".encode('utf8'))
+                if this_vote == 'down':
+                    self.wfile.write(" style='opacity: .4'".encode('utf8'))
+                self.wfile.write('/></article>'.encode('utf8'))
 
             self.wfile.write(f'''</div><script>
 const page_IDs = {randomized};
@@ -1271,7 +1276,6 @@ function handleTouchMove(evt) {{
     if (xStart == null || yStart == null) {{
         return;
     }}
-
     xEnd = evt.touches[0].clientX;
     yEnd = evt.touches[0].clientY;
 
@@ -1294,7 +1298,13 @@ function vote(my_vote) {{
     if (checkVoteValidity(my_vote, votes[current_index])) {{
         xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
-
+        if (votes[current_index] != 'abstain') {{
+            document.getElementById(current_index + ' ' + votes[current_index]).style.opacity = '0';
+        }}
+        if (my_vote != 'abstain') {{
+            document.getElementById(current_index + ' ' + my_vote).style.opacity = '1';
+        }}
+        votes[current_index] = my_vote;
         setTimeout(() => {{change(1)}}, 1000);
     }}
 }}
@@ -1352,7 +1362,14 @@ function change(i) {{
     let opinion_holder = document.getElementById('opinion_holder');
     opinion_holder.style.transition = '0.4s';
     opinion_holder.style.transform = 'translateX(' + target + 'px)';
-    setTimeout(function() {{ opinion_holder.style.transition = 'none'; }}, 400);
+    let old_index = current_index;
+    function reset() {{
+        opinion_holder.style.transition = 'none';
+        if (votes[old_index] != 'abstain') {{
+            document.getElementById(old_index + ' ' + votes[old_index]).style.opacity = '0.4';
+        }}
+    }}
+    setTimeout(reset, 400);
     current_index = newIndex;
     current_translation = target;
 }}
