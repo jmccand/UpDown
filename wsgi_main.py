@@ -1147,6 +1147,14 @@ div#banner {
   z-index: 1;
   display: none;
 }
+img.stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  z-index: 2;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1178,6 +1186,8 @@ Opinion #{index + 1}
 <section id='opinion_text'>
 <p id='opinion_p'>{db.opinions_database[randomized[index]].text}</p>
 </section>
+<img id='{index} up' class='stamp' src='up_stamp.png'/>
+<img id='{index} down' class='stamp' src='down_stamp.png'/>
 </article>'''.encode('utf8'))
 
             self.wfile.write(f'''</div><script>
@@ -1284,17 +1294,7 @@ function vote(my_vote) {{
     if (checkVoteValidity(my_vote, votes[current_index])) {{
         xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
-        votes[current_index] = my_vote;
-        let opinion_box = document.getElementById('opinion_text');
-        if (my_vote == 'up') {{
-            opinion_box.style.borderColor = '#00ff00ff';
-        }}
-        else if (my_vote == 'down') {{
-            opinion_box.style.borderColor = '#ff0000ff';
-        }}
-        else {{
-            opinion_box.style.borderColor = '#595959';
-        }}
+
         setTimeout(() => {{change(1)}}, 1000);
     }}
 }}
