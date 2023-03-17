@@ -1223,6 +1223,7 @@ const opinion_texts = {opinion_texts};
 let votes = {my_votes};
 let current_index = 0;
 let current_translation = 0;
+let already_changed = false;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
@@ -1351,7 +1352,8 @@ function vote(my_vote) {{
             }}
         }}
         votes[current_index] = my_vote;
-        setTimeout(() => {{change(1)}}, 1000);
+        already_changed = false;
+        setTimeout(() => {{if (!already_changed) {{ change(1)}} }}, 1000);
     }}
 }}
 function checkVoteValidity(new_vote, old_vote) {{
@@ -1418,6 +1420,7 @@ function change(i) {{
     setTimeout(reset, 400);
     current_index = newIndex;
     current_translation = target;
+    already_changed = true;
 }}
 </script>
 '''.encode('utf8'))
