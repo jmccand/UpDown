@@ -65,7 +65,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png'):
             self.path_root = '/get_email'
             self.get_email()
         else:
@@ -73,7 +73,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png'):
+                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png'):
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -1156,6 +1156,11 @@ img.stamp {
   z-index: 2;
   opacity: 0;
 }
+img.stamp_icon {
+  position: fixed;
+  top: 150px;
+  width: 10%;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1163,18 +1168,21 @@ img.stamp {
             self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
             self.wfile.write(f'''<article id='ballot_label'>
 {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
-</article>
-<div id='opinion_holder'>'''.encode('utf8'))
+</article>'''.encode('utf8'))
+            
+            self.wfile.write('''<div id='opinion_holder'>'''.encode('utf8'))
 
             randomized = list(db.opinions_calendar[str(see_day)])
             random.Random(int(my_account.user_ID)).shuffle(randomized)
             my_votes = []
             opinion_texts = []
+            vote_counts = [0, 0]
             for index, opinion_ID in enumerate(randomized):
                 assert opinion_ID in db.opinions_database
                 opinion = db.opinions_database[opinion_ID]
                 assert opinion.approved == True
                 opinion_texts.append(opinion.text)
+                this_vote = 'abstain'
                 if str(opinion_ID) in my_account.votes:
                     this_vote = my_account.votes[str(opinion_ID)][-1][0]
                     my_votes.append(this_vote)
@@ -1190,12 +1198,26 @@ Opinion #{index + 1}
                 self.wfile.write(f"<img id='{index} up' class='stamp' src='up_stamp.png'".encode('utf8'))
                 if this_vote == 'up':
                     self.wfile.write(" style='opacity: .4'".encode('utf8'))
+                    vote_counts[0] += 1
                 self.wfile.write(f"/><img id='{index} down' class='stamp' src='down_stamp.png'".encode('utf8'))
                 if this_vote == 'down':
                     self.wfile.write(" style='opacity: .4'".encode('utf8'))
+                    vote_counts[1] += 1
                 self.wfile.write('/></article>'.encode('utf8'))
+            self.wfile.write('</div>'.encode('utf8'))
 
-            self.wfile.write(f'''</div><script>
+            assert vote_counts[0] + vote_counts[1] <= 8
+
+            for stamp_number in range(8):
+                if stamp_number < vote_counts[0]:
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
+                elif stamp_number >= 8 - vote_counts[1]:
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
+                else:
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
+                    
+
+            self.wfile.write(f'''<script>
 const page_IDs = {randomized};
 const opinion_texts = {opinion_texts};
 let votes = {my_votes};
