@@ -1205,7 +1205,7 @@ function setX(amount) {{
         document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 20) + 'px)';
     }}
     else if (current_translation + amount > 0) {{
-        document.getElementById('opinion_holder').style.transform = '0px';
+        document.getElementById('opinion_holder').style.transform = 'translateX(0px)';
     }}
     else {{
         document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
