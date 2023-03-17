@@ -926,7 +926,6 @@ function setX(amount) {{
     else {{
         document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
     }}
-    
 }}
 
 function getTouches(evt) {{
@@ -1177,7 +1176,7 @@ div#banner {
 Opinion #{index + 1}
 </div>
 <section id='opinion_text'>
-<p id='opinion_p'>{db.opinions_database[randomized[0]].text}</p>
+<p id='opinion_p'>{db.opinions_database[randomized[index]].text}</p>
 </section>
 </article>'''.encode('utf8'))
 
@@ -1201,9 +1200,16 @@ let yStart = null;
 let xEnd = null;
 let yEnd = null;
 
-function scrollX(amount) {{
-    document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
-    current_translation += amount;
+function setX(amount) {{
+    if (current_translation + amount < -screen.width * 20) {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(' + (screen.width * 20) + 'px)';
+    }}
+    else if (current_translation + amount > 0) {{
+        document.getElementById('opinion_holder').style.transform = '0px';
+    }}
+    else {{
+        document.getElementById('opinion_holder').style.transform = 'translateX(' + (current_translation + amount) + 'px)';
+    }}
 }}
 
 function getTouches(evt) {{
@@ -1263,7 +1269,7 @@ function handleTouchMove(evt) {{
     var yDiff = yStart - yEnd;
 
     if (Math.abs(xDiff) > Math.abs(yDiff)) {{
-        scrollX(-xDiff/3);
+        setX(-xDiff/3);
     }}
     else {{
         return;
@@ -1335,21 +1341,27 @@ function handleKeyDown(evt) {{
     }}
 }}
 function change(i) {{
-    if (current_index + i < page_IDs.length && current_index + i >= 0) {{
-        current_index += i;
+    let newIndex = current_index + i;
+    if (newIndex < 0) {{
+        newIndex = 0;
     }}
+    else if (newIndex >= opinion_texts.length) {{
+        newIndex = opinion_texts.length - 1;
+    }}
+    let target = newIndex * -screen.width;
     if (current_translation < target) {{
         for (let currentX = current_translation; currentX < target; currentX++) {{
-            document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
-            current_translation = currentX;
+                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+                current_translation = currentX;
         }}
     }}
     else if (current_translation > target) {{
         for (let currentX = current_translation; currentX > target; currentX--) {{
-            document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
-            current_translation = currentX;
+                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
+                current_translation = currentX;
         }}
     }}
+    current_index = newIndex;
 }}
 </script>
 '''.encode('utf8'))
