@@ -1320,11 +1320,35 @@ function vote(my_vote) {{
     if (checkVoteValidity(my_vote, votes[current_index])) {{
         xhttp.open('GET', '/vote?opinion_ID=' + page_IDs[current_index] + '&my_vote=' + my_vote, true);
         xhttp.send();
+        let up_count = 0;
+        let down_count = 0;
+        for (let index = 0; index < votes.length; index++) {{
+            if (votes[index] == 'up') {{
+                up_count++;
+            }}
+            else if (votes[index] == 'down') {{
+                down_count++;
+            }}
+        }}
         if (votes[current_index] != 'abstain') {{
             document.getElementById(current_index + ' ' + votes[current_index]).style.opacity = '0';
+            if (votes[current_index] == 'up' && up_count > 0) {{
+                document.getElementById('stamp ' + (up_count - 1)).src = 'gray_icon.png';
+                up_count--;
+            }}
+            else if (down_count > 0) {{
+                document.getElementById('stamp ' + (8 - down_count)).src = 'gray_icon.png';
+                down_count--;
+            }}
         }}
         if (my_vote != 'abstain') {{
             document.getElementById(current_index + ' ' + my_vote).style.opacity = '1';
+            if (my_vote == 'up') {{
+                document.getElementById('stamp ' + up_count).src = 'green_icon.png';
+            }}
+            else {{
+                document.getElementById('stamp ' + (8 - down_count - 1)).src = 'red_icon.png';
+            }}
         }}
         votes[current_index] = my_vote;
         setTimeout(() => {{change(1)}}, 1000);
