@@ -1349,19 +1349,12 @@ function change(i) {{
         newIndex = opinion_texts.length - 1;
     }}
     let target = newIndex * -screen.width;
-    if (current_translation < target) {{
-        for (let currentX = current_translation; currentX < target; currentX++) {{
-                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
-                current_translation = currentX;
-        }}
-    }}
-    else if (current_translation > target) {{
-        for (let currentX = current_translation; currentX > target; currentX--) {{
-                document.getElementById('opinion_holder').style.transform = 'translateX(' + currentX + 'px)';
-                current_translation = currentX;
-        }}
-    }}
+    let opinion_holder = document.getElementById('opinion_holder');
+    opinion_holder.style.transition = '0.4s';
+    opinion_holder.style.transform = 'translateX(' + target + 'px)';
+    setTimeout(function() {{ opinion_holder.style.transition = 'none'; }}, 400);
     current_index = newIndex;
+    current_translation = target;
 }}
 </script>
 '''.encode('utf8'))
