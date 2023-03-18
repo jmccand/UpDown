@@ -1278,6 +1278,9 @@ function handleTouchEnd(evt) {{
                 change(-1);
             }}
         }}
+        else {{
+            change(0);
+        }}
     }}
     else {{
         if (Math.abs(yDiff) > 30) {{
@@ -1288,8 +1291,10 @@ function handleTouchEnd(evt) {{
                 vote('down');
             }}
         }}
+        else {{
+            change(0);
+        }}
     }}
-    change(0);
     xStart = null;
     yStart = null;
     xEnd = null;
