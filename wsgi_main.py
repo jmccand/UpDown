@@ -343,10 +343,11 @@ header {
             if ((my_account.email in local.BETA_TESTERS) or (my_account.email in local.COMMUNITY_SERVICE)) and verified_result == 'verified':
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('</div>'.encode('utf8'))
-        if verified_result != 'verified':
+        if verified_result != 'verified' and my_account != None:
             self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
         self.wfile.write('</header>'.encode('utf8'))
-        self.wfile.write('''<img id='help' src='help.png' onclick='help()'/>'''.encode('utf8'))
+        if my_account != None:
+            self.wfile.write('''<img id='help' src='help.png' onclick='help()'/>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
     let menu = document.getElementById('menu').style.width = '250px';
@@ -485,7 +486,7 @@ article {
         self.send_links_body()
         YOGS = valid_yogs()
         self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
-Enter your email to vote:<br />
+Enter your email to join:<br />
 <input id='email' type='email' name='email' /><br />
 <input id='submit' type='submit' value='I AGREE TO THE TERMS OF SERVICE' disabled='true'/>
 </form>
@@ -494,9 +495,9 @@ TERMS OF SERVICE:
 </div>
 <article>
 UpDown uses your email to ensure that each student only votes once.<br /><br />
-This app was created to channel the focus of the student body. As LHS has over 2000 students, it can be hard to unify our beliefs. By uniting our preferences, we can work with the administration to bring real change to LHS.<br /><br />
+<!--This app was created to channel the focus of the student body. As LHS has over 2000 students, it can be hard to unify our beliefs. By uniting our preferences, we can work with the administration to bring real change to LHS.<br /><br />
 Using UpDown, students submit and vote on opinions. In this way, the student body can raise issues that we care about.<br /><br />
-The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />
+The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />-->
 On UpDown, everything you do is kept anonymous. All that UpDown needs from you is your honest opinions about our school. Your name will not be tied to your votes, nor the opinions that you submit.<br /><br />
 That said, everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy is contingent on your following LHS's Code of Conduct which outlaws bullying, cyberbullying, and hate speech. Not-safe-for-work content is also not allowed. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher or how much you hate school.<br /><br />
 </form>
@@ -509,17 +510,13 @@ const re = /{local.EMAIL_MATCH_RE}/;
 setTimeout(checkEmail, 1000);
 function checkEmail() {{
     current_email = document.getElementById('email').value;
-    console.log('email: ' + current_email);
     if (re.test(current_email) && YOGS.indexOf(current_email[0] + current_email[1]) != -1) {{
-        console.log('PROPER EMAIL');
         document.getElementById('submit').disabled = false;
     }}
     else if (exceptionEmails.indexOf(current_email) != -1) {{
-        console.log('EXCEPTION EMAIL');
         document.getElementById('submit').disabled = false;
     }}
     else {{
-        console.log('IMPROPER EMAIL');
         document.getElementById('submit').disabled = true;
     }}
     setTimeout(checkEmail, 1000);
