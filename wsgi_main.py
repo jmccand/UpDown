@@ -28,6 +28,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import db_corruption
 import math
+import requests
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -670,7 +671,6 @@ select.status_drop {
                 if user.email == my_email:
                     id_list.append(ID)
             cookie_list = []
-            print(f'ID LIST: {id_list}')
             def last_active(cookie):
                 latest = None
                 cookie_account = db.user_ids[db.cookie_database[cookie][0]]
@@ -682,16 +682,27 @@ select.status_drop {
                 return latest
             for cookie, secure in db.cookie_database.items():
                 ID = secure[0]
-                print(f'  ID: {ID}')
                 if ID in id_list:
-                    print(f'    in (cookie {cookie})')
                     cookie_list.append((cookie, last_active(cookie)))
-            print(f'cookie list: {cookie_list}')
             cookie_list.sort(key=lambda x: x[1], reverse=True)
             for cookie, latest in cookie_list:
                 ip_address, parsed_ua = db.device_info[cookie]
+                ip_address = ip_address[0]
                 my_verified_result = db.cookie_database[cookie][1]
-                self.wfile.write(f'''<table class='device'>
+                ipapi_response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+                if ipapi_response.get('country_name') != None:
+                    self.wfile.write(f'''<table class='device'>
+<tr><td class='session_info'>{'THIS DEVICE: ' if cookie==self.my_cookies['code'].value else ''}{parsed_ua}<br />{ipapi_response.get('city')}, {ipapi_response.get('region')}, {ipapi_response.get('country_name')}<br />Last active: {latest.date()}</td><td class='status'>
+<select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
+<option id='{cookie}_verified' value='verified'>verified</option>
+<option id='{cookie}_unsure' value='unsure' disabled='true'>unsure</option>
+<option id='{cookie}_blocked' value='blocked'>blocked</option></select></td></tr>
+</table>
+<script>
+document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
+</script>'''.encode('utf8'))
+                else:
+                    self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{'THIS DEVICE: ' if cookie==self.my_cookies['code'].value else ''}{parsed_ua}<br />Last active: {latest.date()}</td><td class='status'>
 <select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
 <option id='{cookie}_verified' value='verified'>verified</option>
