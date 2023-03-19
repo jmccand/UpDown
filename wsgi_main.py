@@ -632,7 +632,7 @@ form {
 }
 table.device {
   position: relative;
-  top: 50px;
+  top: 20px;
   width: 90%;
   left: 5%;
   box-sizing: border-box;
@@ -657,11 +657,24 @@ td.status {
 select.status_drop {
   font-size: 20px;
 }
+div#aggregate_ip {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  font-size: 20px;
+}
+input#aggregate_checkbox {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  top: 3px;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write(f'''<form method='GET' action='/verification'><input type='hidden' name='verification_id' value='{verification_ID}' />'''.encode('utf8'))
+            self.wfile.write(f'''<form id='form' method='GET' action='/verification'><input type='hidden' name='verification_id' value='{verification_ID}' />'''.encode('utf8'))
             my_email = db.verification_links[verification_ID]
             id_list = []
             for ID, user in db.user_ids.items():
@@ -709,6 +722,15 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 <script>
 document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 </script>'''.encode('utf8'))
+            aggregate_checkbox = url_arguments.get('aggregate_ip', [None])[0]
+            if len(url_arguments) == 1:
+                aggregate_checkbox = 'yes'
+            if aggregate_checkbox == 'yes':
+                self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()' checked='true'/>
+Aggregate IP</div>'''.encode('utf8'))
+            else:
+                self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()'/>
+Aggregate IP</div>'''.encode('utf8'))
             self.wfile.write('''</form></body></html>'''.encode('utf8'))
                 
     def opinions_page(self):
