@@ -691,11 +691,12 @@ input#aggregate_checkbox {
                     id_list.append(ID)
             cookie_list = []
             def last_active(cookie):
-                latest = None
+                latest = datetime.datetime.combine(local.LAUNCH_DATE, datetime.datetime.min.time())
                 cookie_account = db.user_ids[db.cookie_database[cookie][0]]
                 for active_date, user_activity in cookie_account.activity.items():
                     for activity_unit in user_activity:
-                        if activity_unit[1] == cookie:
+                        if activity_unit[1] == cookie and activity_unit[2] not in ('verified', 'blocked'):
+                            print(f'successful activity unit: {activity_unit}')
                             if latest == None or activity_unit[-1] > latest:
                                 latest = activity_unit[-1]
                 return latest
@@ -788,6 +789,7 @@ document.getElementById("{cookie_list}_{compiled_verification}").selected = 'tru
                 self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()' checked='true'/>
 Aggregate by IP</div>'''.encode('utf8'))
             self.wfile.write('''</form></body></html>'''.encode('utf8'))
+            self.log_activity()
                 
     def opinions_page(self):
         reset_cookie = False
