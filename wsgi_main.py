@@ -616,10 +616,19 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
                 for cookie_key, arg_list in url_arguments.items():
                     if cookie_key != 'verification_id':
                         if arg_list[0] in ('verified', 'blocked', 'unsure'):
-                            if arg_list[0] == 'verified':
-                                verify_device(cookie_key)
-                            elif arg_list[0] == 'blocked':
-                                block_device(cookie_key)
+                            if '#' in cookie_key:
+                                cookie_list = cookie_key.split('#')
+                                if arg_list[0] == 'verified':
+                                    for cookie_k in cookie_list:
+                                        verify_device(cookie_k)
+                                elif arg_list[0] == 'blocked':
+                                    for cookie_k in cookie_list:
+                                        block_device(cookie_k)
+                            else:
+                                if arg_list[0] == 'verified':
+                                    verify_device(cookie_key)
+                                elif arg_list[0] == 'blocked':
+                                    block_device(cookie_key)
             # send response
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
@@ -695,13 +704,17 @@ input#aggregate_checkbox {
                 if ID in id_list:
                     cookie_list.append((cookie, last_active(cookie)))
             cookie_list.sort(key=lambda x: x[1], reverse=True)
-            for cookie, latest in cookie_list:
-                ip_address, parsed_ua = db.device_info[cookie]
-                ip_address = ip_address[0]
-                my_verified_result = db.cookie_database[cookie][1]
-                ipapi_response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
-                if ipapi_response.get('country_name') != None:
-                    self.wfile.write(f'''<table class='device'>
+            aggregate_checkbox = url_arguments.get('aggregate_ip', [None])[0]
+            if len(url_arguments) == 1:
+                aggregate_checkbox = 'yes'
+            if aggregate_checkbox != 'yes':
+                for cookie, latest in cookie_list:
+                    ip_address, parsed_ua = db.device_info[cookie]
+                    ip_address = ip_address[0]
+                    my_verified_result = db.cookie_database[cookie][1]
+                    ipapi_response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+                    if ipapi_response.get('country_name') != None:
+                        self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{'THIS DEVICE: ' if cookie==self.my_cookies['code'].value else ''}{parsed_ua}<br />{ipapi_response.get('city')}, {ipapi_response.get('region')}, {ipapi_response.get('country_name')}<br />Last active: {latest.date()}</td><td class='status'>
 <select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
 <option id='{cookie}_verified' value='verified'>verified</option>
@@ -711,8 +724,8 @@ input#aggregate_checkbox {
 <script>
 document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 </script>'''.encode('utf8'))
-                else:
-                    self.wfile.write(f'''<table class='device'>
+                    else:
+                        self.wfile.write(f'''<table class='device'>
 <tr><td class='session_info'>{'THIS DEVICE: ' if cookie==self.my_cookies['code'].value else ''}{parsed_ua}<br />Last active: {latest.date()}</td><td class='status'>
 <select class='status_drop' name='{cookie}' onchange='this.form.submit()'>
 <option id='{cookie}_verified' value='verified'>verified</option>
@@ -722,14 +735,59 @@ document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 <script>
 document.getElementById('{cookie}_{my_verified_result}').selected = 'true';
 </script>'''.encode('utf8'))
-            aggregate_checkbox = url_arguments.get('aggregate_ip', [None])[0]
-            if len(url_arguments) == 1:
-                aggregate_checkbox = 'yes'
-            if aggregate_checkbox == 'yes':
-                self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()' checked='true'/>
+                self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()'/>
 Aggregate IP</div>'''.encode('utf8'))
             else:
+                ip_dictionary = {}
+                for cookie, latest in cookie_list:
+                    ip_address, parsed_ua = db.device_info[cookie]
+                    ip_address = ip_address[0]
+                    if ip_address in ip_dictionary:
+                        ip_dictionary[ip_address].append((cookie, latest))
+                    else:
+                        ip_dictionary[ip_address] = [(cookie, latest)]
+                for ip_address, cookie_latest_list in ip_dictionary.items():
+                    parsed_ua = db.device_info[cookie_latest_list[0][0]][1]
+                    latest = cookie_latest_list[0][1]
+                    cookie_list = list(x[0] for x in cookie_latest_list)
+                    cookie_list = '#'.join(cookie_list)
+                    compiled_verification = None
+                    last_verified_result = None
+                    for cookie, latest in cookie_latest_list:
+                        my_verified_result = db.cookie_database[cookie][1]
+                        if last_verified_result == None:
+                            last_verified_result = my_verified_result
+                        if my_verified_result != last_verified_result:
+                            compiled_verification = 'unsure'
+                            break
+                    if compiled_verification == None:
+                        compiled_verification = last_verified_result
+                    ipapi_response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+                    if ipapi_response.get('country_name') != None:
+                        self.wfile.write(f'''<table class='device'>
+<tr><td class='session_info'>{parsed_ua}<br />{ipapi_response.get('city')}, {ipapi_response.get('region')}, {ipapi_response.get('country_name')}<br />Last active: {latest.date()}</td><td class='status'>
+<select class='status_drop' name="{cookie_list}" onchange='this.form.submit()'>
+<option id="{cookie_list}_verified" value='verified'>verified</option>
+<option id="{cookie_list}_unsure" value='unsure' disabled='true'>unsure</option>
+<option id="{cookie_list}_blocked" value='blocked'>blocked</option></select></td></tr>
+</table>
+<script>
+document.getElementById("{cookie_list}_{compiled_verification}").selected = 'true';
+</script>'''.encode('utf8'))
+                    else:
+                        self.wfile.write(f'''<table class='device'>
+<tr><td class='session_info'>{parsed_ua}<br />Last active: {latest.date()}</td><td class='status'>
+<select class='status_drop' name="{cookie_list}" onchange='this.form.submit()'>
+<option id="{cookie_list}_verified" value='verified'>verified</option>
+<option id="{cookie_list}_unsure" value='unsure' disabled='true'>unsure</option>
+<option id="{cookie_list}_blocked" value='blocked'>blocked</option></select></td></tr>
+</table>
+<script>
+document.getElementById("{cookie_list}_{compiled_verification}").selected = 'true';
+</script>'''.encode('utf8'))
                 self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()'/>
+Aggregate IP</div>'''.encode('utf8'))
+                self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()' checked='true'/>
 Aggregate IP</div>'''.encode('utf8'))
             self.wfile.write('''</form></body></html>'''.encode('utf8'))
                 
@@ -3904,7 +3962,7 @@ def auto_schedule():
                         seconds_sum += seconds_passed
                         ages.append((seconds_passed, opinion_ID))
             compiled_set = db.opinions_calendar.get(str(next_due_date), set())
-            compiled_set = list(str(x) for x in compiled_set)
+            compiled_set = set(str(x) for x in compiled_set)
 
             if len(compiled_set) + len(ages) <= 10:
                 for age_secs, opinion_ID in ages:
