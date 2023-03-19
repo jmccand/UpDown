@@ -66,7 +66,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png'):
             self.path_root = '/get_email'
             self.get_email()
         else:
@@ -74,7 +74,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png'):
+                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png'):
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -1563,7 +1563,7 @@ form {
   position: absolute;
   top: 100px;
   width: 92%;
-  height: 130px;
+  height: 30%;
   left: 4%;
   font-size: 25px;
   padding: 6%;
@@ -1578,6 +1578,12 @@ input {
   top: 15px;
   width: 97%;
   font-size: 20px;
+}
+img#submit_button {
+  position: absolute;
+  width: 20%;
+  left: 40%;
+  top: 120px;
 }
 div#similar_message {
   position: absolute;
@@ -1608,6 +1614,7 @@ section {
   border-radius: 6px;
   box-sizing: border-box;
 }
+
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1616,6 +1623,7 @@ section {
         self.wfile.write('''<form method='GET' action='/submit_opinions'>
 Enter your opinion below:<br />
 <input type='text' id='opinion' name='opinion_text'/>
+<img id='submit_button' src='submit_arrow.png' onclick='this.parentElement.submit()'/>
 </form>
 <div id='similar_message'>
 Similar opinions
@@ -3954,7 +3962,7 @@ def auto_schedule():
             seconds_sum = 0
             approved_set = set()
             for opinion_ID, opinion in db.opinions_database.items():
-                if not smart_opinion_in(approved_set, opinion_ID):
+                if opinion.approved == True and not smart_opinion_in(approved_set, opinion_ID):
                     approved_set.add(opinion_ID)
                     if not opinion.scheduled:
                         creation_date = opinion.activity[0][-1]
