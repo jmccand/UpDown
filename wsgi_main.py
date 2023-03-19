@@ -785,10 +785,8 @@ document.getElementById("{cookie_list}_{compiled_verification}").selected = 'tru
 <script>
 document.getElementById("{cookie_list}_{compiled_verification}").selected = 'true';
 </script>'''.encode('utf8'))
-                self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()'/>
-Aggregate IP</div>'''.encode('utf8'))
                 self.wfile.write('''<div id='aggregate_ip'><input id='aggregate_checkbox' type='checkbox' name='aggregate_ip' value='yes' onchange='this.form.submit()' checked='true'/>
-Aggregate IP</div>'''.encode('utf8'))
+Aggregate by IP</div>'''.encode('utf8'))
             self.wfile.write('''</form></body></html>'''.encode('utf8'))
                 
     def opinions_page(self):
