@@ -1559,11 +1559,44 @@ if ('serviceWorker' in navigator) {{
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
+div#opinion_supply {
+  position: fixed;
+  top: 90px;
+  left: 4%;
+  width: 44%;
+  height: 100px;
+  padding: 3%;
+  box-sizing: border-box;
+  border: 3px solid black;
+  border-radius: 20px;
+  background-color: #ffef90ff;
+  text-align: left;
+}
+table#counter_table {
+  position: fixed;
+  top: 90px;
+  right: 4%;
+  width: 44%;
+  height: 100px;
+  padding: 3%;
+  box-sizing: border-box;
+  border: 3px solid black;
+  border-radius: 20px;
+  text-align: center;
+}
+td#counter {
+  background-color: white;
+  font-size: 36px;
+}
+td#days {
+  writing-mode: sideways-lr;
+  background-color: #d9d9d9ff;
+}
 form {
-  position: absolute;
-  top: 100px;
+  position: fixed;
+  top: 210px;
   width: 92%;
-  height: 30%;
+  height: 36%;
   left: 4%;
   font-size: 25px;
   padding: 6%;
