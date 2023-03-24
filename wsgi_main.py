@@ -66,7 +66,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png'):
             self.path_root = '/get_email'
             self.get_email()
         else:
@@ -74,7 +74,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png'):
+                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png'):
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -1193,7 +1193,7 @@ article.opinion {
   background-color: #ffef90ff;
   box-sizing: border-box;
 }
-div#counter {
+div.counter {
   position: absolute;
   top: 0;
   font-size: 25px;
@@ -1280,7 +1280,7 @@ img.stamp_icon {
                 else:
                     my_votes.append('abstain')
                 self.wfile.write(f'''<article class='opinion' style='left: {.2+10*index}%'>
-<div id='counter'>
+<div class='counter'>
 Opinion #{index + 1}
 </div>
 <section id='opinion_text'>
@@ -1572,7 +1572,7 @@ div#opinion_supply {
   background-color: #ffef90ff;
   text-align: left;
 }
-table#counter_table {
+div#counter_div {
   position: fixed;
   top: 90px;
   right: 4%;
@@ -1584,11 +1584,11 @@ table#counter_table {
   border-radius: 20px;
   text-align: center;
 }
-td#counter {
+div#counter {
   background-color: white;
   font-size: 36px;
 }
-td#days {
+div#days {
   writing-mode: sideways-lr;
   background-color: #d9d9d9ff;
 }
@@ -1606,94 +1606,106 @@ form {
   text-align: center;
   background-color: #ffef90ff;
 }
-input {
+div#entry_box {
   position: relative;
   top: 15px;
   width: 97%;
+  height: 120px;
+}
+textarea#opinion_text {
+  height: 100%;
+  width: 80%;
   font-size: 20px;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 15px;
+}
+div#submit_holder {
+  height: 100%;
+  width: 20%;
+  background-color: #6d9eebff;
 }
 img#submit_button {
   position: absolute;
-  width: 20%;
-  left: 40%;
-  top: 120px;
+  width: 90%;
+  left: 5%;
+  top: 50%;
+  transform: translate(50%, 0);
 }
-div#similar_message {
-  position: absolute;
-  top: 250px;
-  height: 45px;
-  font-size: 25px;
-  width: 100%;
-  padding: 3%;
-  box-sizing: border-box;
-}
-article {
-  position: absolute;
-  top: 305px;
-  bottom: 0;
-  width: 100%;
-  font-size: 25px;
-  padding: 3%;
-  box-sizing: border-box;
-}
-section {
-  width: 98%;
-  margin: 1%;
-  margin-bottom: 4%;
-  padding: 3%;
-  position: relative;
-  background-color: #cfe2f3ff;
+article#similar {
+  position: fixed;
+  height: 25%;
+  width: 96%;
+  leftL 2%l
+  bottom: 80px;
   z-index: 1;
-  border-radius: 6px;
+  border-radius: 30px;
+  border: 3px solid black;
+  background-color: #ffef90ff;
   box-sizing: border-box;
 }
-
+div#similar_label {
+  position: absolute;
+  top: 0;
+  font-size: 25px;
+  padding: 5px;
+  border-bottom: 2px solid black;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+p#similar_text {
+  margin: 0;
+  position: absolute;
+  padding: 10px;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
         self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
         self.wfile.write('''<form method='GET' action='/submit_opinions'>
-Enter your opinion below:<br />
-<input type='text' id='opinion' name='opinion_text'/>
-<img id='submit_button' src='submit_arrow.png' onclick='this.parentElement.submit()'/>
-</form>
-<div id='similar_message'>
-Similar opinions
-<span style='font-size: 12px; width: 100%; text-align: center'>* identical ones will be rejected *</span>
+UpDown needs your help to continue running!<br />
+<div id='entry_box'>
+<textarea id='opinion_text' placeholder='Please enter your opinion here!'>
+</textarea>
+<div id='submit_holder'>
+<img src='submit_button.png' onclick='this.parentElement.submit()'/>
 </div>
-<article id='results'>
-Similar opinions will display here.
+</div>
+</form>
+<article id='similar'>
+<div id='similar_label'>
+<span style='font-size: 16px'>Closest Relative</span><br />
+<span style='font-size: 11px'>Identical twins may be rejected</span>
+</div>
+<p id='similar_text'>
+</p>
 </article>
 <script>
 var old_opinion;
 setInterval(updateSearch, 1000);
 function updateSearch() {
-    let current_opinion = document.getElementById('opinion').value;
+    let current_opinion = document.getElementById('opinion_text').value;
     if (current_opinion != old_opinion) {
-        let results = document.getElementById('results');
-        if (current_opinion == '') {
-            results.innerHTML = 'Similar opinions will display here.';
-        }
-        else {
+        if (current_opinion != '') {
             var xhttp = new XMLHttpRequest();
             xhttp.open('GET', '/submit_opinion_search?text=' + current_opinion);
             xhttp.send();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var response = JSON.parse(this.responseText);
-                    let search_results = response;
-                    if (search_results.length == 0) {
-                        results.innerHTML = 'No similar opinions.';
-                    }
-                    else {
-                        results.innerHTML = '';
-                        for (var index = 0; index < search_results.length; index++) {
-                            results.innerHTML += '<section>' + search_results[index] + '</section>';
-                        }
-                    }
+                    var similar_text = JSON.parse(this.responseText);
+                    document.getElementById('similar_text').innerHTML = similar_text;
                 }
             };
+        }
+        else {
+            document.getElementById('similar_text').innerHTML = '';
         }
     }
     old_opinion = current_opinion;
@@ -3662,9 +3674,11 @@ function editBill(mark_resolved) {{
         url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'text' in url_arguments:
             opinions = search(url_arguments['text'][0])
-            opinions_text = [db.opinions_database[str(opinion_ID)].text for opinion_ID in opinions]
+            opinions_text = ''
+            if len(opinions) > 0:
+                opinions_text = db.opinions_database[str(opinions[0])].text
             self.start_response('200 OK', [])
-            self.wfile.write(json.dumps(opinions_text[:5]).encode('utf8'))
+            self.wfile.write(json.dumps(opinions_text).encode('utf8'))
             
     def approve_opinion_search(self):
         my_account = self.identify_user()
