@@ -1594,7 +1594,7 @@ div#days {
 }
 form {
   position: fixed;
-  top: 210px;
+  top: 160px;
   width: 92%;
   height: 36%;
   left: 4%;
@@ -1607,52 +1607,65 @@ form {
   background-color: #ffef90ff;
 }
 div#entry_box {
-  position: relative;
-  top: 15px;
-  width: 97%;
+  position: absolute;
+  top: 95px;
+  width: 92%;
+  left: 4%;
   height: 120px;
 }
 textarea#opinion_text {
+  position: absolute;
   height: 100%;
-  width: 80%;
+  width: 85%;
+  left: 0;
   font-size: 20px;
   text-align: center;
   box-sizing: border-box;
   padding: 15px;
+  border-radius: 15px 0 0 15px;
 }
 div#submit_holder {
+  position: absolute;
+  top: 0;
+  right: 0;
   height: 100%;
-  width: 20%;
+  width: 15%;
   background-color: #6d9eebff;
+  border-radius: 0 15px 15px 0;
 }
 img#submit_button {
   position: absolute;
-  width: 90%;
-  left: 5%;
+  width: 80%;
+  left: 10%;
   top: 50%;
-  transform: translate(50%, 0);
+  transform: translate(0, -50%);
 }
 article#similar {
   position: fixed;
   height: 25%;
-  width: 96%;
-  leftL 2%l
+  width: 92%;
+  left: 4%;
   bottom: 80px;
   z-index: 1;
   border-radius: 30px;
   border: 3px solid black;
-  background-color: #ffef90ff;
   box-sizing: border-box;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  background-color: white;
 }
 div#similar_label {
   position: absolute;
   top: 0;
   font-size: 25px;
-  padding: 5px;
+  padding-top: 15px;
+  padding-bottom: 5px;
   border-bottom: 2px solid black;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
+  background-color: #ffef90ff;
+  border-radius: 27px 27px 0 0;
+  line-height: 20px;
 }
 p#similar_text {
   margin: 0;
@@ -1674,15 +1687,15 @@ UpDown needs your help to continue running!<br />
 <div id='entry_box'>
 <textarea id='opinion_text' placeholder='Please enter your opinion here!'>
 </textarea>
-<div id='submit_holder'>
-<img src='submit_button.png' onclick='this.parentElement.submit()'/>
+<div id='submit_holder' onclick='this.parentElement.parentElement.submit()'>
+<img id='submit_button' src='submit_button.png'/>
 </div>
 </div>
 </form>
 <article id='similar'>
 <div id='similar_label'>
-<span style='font-size: 16px'>Closest Relative</span><br />
-<span style='font-size: 11px'>Identical twins may be rejected</span>
+<span style='font-size: 24px'>Closest Relative</span><br />
+<span style='font-size: 16px'>Identical twins may be rejected</span>
 </div>
 <p id='similar_text'>
 </p>
