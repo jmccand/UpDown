@@ -1685,7 +1685,7 @@ p#similar_text {
         self.wfile.write('''<form method='GET' action='/submit_opinions'>
 UpDown needs your help to continue running!<br />
 <div id='entry_box'>
-<textarea id='opinion_text' placeholder='Please enter your opinion here!'>
+<textarea id='opinion_text' name='opinion_text' placeholder='Please enter your opinion here!'>
 </textarea>
 <div id='submit_holder' onclick='this.parentElement.parentElement.submit()'>
 <img id='submit_button' src='submit_button.png'/>
