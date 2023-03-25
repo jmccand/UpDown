@@ -1554,6 +1554,26 @@ if ('serviceWorker' in navigator) {{
         url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'opinion_text' in url_arguments:
             self.submit_opinion(False)
+        unscheduled_approved = 0
+        for opinion_ID, opinion in db.opinions_database.items():
+            if opinion.approved == True and not opinion.scheduled:
+                unscheduled_approved += 1
+        unscheduled_approved = unscheduled_approved // 10
+        next_date = datetime.date.today()
+        if (next_date.weekday() + 1) % 7 < 3:
+            next_date += datetime.timedelta(3 - (next_date.weekday() + 1) % 7)
+        elif (next_date.weekday() + 1) % 7 > 3:
+            next_date += datetime.timedelta(7 - (next_date.weekday() + 1) % 7)
+        else:
+            next_date += datetime.timedelta(1)
+        while unscheduled_approved > 0:
+            if next_date.weekday() == 6:
+                next_date += datetime.timedelta(4)
+            else:
+                assert next_date.weekday() == 3
+                next_date += datetime.timedelta(3)
+            unscheduled_approved -= 10
+                
         self.start_response('200 OK', [])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
@@ -1577,10 +1597,18 @@ div#counter_div {
   height: 130px;
   z-index: 0;
 }
-.center_all {
+p#day_count {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  margin: 0;
+}
+p#supply_label {
+  position: absolute;
+  top: 50%;
+  left: 45%;
   transform: translate(-50%, -50%);
   z-index: 2;
   margin: 0;
@@ -1657,7 +1685,7 @@ div#similar_label {
   position: absolute;
   top: 0;
   font-size: 25px;
-n  padding-top: 15px;
+  padding-top: 15px;
   padding-bottom: 5px;
   border-bottom: 2px solid black;
   width: 100%;
@@ -1683,14 +1711,14 @@ p#similar_text {
         self.send_links_body()
         self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
         self.wfile.write(f'''<div id='opinion_supply'>
-<p class='center_all'>
+<p id='supply_label'>
 Opinion Supply
 </p>
 <img class='full' src='sign.png' />
 </div>
 <div id='counter_div'>
-<p class='center_all'>
-23
+<p id='day_count'>
+{(next_date - datetime.date.today()).days}
 </p>
 <img class='full' src='clock.png' />
 </div>
