@@ -1550,7 +1550,6 @@ if ('serviceWorker' in navigator) {{
         self.log_activity()
         
     def submit_opinions_page(self):
-        print('submit opinions page')
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'opinion_text' in url_arguments:
@@ -1561,36 +1560,37 @@ if ('serviceWorker' in navigator) {{
         self.wfile.write('''<style>
 div#opinion_supply {
   position: fixed;
-  top: 90px;
+  top: 80px;
   left: 4%;
-  width: 44%;
-  height: 100px;
+  width: 66%;
+  height: 70px;
   padding: 3%;
   box-sizing: border-box;
-  border: 3px solid black;
-  border-radius: 20px;
-  background-color: #ffef90ff;
-  text-align: left;
+  text-align: center;
+  z-index: 2;
 }
 div#counter_div {
   position: fixed;
-  top: 90px;
-  right: 4%;
-  width: 44%;
-  height: 100px;
-  padding: 3%;
-  box-sizing: border-box;
-  border: 3px solid black;
-  border-radius: 20px;
-  text-align: center;
+  top: 50px;
+  right: 1%;
+  width: 130px;
+  height: 130px;
+  z-index: 0;
 }
-div#counter {
-  background-color: white;
-  font-size: 36px;
+.center_all {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  margin: 0;
 }
-div#days {
-  writing-mode: sideways-lr;
-  background-color: #d9d9d9ff;
+img.full {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
 }
 form {
   position: fixed;
@@ -1657,7 +1657,7 @@ div#similar_label {
   position: absolute;
   top: 0;
   font-size: 25px;
-  padding-top: 15px;
+n  padding-top: 15px;
   padding-bottom: 5px;
   border-bottom: 2px solid black;
   width: 100%;
@@ -1682,7 +1682,19 @@ p#similar_text {
 <body>'''.encode('utf8'))
         self.send_links_body()
         self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
-        self.wfile.write('''<form method='GET' action='/submit_opinions'>
+        self.wfile.write(f'''<div id='opinion_supply'>
+<p class='center_all'>
+Opinion Supply
+</p>
+<img class='full' src='sign.png' />
+</div>
+<div id='counter_div'>
+<p class='center_all'>
+23
+</p>
+<img class='full' src='clock.png' />
+</div>
+<form method='GET' action='/submit_opinions'>
 UpDown needs your help to continue running!<br />
 <div id='entry_box'>
 <textarea id='opinion_text' name='opinion_text' placeholder='Please enter your opinion here!'>
@@ -1699,8 +1711,8 @@ UpDown needs your help to continue running!<br />
 </div>
 <p id='similar_text'>
 </p>
-</article>
-<script>
+</article>'''.encode('utf8'))
+        self.wfile.write('''<script>
 var old_opinion;
 setInterval(updateSearch, 1000);
 function updateSearch() {
