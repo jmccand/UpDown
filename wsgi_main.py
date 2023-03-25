@@ -1583,18 +1583,18 @@ div#opinion_supply {
   top: 80px;
   left: 4%;
   width: 66%;
-  height: 70px;
-  padding: 3%;
+  height: 80px;
   box-sizing: border-box;
   text-align: center;
   z-index: 2;
+  padding: 0;
 }
 div#counter_div {
   position: fixed;
   top: 50px;
   right: 1%;
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 140px;
   z-index: 0;
 }
 p#day_count {
@@ -1604,6 +1604,8 @@ p#day_count {
   transform: translate(-50%, -50%);
   z-index: 2;
   margin: 0;
+  font-family: Verdana, Helvetica, 'Trebuchet MS', sans-serif, Arial;
+  text-align: center;
 }
 p#supply_label {
   position: absolute;
@@ -1612,6 +1614,9 @@ p#supply_label {
   transform: translate(-50%, -50%);
   z-index: 2;
   margin: 0;
+  font-family: Verdana, Helvetica, 'Trebuchet MS', sans-serif, Arial;
+  font-size: 20px;
+  white-space: nowrap;
 }
 img.full {
   position: absolute;
@@ -1622,7 +1627,7 @@ img.full {
 }
 form {
   position: fixed;
-  top: 160px;
+  top: 170px;
   width: 92%;
   height: 36%;
   left: 4%;
@@ -1639,7 +1644,7 @@ div#entry_box {
   top: 95px;
   width: 92%;
   left: 4%;
-  height: 120px;
+  bottom: 15px;
 }
 textarea#opinion_text {
   position: absolute;
@@ -1678,7 +1683,7 @@ article#similar {
   border-radius: 30px;
   border: 3px solid black;
   box-sizing: border-box;
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  font-family: Verdana, Helvetica, 'Trebuchet MS', sans-serif, Arial;
   background-color: white;
 }
 div#similar_label {
@@ -1718,7 +1723,8 @@ Opinion Supply
 </div>
 <div id='counter_div'>
 <p id='day_count'>
-{(next_date - datetime.date.today()).days}
+<span style='font-size: 36px'>{(next_date - datetime.date.today()).days}</span><br />
+<span style='font-size: 14px'>{'day' if (next_date - datetime.date.today()).days == 1 else 'days'}</span>
 </p>
 <img class='full' src='clock.png' />
 </div>
