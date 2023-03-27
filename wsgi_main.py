@@ -388,7 +388,7 @@ function help() {
         image_type = os.path.splitext(self.path)[1][1:]
         if image_type in ('ico', 'png'):
             image_data = open(self.path[1:], 'rb').read()
-            self.start_response('200 OK', [('content-type', f'image/{image_type}'), ('content-length', str(len(image_data)))])
+            self.start_response('200 OK', [('content-type', f'image/{image_type}'), ('content-length', str(len(image_data))), ('cache-control', 'max-age=126100000')])
             self.wfile.write(image_data)
 
     def load_file(self):
@@ -696,7 +696,6 @@ input#aggregate_checkbox {
                 for active_date, user_activity in cookie_account.activity.items():
                     for activity_unit in user_activity:
                         if activity_unit[1] == cookie and activity_unit[2] not in ('verified', 'blocked'):
-                            print(f'successful activity unit: {activity_unit}')
                             if latest == None or activity_unit[-1] > latest:
                                 latest = activity_unit[-1]
                 return latest
@@ -3115,14 +3114,14 @@ function updateStats(element) {{
         self.send_links_head()
         self.wfile.write('''<style>
 form {
-  position: absolute;
-  top: 90px;
+  position: fixed;
+  top: 80px;
   width: 96%;
   left: 2%;
   bottom: 65%;
   border: 3px solid black;
   box-sizing: border-box;
-  border-radius: 6px;
+  border-radius: 30px 30px 0 0;
   background-color: #ffef90ff;
 }
 #search_bar {
@@ -3136,8 +3135,8 @@ form {
   padding-left: 10px;
   padding-right: 10px;
   border: 1px solid black;
-  border-radius: 20px;
   box-sizing: border-box;
+  border-radius: 20px;
 }
 form table {
   position: absolute;
@@ -3153,14 +3152,15 @@ form td {
   padding: 5px;
 }
 article#results {
-  position: absolute;
-  bottom: 3%;
-  top: 38%;
+  position: fixed;
+  bottom: 10%;
+  top: 35%;
   width: 96%;
   left: 2%;
   overflow: scroll;
   border: 3px solid black;
-  border-radius: 6px;
+  border-radius: 0 0 30px 30px;
+  border-top: 0;
   box-sizing: border-box;
   background-color: gray;
 }
@@ -3191,8 +3191,8 @@ select {
   font-size: 20px;
 }
 article#view_popup {
-  position: absolute;
-  top: 90px;
+  position: fixed;
+  top: 80px;
   bottom: 3%;
   border: 3px solid black;
   border-radius: 6px;
@@ -3219,6 +3219,7 @@ div#reserved_header {
   text-align: center;
   background-color: #ffef90ff;
   box-sizing: border-box;
+  border-radius: 3px 3px 0 0;
   border-bottom: 2px solid black;
 }
 #reserved_for {
@@ -3241,6 +3242,7 @@ div#opinion_text {
 #opinion_text p {
   position: absolute;
   margin: 0;
+  padding: 15px;
   top: 50%;
   left: 50%;
   margin-right: -50%;
