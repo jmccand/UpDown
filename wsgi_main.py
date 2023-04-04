@@ -370,7 +370,7 @@ function help() {
 
     def log_activity(self, what=[]):
         my_account = self.identify_user()
-        activity_unit = [self.path_root, self.my_cookies['code'].value] + what + [datetime.datetime.now()]
+        activity_unit = [self.path_root, (self.my_cookies['code'].value, self.client_address, user_agents.parse(self.http_user_agent))] + what + [datetime.datetime.now()]
         if datetime.date.today() in my_account.activity:
             my_account.activity[datetime.date.today()].append(tuple(activity_unit))
         else:
