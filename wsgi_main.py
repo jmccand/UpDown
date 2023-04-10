@@ -3946,14 +3946,18 @@ class invalidCookie(ValueError):
         super().__init__(message)
 
 def run_and_sync(lock_needed, change, database, check_corrupt=True):
+    print(f'start sync {datetime.datetime.now()}')
     lock_needed.acquire()
     try:
         returns = change()
         if check_corrupt:
+            print('start corruption {datetime.datetime.now()}')
             db_corruption.check_corruption((db.user_ids, db.opinions_database, db.cookie_database, db.verification_links, db.opinions_calendar, db.device_info))
+            print('end corruption {{datetime.datetime.now()}')
         return returns
     finally:
         lock_needed.release()
+        print(f'end sync {datetime.datetime.now()}')
             
 def simplify_text(text):
     split_text = re.split('''\W+''', text)
