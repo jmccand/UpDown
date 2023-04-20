@@ -1256,13 +1256,15 @@ img.stamp_icon {
 div.help_box {
   position: fixed;
   z-index: 4;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
 div.help_text {
   position: absolute;
-  border: 2px solid black;
-  border-radius: 10px;
-  padding: 8px;
-  background-color: white;
+  border: 3px dashed black;
+  border-radius: 20px;;
+  padding: 12px;
+  background-color: #e0e0e0;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
   text-align: center;
 }
@@ -1333,9 +1335,9 @@ Opinion #{index + 1}
                     self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
                     
             if verified_result == 'verified':
-                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=130, width=300)
+                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=110, width=300)
             else:
-                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=165, width=300)
+                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=145, width=300)
             
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
