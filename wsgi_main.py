@@ -1253,6 +1253,30 @@ img.stamp_icon {
   top: 150px;
   width: 10%;
 }
+div.help_box {
+  position: fixed;
+  z-index: 4;
+}
+div.help_text {
+  position: absolute;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 8px;
+  background-color: white;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  text-align: center;
+}
+div.help_up {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 15px solid black;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1308,7 +1332,11 @@ Opinion #{index + 1}
                 else:
                     self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
                     
-
+            if verified_result == 'verified':
+                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=130, width=300)
+            else:
+                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=165, width=300)
+            
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
 const opinion_texts = {opinion_texts};
@@ -1316,6 +1344,7 @@ let votes = {my_votes};
 let current_index = 0;
 let current_translation = 0;
 let already_changed = false;
+let open_help = null;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
@@ -1518,6 +1547,19 @@ function change(i) {{
     current_index = newIndex;
     current_translation = target;
     already_changed = true;
+}}
+function manageHelp(newId) {{
+    if (open_help != null && open_help != newId) {{
+        document.getElementById(open_help).display = 'none';
+        document.getElementById(newId).display = 'initial';
+        open_help = newId;
+    }}
+}}
+function clearHelp() {{
+    if (open_help != null) {{
+        document.getElementById(open_help).display = 'none';
+        open_help = newId;
+    }}
 }}
 </script>
 '''.encode('utf8'))
@@ -3940,7 +3982,11 @@ td {
             self.log_activity()
         else:
             self.start_response('400 BAD REQUEST', [])
-                                
+
+    def send_help_box(self, element_id, text, top=0, width=100, point='top'):
+        arrow_height = 15
+        if point == 'top':
+            self.wfile.write(f'''<div id='{element_id}' class='help_box' style='top: {top}px; width: {width}px'><div class='help_text' style='top: {arrow_height}px'>{text}</div><div class='help_up'></div></div>'''.encode('utf8'))    
 
                     
 class invalidCookie(ValueError):
