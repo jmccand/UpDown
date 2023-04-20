@@ -808,6 +808,7 @@ Aggregate by IP</div>'''.encode('utf8'))
         
         see_day = None
         today_date = datetime.date.today()
+        print(f'today weekday: {today_date.weekday()}')
         if (today_date.weekday() + 1) % 7 < 3:
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
         elif (today_date.weekday() + 1) % 7 > 3:
@@ -4053,89 +4054,90 @@ def auto_schedule():
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
         else:
             see_day = today_date
-        next_due_date = None
-        if len(db.opinions_calendar.get(str(see_day), set())) < 10:
-            next_due_date = see_day
-        else:
-            if (see_day.weekday() + 1) % 7 < 3:
-                next_due_date = see_day + datetime.timedelta(days=4)
+        if see_day.weekday() != 2:
+            next_due_date = None
+            if len(db.opinions_calendar.get(str(see_day), set())) < 10:
+                next_due_date = see_day
             else:
-                next_due_date = see_day + datetime.timedelta(days=3)
-            # convert next due date to datetime
-        next_due_time = datetime.datetime.combine(next_due_date, datetime.datetime.min.time())
-
-        def smart_opinion_in(collection, opinion_ID):
-            for check_ID in collection:
-                if db.opinions_database[check_ID].text == db.opinions_database[opinion_ID].text:
-                    return True
-            return False
-        
-        if datetime.datetime.now() + datetime.timedelta(seconds=0.5) > next_due_time:
-            ages = []
-            seconds_sum = 0
-            approved_set = set()
-            for opinion_ID, opinion in db.opinions_database.items():
-                if opinion.approved == True and not smart_opinion_in(approved_set, opinion_ID):
-                    approved_set.add(opinion_ID)
-                    if not opinion.scheduled:
-                        creation_date = opinion.activity[0][-1]
-                        seconds_passed = (datetime.datetime.now() - creation_date).total_seconds()
-                        seconds_sum += seconds_passed
-                        ages.append((seconds_passed, opinion_ID))
-            compiled_set = db.opinions_calendar.get(str(next_due_date), set())
-            compiled_set = set(str(x) for x in compiled_set)
-
-            if len(compiled_set) + len(ages) <= 10:
-                for age_secs, opinion_ID in ages:
-                    compiled_set.add(opinion_ID)
-                # make sure no infinite loop
-                if len(approved_set) > 10:
-                    while len(compiled_set) < 10:
-                        new_random = random.choice(list(db.opinions_database.keys()))
-                        copy_opinion = db.opinions_database[new_random]
-                        if new_random not in compiled_set and copy_opinion.approved == True:
-                            def update_opinions_database():
-                                new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
-                                db.opinions_database[str(new_opinion.ID)] = new_opinion
-                                return new_opinion.ID
-                            new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
-                            compiled_set.add(str(new_opinion_id))
+                if (see_day.weekday() + 1) % 7 < 3:
+                    next_due_date = see_day + datetime.timedelta(days=4)
                 else:
-                    for opinion_ID in list(db.opinions_database.keys()):
-                        copy_opinion = db.opinions_database[opinion_ID]
-                        if not smart_opinion_in(compiled_set, opinion_ID) and copy_opinion.approved == True:
-                            def update_opinions_database():
-                                new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
-                                db.opinions_database[str(new_opinion.ID)] = new_opinion
-                                return new_opinion.ID
-                            new_opinion_id = run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
-                            compiled_set.add(str(new_opinion_id))
-                    
-            else:
-                while len(compiled_set) < 10:
-                    # reset remaining count
-                    remaining = random.random()
-                    remaining *= seconds_sum
-                    opinion_index = 0
-                    while remaining > 0 and opinion_index < len(ages):
-                        remaining -= ages[opinion_index][0]
-                        opinion_index += 1
-                    if ages[opinion_index - 1][1] not in compiled_set:
-                        compiled_set.add(ages[opinion_index - 1][1])
+                    next_due_date = see_day + datetime.timedelta(days=3)
+                # convert next due date to datetime
+            next_due_time = datetime.datetime.combine(next_due_date, datetime.datetime.min.time())
 
-            with db.opinions_calendar_lock:
-                db.opinions_calendar[str(next_due_date)] = compiled_set
-                db.opinions_calendar.sync()
+            def smart_opinion_in(collection, opinion_ID):
+                for check_ID in collection:
+                    if db.opinions_database[check_ID].text == db.opinions_database[opinion_ID].text:
+                        return True
+                return False
 
-            for opinion_ID in compiled_set:
-                opinion = db.opinions_database[opinion_ID]
-                if not opinion.scheduled:
-                    assert len(opinion.activity) == 2
-                    opinion.activity.append([(next_due_date, datetime.datetime.now())])
-                    opinion.scheduled = True
-                    with db.opinions_database_lock:
-                        db.opinions_database[opinion_ID] = opinion
-                        db.opinions_database.sync()
+            if datetime.datetime.now() + datetime.timedelta(seconds=0.5) > next_due_time:
+                ages = []
+                seconds_sum = 0
+                approved_set = set()
+                for opinion_ID, opinion in db.opinions_database.items():
+                    if opinion.approved == True and not smart_opinion_in(approved_set, opinion_ID):
+                        approved_set.add(opinion_ID)
+                        if not opinion.scheduled:
+                            creation_date = opinion.activity[0][-1]
+                            seconds_passed = (datetime.datetime.now() - creation_date).total_seconds()
+                            seconds_sum += seconds_passed
+                            ages.append((seconds_passed, opinion_ID))
+                compiled_set = db.opinions_calendar.get(str(next_due_date), set())
+                compiled_set = set(str(x) for x in compiled_set)
+
+                if len(compiled_set) + len(ages) <= 10:
+                    for age_secs, opinion_ID in ages:
+                        compiled_set.add(opinion_ID)
+                    # make sure no infinite loop
+                    if len(approved_set) > 10:
+                        while len(compiled_set) < 10:
+                            new_random = random.choice(list(db.opinions_database.keys()))
+                            copy_opinion = db.opinions_database[new_random]
+                            if new_random not in compiled_set and copy_opinion.approved == True:
+                                def update_opinions_database():
+                                    new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
+                                    db.opinions_database[str(new_opinion.ID)] = new_opinion
+                                    return new_opinion.ID
+                                new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
+                                compiled_set.add(str(new_opinion_id))
+                    else:
+                        for opinion_ID in list(db.opinions_database.keys()):
+                            copy_opinion = db.opinions_database[opinion_ID]
+                            if not smart_opinion_in(compiled_set, opinion_ID) and copy_opinion.approved == True:
+                                def update_opinions_database():
+                                    new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
+                                    db.opinions_database[str(new_opinion.ID)] = new_opinion
+                                    return new_opinion.ID
+                                new_opinion_id = run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
+                                compiled_set.add(str(new_opinion_id))
+
+                else:
+                    while len(compiled_set) < 10:
+                        # reset remaining count
+                        remaining = random.random()
+                        remaining *= seconds_sum
+                        opinion_index = 0
+                        while remaining > 0 and opinion_index < len(ages):
+                            remaining -= ages[opinion_index][0]
+                            opinion_index += 1
+                        if ages[opinion_index - 1][1] not in compiled_set:
+                            compiled_set.add(ages[opinion_index - 1][1])
+
+                with db.opinions_calendar_lock:
+                    db.opinions_calendar[str(next_due_date)] = compiled_set
+                    db.opinions_calendar.sync()
+
+                for opinion_ID in compiled_set:
+                    opinion = db.opinions_database[opinion_ID]
+                    if not opinion.scheduled:
+                        assert len(opinion.activity) == 2
+                        opinion.activity.append([(next_due_date, datetime.datetime.now())])
+                        opinion.scheduled = True
+                        with db.opinions_database_lock:
+                            db.opinions_database[opinion_ID] = opinion
+                            db.opinions_database.sync()
 
 def reserve_count(committee):
     cur_count = 0
