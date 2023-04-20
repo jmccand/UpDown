@@ -1284,7 +1284,7 @@ div.help_up {
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
-            self.wfile.write(f'''<article id='ballot_label'>
+            self.wfile.write(f'''<article id='ballot_label' onclick='manageHelp("h_title")'>
 {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
 </article>'''.encode('utf8'))
             
@@ -1328,12 +1328,13 @@ Opinion #{index + 1}
 
             for stamp_number in range(8):
                 if stamp_number < vote_counts[0]:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_title")'/>'''.encode('utf8'))
                 elif stamp_number >= 8 - vote_counts[1]:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_title")'/>'''.encode('utf8'))
                 else:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%'/>'''.encode('utf8'))
-                    
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_title")'/>'''.encode('utf8'))
+
+
             if verified_result == 'verified':
                 self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=110, width=300)
             else:
@@ -1347,6 +1348,7 @@ let current_index = 0;
 let current_translation = 0;
 let already_changed = false;
 let open_help = null;
+let just_switched = false;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
@@ -1385,6 +1387,8 @@ function handleTouchStart(evt) {{
 }}
 
 function handleTouchEnd(evt) {{
+    setTimeout(clearHelp, 100);
+
     if (xStart == null || yStart == null || xEnd == null || yEnd == null) {{
         return;
     }}
@@ -1552,16 +1556,22 @@ function change(i) {{
 }}
 function manageHelp(newId) {{
     if (open_help != null && open_help != newId) {{
-        document.getElementById(open_help).display = 'none';
-        document.getElementById(newId).display = 'initial';
-        open_help = newId;
+        document.getElementById(open_help).style.display = 'none';
     }}
+    if (newId != null && !just_switched) {{
+        document.getElementById(newId).style.display = 'initial';
+        just_switched = true;
+    }}
+    open_help = newId;
+    console.log('open_help = ' + open_help);
 }}
 function clearHelp() {{
-    if (open_help != null) {{
-        document.getElementById(open_help).display = 'none';
-        open_help = newId;
+    console.log('clear help');
+    if (open_help != null && !just_switched) {{
+        document.getElementById(open_help).style.display = 'none';
+        open_help = null;
     }}
+    just_switched = false;
 }}
 </script>
 '''.encode('utf8'))
