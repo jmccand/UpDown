@@ -43,7 +43,7 @@ def application(environ, start_response):
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
-    DEBUG = 0
+    DEBUG = 3
 
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -3975,15 +3975,16 @@ def build_search_index():
     for opinion_ID in range(len(db.opinions_database)):
         opinion = db.opinions_database[str(opinion_ID)]
         search_index_add_opinion(opinion)
-    print(f'{SEARCH_INDEX}')
+    if MyWSGIHandler.DEBUG == 0:
+        print(f'{SEARCH_INDEX}')
 
     search_index_lock.release()
 
 def search_index_add_opinion(opinion):
     search_index_lock.acquire()
     split_text = simplify_text(opinion.text)
-
-    print(f'{opinion.text} -- {split_text}')
+    if MyWSGIHandler.DEBUG == 0:
+        print(f'{opinion.text} -- {split_text}')
 
     for word in split_text:
         if word in SEARCH_INDEX:
