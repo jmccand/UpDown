@@ -348,7 +348,7 @@ header {
             self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
         self.wfile.write('</header>'.encode('utf8'))
         if my_account != None:
-            self.wfile.write('''<img id='help' src='help.png' onclick='help()'/>'''.encode('utf8'))
+            self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h_question")'/>'''.encode('utf8'))
         self.wfile.write('''<script>
 function open_menu() {
     let menu = document.getElementById('menu').style.width = '250px';
@@ -1279,6 +1279,17 @@ div.help_up {
   left: 50%;
   transform: translate(-50%, 0);
 }
+div.help_down {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 15px solid black;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1328,17 +1339,20 @@ Opinion #{index + 1}
 
             for stamp_number in range(8):
                 if stamp_number < vote_counts[0]:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_title")'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_stamps")'/>'''.encode('utf8'))
                 elif stamp_number >= 8 - vote_counts[1]:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_title")'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_stamps")'/>'''.encode('utf8'))
                 else:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_title")'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_stamps")'/>'''.encode('utf8'))
 
 
             if verified_result == 'verified':
                 self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=110, width=300)
             else:
                 self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=145, width=300)
+
+            self.send_help_box('h_stamps', 'These stamps keep track of your 8 available votes and how they are spent. Only possessing a max of 5 up or 5 down stamps, these stamps help you prioritize the opinions you care about.', top=180, width=300)
+            self.send_help_box('h_question', 'Swipe up/down to vote. Swipe left/right to switch between opinions. Double tap to abstain on an opinion.', bottom=50, width=300, point='bottom')
             
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
@@ -1387,7 +1401,7 @@ function handleTouchStart(evt) {{
 }}
 
 function handleTouchEnd(evt) {{
-    setTimeout(clearHelp, 100);
+    setTimeout(clearHelp, 50);
 
     if (xStart == null || yStart == null || xEnd == null || yEnd == null) {{
         return;
@@ -3995,10 +4009,12 @@ td {
         else:
             self.start_response('400 BAD REQUEST', [])
 
-    def send_help_box(self, element_id, text, top=0, width=100, point='top'):
+    def send_help_box(self, element_id, text, top=0, width=100, bottom=0, point='top'):
         arrow_height = 15
         if point == 'top':
-            self.wfile.write(f'''<div id='{element_id}' class='help_box' style='top: {top}px; width: {width}px'><div class='help_text' style='top: {arrow_height}px'>{text}</div><div class='help_up'></div></div>'''.encode('utf8'))    
+            self.wfile.write(f'''<div id='{element_id}' class='help_box' style='top: {top}px; width: {width}px; display: none'><div class='help_text' style='top: {arrow_height}px'>{text}</div><div class='help_up'></div></div>'''.encode('utf8'))
+        elif point == 'bottom':
+            self.wfile.write(f'''<div id='{element_id}' class='help_box' style='bottom: {bottom}px; width: {width}px; display: none'><div class='help_text' style='bottom: {arrow_height}px'>{text}</div><div class='help_down'></div></div>'''.encode('utf8'))
 
                     
 class invalidCookie(ValueError):
