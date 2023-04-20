@@ -29,6 +29,7 @@ from email.mime.text import MIMEText
 import db_corruption
 import math
 import requests
+from waitress import serve
 
 def application(environ, start_response):
     for key, item in environ.items():
@@ -4312,8 +4313,9 @@ def main():
             print(f'  {cookie} : {info}')
 
 
-    httpd = make_server('10.17.4.226', 8888, application)
-    httpd.serve_forever()
+    # httpd = make_server('10.17.4.226', 8888, application)
+    # httpd.serve_forever()
+    serve(application, host='10.17.4.226', port=8888)
 
 logging.basicConfig(filename='UpDown.log', level=logging.DEBUG)
 
