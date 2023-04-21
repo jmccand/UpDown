@@ -267,21 +267,6 @@ header {
   height: 50px;
   z-index: 3;
 }
-#help_box {
-  position: fixed;
-  bottom: 65px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 92%;
-  background-color: white;
-  border: 3px solid black;
-  border-radius: 10px;
-  padding: 2%;
-  display: none;
-  z-index: 3;
-  text-align: center;
-  font-size: 20px;
-}
 #unverified_warning {
   position: fixed;
   top: 70px;
@@ -396,17 +381,6 @@ function open_menu() {
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
-}
-let help_open = false;
-function help() {
-    if (help_open) {
-        document.getElementById('help_box').style.display = 'none';
-        help_open = false;
-    }
-    else {
-        document.getElementById('help_box').style.display = 'initial';
-        help_open = true;
-    }
 }
 function manageHelp(newId) {
     console.log('manage help');
@@ -989,7 +963,7 @@ article#cover div {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<div id='help_box'>Wednesdays are "off days" as the ballot rotates. On Wednesdays, you get the opportunity to check back in on the week's opinions. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
+            self.send_help_box('h_question', '''Wednesdays are "off days" as the ballot rotates. On Wednesdays, you can check back in on the week's opinions. Swipe left/right to move between opinions.''', point='bottom', bottom=50, width=300)
             self.wfile.write('''<div id='highlight_title'>
 </div>
 <footer>
@@ -1317,7 +1291,6 @@ img.stamp_icon {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<div id='help_box'>This page is where you vote on current opinions. Opinions run in half-week cycles, switching on Wednesdays. Swipe up/down to vote. Swipe left/right to move between opinions.</div>'''.encode('utf8'))
             self.wfile.write(f'''<article id='ballot_label' onclick='manageHelp("h_title")'>
 {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
 </article>'''.encode('utf8'))
@@ -1784,7 +1757,6 @@ p#similar_text {
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
         self.send_help_box('h_count', 'This counter shows how long the current number of submitted opinions will be able to fill the ballot, with 10 opinions used bi-weekly.', top=150, width=300, point='top')
         self.send_help_box('h_relative', 'UpDown tries to promote original opinions to sustain an intriguing ballot for users.', point='top', top=480, width=300)
         self.send_help_box('h_question', 'UpDown relies on all users to submit opinions. From small to large issues, your opinions are what makes UpDown special. This is why UpDown maintains your anonymity as you submit opinions.', point='bottom', bottom=50, width=300)
@@ -1940,7 +1912,7 @@ footer {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<div id='help_box'>You use this page to approve opinions. Swipe up/down starting on the lock to approve/reject opinions. Think before you swipe!</div>'''.encode('utf8'))
+            self.send_help_box('h_question', 'Swipe up/down starting on the lock to approve/reject opinions. Think before you swipe!', point='bottom', bottom=50, width=300)
             unapproved_list = []
             for opinion_ID, opinion in db.opinions_database.items():
                 if opinion.approved == None:
@@ -2118,7 +2090,7 @@ article {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<div id='help_box'>Use this page to check out our school Senate!</div>'''.encode('utf8'))
+        self.send_help_box('h_question', "Check out our school Senate!", point='bottom', bottom=50, width=300)
         self.wfile.write('''<div id='back_to_top'><a href='/senate#TOC'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<article>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
@@ -3416,7 +3388,7 @@ div#similar_text {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.wfile.write('''<div id='help_box'>Use this page to track prior opinions and check out statistics about each opinion! You can change what you sort by to check out the most popular opinions in UpDown history!</div>'''.encode('utf8'))
+        self.send_help_box('h_question', 'Track opinions that you care about using the search, sort, and filter options. Clicking on an opinion will give you statistics about it. Find the most popular opinions in UpDown history!', point='bottom', bottom=50, width=300)
 
         keywords = url_arguments.get('words', [''])[0]
         sort_method = url_arguments.get('sort', ['overall'])[0]
@@ -3734,7 +3706,7 @@ button.savebtn {
 </head>
 <body>'''.encode('utf8'))
                 self.send_links_body()
-                self.wfile.write('''<div id='help_box'>This page is dedicated to a specific committee. This is where you can view current opinions your committee has reserved and submit updated bills.</div>'''.encode('utf8'))
+                self.send_help_box('h_question', "Stay up to date on your committee's work by viewing your reserved opinions and submitting updated bills.", point='bottom', bottom=50, width=300)
 
                 data = []
                 for opinion_ID, opinion in db.opinions_database.items():
@@ -3997,7 +3969,7 @@ td {
 </style>'''.encode('utf8'))
             self.wfile.write('</head><body>'.encode('utf8'))
             self.send_links_body()
-            self.wfile.write('''<div id='help_box'>This is where you can view your current community service hours. They always round up!</div>'''.encode('utf8'))
+            self.send_help_box('h_question', 'This is where you can view your current community service hours. They always round up!', point='bottom', bottom=50, width=300)
             self.wfile.write('''<span id='note'>hour:minute:second --> total hours rounded up</span>'''.encode('utf8'))
             self.wfile.write('''<table id='cs'>'''.encode('utf8'))
             if my_account.email in local.COMMUNITY_SERVICE and verified_result == 'verified':
