@@ -294,6 +294,43 @@ header {
   z-index: 1;
   border-bottom: 2px solid black;
 }
+div.help_box {
+  position: fixed;
+  z-index: 4;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+div.help_text {
+  position: absolute;
+  border: 3px dashed black;
+  border-radius: 20px;;
+  padding: 12px;
+  background-color: #e0e0e0;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  text-align: center;
+}
+div.help_up {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 15px solid black;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+div.help_down {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 15px solid black;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
 </style>'''.encode('utf8'))
         
     def send_links_body(self):
@@ -1273,43 +1310,6 @@ img.stamp_icon {
   top: 150px;
   width: 10%;
 }
-div.help_box {
-  position: fixed;
-  z-index: 4;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
-div.help_text {
-  position: absolute;
-  border: 3px dashed black;
-  border-radius: 20px;;
-  padding: 12px;
-  background-color: #e0e0e0;
-  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-  text-align: center;
-}
-div.help_up {
-  width: 0;
-  height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-bottom: 15px solid black;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
-div.help_down {
-  width: 0;
-  height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-top: 15px solid black;
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
 </style>
 </head>
 <body>'''.encode('utf8'))
@@ -1782,13 +1782,14 @@ p#similar_text {
 <body>'''.encode('utf8'))
         self.send_links_body()
         self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
-        self.wfile.write(f'''<div id='opinion_supply'>
+        self.send_help_box('h_count', 'UpDown relies on its users to submit original opinions, which are voted on in groups of 10 on the bi-weekly ballot.', top=170, width=300)
+        self.wfile.write(f'''<div id='opinion_supply' onclick='manageHelp("h_count")'>
 <p id='supply_label'>
 Opinion Supply
 </p>
 <img class='full' src='sign.png' />
 </div>
-<div id='counter_div'>
+<div id='counter_div' onclick='manageHelp("h_count")'>
 <p id='day_count'>
 <span style='font-size: 36px'>{(next_date - datetime.date.today()).days}</span><br />
 <span style='font-size: 14px'>{'day' if (next_date - datetime.date.today()).days == 1 else 'days'}</span>
