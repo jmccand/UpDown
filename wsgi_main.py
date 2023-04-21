@@ -387,6 +387,7 @@ div.help_down {
         if my_account != None:
             self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h_question")'/>'''.encode('utf8'))
         self.wfile.write('''<script>
+document.addEventListener('touchstart', () => {}, false);
 document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
 let open_help = null;
 let just_switched = false;
@@ -408,6 +409,7 @@ function help() {
     }
 }
 function manageHelp(newId) {
+    console.log('manage help');
     if (open_help != null && open_help != newId) {
         document.getElementById(open_help).style.display = 'none';
     }
@@ -418,6 +420,7 @@ function manageHelp(newId) {
     open_help = newId;
 }
 function clearHelp() {
+    console.log('clear help');
     if (open_help != null && !just_switched) {
         document.getElementById(open_help).style.display = 'none';
         open_help = null;
