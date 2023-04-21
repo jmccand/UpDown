@@ -1785,7 +1785,9 @@ p#similar_text {
 <body>'''.encode('utf8'))
         self.send_links_body()
         self.wfile.write('''<div id='help_box'>This page is where you submit your own opinions. You can submit whenever you want, entirely anonymously. Opinions will be chosen at random to run on the ballot.</div>'''.encode('utf8'))
-        self.send_help_box('h_count', 'UpDown relies on its users to submit original opinions, which are voted on in groups of 10 on the bi-weekly ballot.', top=170, width=300)
+        self.send_help_box('h_count', 'This counter shows how long the current number of submitted opinions will be able to fill the ballot, with 10 opinions used bi-weekly.', top=150, width=300, point='top')
+        self.send_help_box('h_relative', 'UpDown tries to promote original opinions to sustain an intriguing ballot for users.', point='top', top=480, width=300)
+        self.send_help_box('h_question', 'UpDown relies on all users to submit opinions. From small to large issues, your opinions are what makes UpDown special. This is why UpDown maintains your anonymity as you submit opinions.', point='bottom', bottom=50, width=300)
         self.wfile.write(f'''<div id='opinion_supply' onclick='manageHelp("h_count")'>
 <p id='supply_label'>
 Opinion Supply
@@ -1810,7 +1812,7 @@ UpDown needs your help to continue running!<br />
 </div>
 </form>
 <article id='similar'>
-<div id='similar_label'>
+<div id='similar_label' onclick='manageHelp("h_relative")'>
 <span style='font-size: 24px'>Closest Relative</span><br />
 <span style='font-size: 16px'>Identical twins may be rejected</span>
 </div>
