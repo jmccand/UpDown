@@ -350,6 +350,9 @@ header {
         if my_account != None:
             self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h_question")'/>'''.encode('utf8'))
         self.wfile.write('''<script>
+document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
+let open_help = null;
+let just_switched = false;
 function open_menu() {
     let menu = document.getElementById('menu').style.width = '250px';
 }
@@ -366,6 +369,23 @@ function help() {
         document.getElementById('help_box').style.display = 'initial';
         help_open = true;
     }
+}
+function manageHelp(newId) {
+    if (open_help != null && open_help != newId) {
+        document.getElementById(open_help).style.display = 'none';
+    }
+    if (newId != null && !just_switched) {
+        document.getElementById(newId).style.display = 'initial';
+        just_switched = true;
+    }
+    open_help = newId;
+}
+function clearHelp() {
+    if (open_help != null && !just_switched) {
+        document.getElementById(open_help).style.display = 'none';
+        open_help = null;
+    }
+    just_switched = false;
 }
 </script>'''.encode('utf8'))
 
@@ -1361,8 +1381,6 @@ let votes = {my_votes};
 let current_index = 0;
 let current_translation = 0;
 let already_changed = false;
-let open_help = null;
-let just_switched = false;
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
@@ -1401,7 +1419,6 @@ function handleTouchStart(evt) {{
 }}
 
 function handleTouchEnd(evt) {{
-    setTimeout(clearHelp, 50);
 
     if (xStart == null || yStart == null || xEnd == null || yEnd == null) {{
         return;
@@ -1567,25 +1584,6 @@ function change(i) {{
     current_index = newIndex;
     current_translation = target;
     already_changed = true;
-}}
-function manageHelp(newId) {{
-    if (open_help != null && open_help != newId) {{
-        document.getElementById(open_help).style.display = 'none';
-    }}
-    if (newId != null && !just_switched) {{
-        document.getElementById(newId).style.display = 'initial';
-        just_switched = true;
-    }}
-    open_help = newId;
-    console.log('open_help = ' + open_help);
-}}
-function clearHelp() {{
-    console.log('clear help');
-    if (open_help != null && !just_switched) {{
-        document.getElementById(open_help).style.display = 'none';
-        open_help = null;
-    }}
-    just_switched = false;
 }}
 </script>
 '''.encode('utf8'))
@@ -1817,6 +1815,7 @@ UpDown needs your help to continue running!<br />
 </article>'''.encode('utf8'))
         self.wfile.write('''<script>
 var old_opinion;
+document.addEventListener('touchend', handleTouchEnd, false);
 setInterval(updateSearch, 1000);
 function updateSearch() {
     let current_opinion = document.getElementById('opinion_text').value;
@@ -1837,6 +1836,9 @@ function updateSearch() {
         }
     }
     old_opinion = current_opinion;
+}
+function handleTouchEnd() {
+    
 }
 </script>
 </body>
