@@ -3517,10 +3517,11 @@ function openpop(element) {{
             document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[2];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[3];
-            document.getElementById('care_stat').innerHTML = response[4][0] + '% care (#' + response[4][1] + ')';
-            document.getElementById('agree_stat').innerHTML = response[5][0] + '% agree (#' + response[5][1] + ')';
-            document.getElementById('overall_stat').innerHTML = response[6][0] + '% overall (#' + response[6][1] + ')';
-            document.getElementById('similar_text').innerHTML = response[7][1];
+            document.getElementById('circle').innerHTML = '<p>' + response[4] + '<br /><span style="font-size: 20px">VOTERS</span></p>';
+            document.getElementById('care_stat').innerHTML = response[5][0] + '% care (#' + response[5][1] + ')';
+            document.getElementById('agree_stat').innerHTML = response[6][0] + '% agree (#' + response[6][1] + ')';
+            document.getElementById('overall_stat').innerHTML = response[7][0] + '% overall (#' + response[7][1] + ')';
+            document.getElementById('similar_text').innerHTML = response[8][1];
             document.getElementById('view_popup').style.display = 'initial';
         }}
     }};
@@ -3776,6 +3777,7 @@ function editBill(mark_resolved) {{
         if 'opinion_ID' in url_arguments:
             opinion_ID = url_arguments['opinion_ID'][0]
             opinion = db.opinions_database[opinion_ID]
+            print('here 1')
             if opinion.is_after_voting():
                 response = [[]]
 
@@ -3799,6 +3801,10 @@ function editBill(mark_resolved) {{
                 response.append(opinion.activity[0][1].strftime('%-m/%-d/%Y'))
                 # voting date
                 response.append(opinion.activity[2][0][0].strftime('%-m/%-d/%Y'))
+                # total # of voters
+                print('here 2')
+                response.append(sum(opinion.count_votes()))
+                print('here 3')
                 # care, agree, overall percentages and rankings
                 care_p, agree_p = opinion.care_agree_percent()
                 overall_p = care_p * agree_p / 100
