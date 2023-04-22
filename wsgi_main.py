@@ -3324,11 +3324,11 @@ table#stats {
   box-sizing: border-box;
 }
 td#circle_td {
-  width: 60%;
+  width: 50%;
 }
 div#circle {
   position: absolute;
-  left: 30%;
+  left: 25%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 120px;
@@ -3518,9 +3518,9 @@ function openpop(element) {{
             document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[2];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[3];
-            document.getElementById('care_stat').innerHTML = response[4][0] + '% care';
-            document.getElementById('agree_stat').innerHTML = response[5][0] + '% agree';
-            document.getElementById('overall_stat').innerHTML = response[6][0] + '% overall';
+            document.getElementById('care_stat').innerHTML = response[4][0] + '% care (#' + response[4][1] + ')';
+            document.getElementById('agree_stat').innerHTML = response[5][0] + '% agree (#' + response[5][1] + ')';
+            document.getElementById('overall_stat').innerHTML = response[6][0] + '% overall (#' + response[6][1] + ')';
             document.getElementById('similar_text').innerHTML = response[7][1];
             document.getElementById('view_popup').style.display = 'initial';
         }}
@@ -3813,6 +3813,7 @@ function editBill(mark_resolved) {{
                     response.append([similar_opinion_ID, similar_opinion_text])
                 else:
                     response.append([opinion_ID, ''])
+                print(response)
                 self.start_response('200 OK', [])
                 self.wfile.write(json.dumps(response).encode('utf8'))
             else:
