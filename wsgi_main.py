@@ -370,20 +370,23 @@ div.help_down {
             self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
         self.wfile.write('</header>'.encode('utf8'))
         if my_account != None:
-            self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h_question")'/>'''.encode('utf8'))
+            self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h1")'/>'''.encode('utf8'))
         self.wfile.write('''<script>
 document.addEventListener('touchstart', () => {}, false);
 document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
 let open_help = null;
-let just_switched = false;
-function open_menu() {
+let just_switched = false;'''.encode('utf8'))
+        if my_account != None and my_account.has_visited(self.path_root):
+            self.wfile.write('let tutorial = false;'.encode('utf8'))
+        else:
+            self.wfile.write('let tutorial = true;'.encode('utf8'))
+        self.wfile.write('''function open_menu() {
     let menu = document.getElementById('menu').style.width = '250px';
 }
 function close_menu() {
     document.getElementById('menu').style.width = '0';
 }
 function manageHelp(newId) {
-    console.log('manage help');
     if (open_help != null && open_help != newId) {
         document.getElementById(open_help).style.display = 'none';
     }
@@ -394,12 +397,14 @@ function manageHelp(newId) {
     open_help = newId;
 }
 function clearHelp() {
-    console.log('clear help');
     if (open_help != null && !just_switched) {
         document.getElementById(open_help).style.display = 'none';
         open_help = null;
     }
     just_switched = false;
+    if (tutorial) {
+        
+    }
 }
 </script>'''.encode('utf8'))
 
@@ -963,7 +968,7 @@ article#cover div {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.send_help_box('h_question', '''Wednesdays are "off days" as the ballot rotates. On Wednesdays, you can check back in on the week's opinions. Swipe left/right to move between opinions.''', point='bottom', bottom=50, width=300)
+            self.send_help_box('h1', '''Wednesdays are "off days" as the ballot rotates. On Wednesdays, you can check back in on the week's opinions. Swipe left/right to move between opinions.''', point='bottom', bottom=50, width=300)
             self.wfile.write('''<div id='highlight_title'>
 </div>
 <footer>
@@ -1291,7 +1296,7 @@ img.stamp_icon {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.wfile.write(f'''<article id='ballot_label' onclick='manageHelp("h_title")'>
+            self.wfile.write(f'''<article id='ballot_label' onclick='manageHelp("h2")'>
 {see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
 </article>'''.encode('utf8'))
             
@@ -1335,20 +1340,19 @@ Opinion #{index + 1}
 
             for stamp_number in range(8):
                 if stamp_number < vote_counts[0]:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_stamps")'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='green_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h3")'/>'''.encode('utf8'))
                 elif stamp_number >= 8 - vote_counts[1]:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_stamps")'/>'''.encode('utf8'))
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='red_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h3")'/>'''.encode('utf8'))
                 else:
-                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h_stamps")'/>'''.encode('utf8'))
-
+                    self.wfile.write(f'''<img id='stamp {stamp_number}' src='gray_icon.png' class='stamp_icon' style='left: {stamp_number * 11 + 6.5}%' onclick='manageHelp("h3")'/>'''.encode('utf8'))
 
             if verified_result == 'verified':
-                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=110, width=300)
+                self.send_help_box('h2', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=110, width=300)
             else:
-                self.send_help_box('h_title', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=145, width=300)
+                self.send_help_box('h2', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=145, width=300)
 
-            self.send_help_box('h_stamps', 'These stamps keep track of your 8 available votes and how they are spent. Only possessing a max of 5 up or 5 down stamps, these stamps help you prioritize the opinions you care about.', top=180, width=300)
-            self.send_help_box('h_question', 'Swipe up/down to vote. Swipe left/right to switch between opinions. Double tap to abstain on an opinion.', bottom=50, width=300, point='bottom')
+            self.send_help_box('h3', 'These stamps keep track of your 8 available votes and how they are spent. Only possessing a max of 5 up or 5 down stamps, these stamps help you prioritize the opinions you care about.', top=180, width=300)
+            self.send_help_box('h1', 'Swipe up/down to vote. Swipe left/right to switch between opinions. Double tap to abstain on an opinion.', bottom=50, width=300, point='bottom')
             
             self.wfile.write(f'''<script>
 const page_IDs = {randomized};
@@ -1757,16 +1761,16 @@ p#similar_text {
 </head>
 <body>'''.encode('utf8'))
         self.send_links_body()
-        self.send_help_box('h_count', 'This counter shows how long the current number of submitted opinions will be able to fill the ballot, with 10 opinions used bi-weekly.', top=150, width=300, point='top')
-        self.send_help_box('h_relative', 'UpDown tries to promote original opinions to sustain an intriguing ballot for users.', point='top', top=480, width=300)
-        self.send_help_box('h_question', 'UpDown relies on all users to submit opinions. From small to large issues, your opinions are what makes UpDown special. This is why UpDown maintains your anonymity as you submit opinions.', point='bottom', bottom=50, width=300)
-        self.wfile.write(f'''<div id='opinion_supply' onclick='manageHelp("h_count")'>
+        self.send_help_box('h2', 'This counter shows how long the current number of submitted opinions will be able to fill the ballot, with 10 opinions used bi-weekly.', top=150, width=300, point='top')
+        self.send_help_box('h3', 'UpDown tries to promote original opinions to sustain an intriguing ballot for users.', point='top', top=480, width=300)
+        self.send_help_box('h1', 'UpDown relies on all users to submit opinions. From small to large issues, your opinions are what makes UpDown special. This is why UpDown maintains your anonymity as you submit opinions.', point='bottom', bottom=50, width=300)
+        self.wfile.write(f'''<div id='opinion_supply' onclick='manageHelp("h2")'>
 <p id='supply_label'>
 Opinion Supply
 </p>
 <img class='full' src='sign.png' />
 </div>
-<div id='counter_div' onclick='manageHelp("h_count")'>
+<div id='counter_div' onclick='manageHelp("h2")'>
 <p id='day_count'>
 <span style='font-size: 36px'>{(next_date - datetime.date.today()).days}</span><br />
 <span style='font-size: 14px'>{'day' if (next_date - datetime.date.today()).days == 1 else 'days'}</span>
@@ -1784,7 +1788,7 @@ UpDown needs your help to continue running!<br />
 </div>
 </form>
 <article id='similar'>
-<div id='similar_label' onclick='manageHelp("h_relative")'>
+<div id='similar_label' onclick='manageHelp("h3")'>
 <span style='font-size: 24px'>Closest Relative</span><br />
 <span style='font-size: 16px'>Identical twins may be rejected</span>
 </div>
@@ -1912,7 +1916,7 @@ footer {
 </head>
 <body>'''.encode('utf8'))
             self.send_links_body()
-            self.send_help_box('h_question', 'Swipe up/down starting on the lock to approve/reject opinions. Think before you swipe!', point='bottom', bottom=50, width=300)
+            self.send_help_box('h1', 'Swipe up/down starting on the lock to approve/reject opinions. Think before you swipe!', point='bottom', bottom=50, width=300)
             unapproved_list = []
             for opinion_ID, opinion in db.opinions_database.items():
                 if opinion.approved == None:
@@ -2090,7 +2094,7 @@ article {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.send_help_box('h_question', "Check out our school Senate!", point='bottom', bottom=50, width=300)
+        self.send_help_box('h1', "Check out our school Senate!", point='bottom', bottom=50, width=300)
         self.wfile.write('''<div id='back_to_top'><a href='/senate#TOC'>Back to the top</a></div>'''.encode('utf8'))
         self.wfile.write('''<article>'''.encode('utf8'))
         self.wfile.write('''<h2><a name='TOC'>Table of Contents</a></h2>
@@ -3385,10 +3389,10 @@ div#similar_text {
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
-        self.send_help_box('h_question', 'Track opinions that you care about using the search, sort, and filter options. Clicking on an opinion will give you statistics about it. Find the most popular opinions in UpDown history!', point='bottom', bottom=50, width=300)
-        self.send_help_box('h_reserved', 'Committees reserve opinions to signify that they are working on a bill to resolve the opinion.', point='top', top=110, width=300)
-        self.send_help_box('h_timeline', 'The automated opinion selection process chooses opinions at random.', point='bottom', bottom=390, width=300)
-        self.send_help_box('h_stats', 'care = voted up or down (did not abstain)<br />agree = voted up given they care<br />overall = care * agree', point='top', top=480, width=300)
+        self.send_help_box('h1', 'Track opinions that you care about using the search, sort, and filter options. Clicking on an opinion will give you statistics about it. Find the most popular opinions in UpDown history!', point='bottom', bottom=50, width=300)
+        self.send_help_box('h2', 'Committees reserve opinions to signify that they are working on a bill to resolve the opinion.', point='top', top=110, width=300)
+        self.send_help_box('h3', 'The automated opinion selection process chooses opinions at random.', point='bottom', bottom=390, width=300)
+        self.send_help_box('h4', 'care = voted up or down (did not abstain)<br />agree = voted up given they care<br />overall = care * agree', point='top', top=480, width=300)
 
         keywords = url_arguments.get('words', [''])[0]
         sort_method = url_arguments.get('sort', ['overall'])[0]
@@ -3450,7 +3454,7 @@ document.getElementById('{filter_for}').selected = 'selected';
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<article id='view_popup'>
-<div id='reserved_header' onclick='manageHelp("h_reserved")'>'''.encode('utf8'))
+<div id='reserved_header' onclick='manageHelp("h2")'>'''.encode('utf8'))
         if isSenator:
             self.wfile.write('''reserved for <select id='reserved_for' onchange='reserve(this)'>
 <option id='unreserved' value='unreserved'>unreserved</option>'''.encode('utf8'))
@@ -3468,10 +3472,10 @@ document.getElementById('{filter_for}').selected = 'selected';
 <div id='close_popup' onclick='closepop()'>X</div>
 <div id='opinion_text'>
 </div>
-<table id='development' onclick='manageHelp("h_timeline")'>
+<table id='development' onclick='manageHelp("h3")'>
 <tr><td id='created'>created<br />_/_/_</td><td>--></td><td id='voted'>voted<br />_/_/_</td></tr>
 </table>
-<table id='stats' onclick='manageHelp("h_stats")'>
+<table id='stats' onclick='manageHelp("h4")'>
 <tr>
 <td id='circle_td'>
 <div id='circle'>
@@ -3656,7 +3660,7 @@ button.savebtn {
 </head>
 <body>'''.encode('utf8'))
                 self.send_links_body()
-                self.send_help_box('h_question', "Stay up to date on your committee's work by viewing your reserved opinions and submitting updated bills.", point='bottom', bottom=50, width=300)
+                self.send_help_box('h1', "Stay up to date on your committee's work by viewing your reserved opinions and submitting updated bills.", point='bottom', bottom=50, width=300)
 
                 data = []
                 for opinion_ID, opinion in db.opinions_database.items():
@@ -3922,7 +3926,7 @@ td {
 </style>'''.encode('utf8'))
             self.wfile.write('</head><body>'.encode('utf8'))
             self.send_links_body()
-            self.send_help_box('h_question', 'This is where you can view your current community service hours. They always round up!', point='bottom', bottom=50, width=300)
+            self.send_help_box('h1', 'This is where you can view your current community service hours. They always round up!', point='bottom', bottom=50, width=300)
             self.wfile.write('''<span id='note'>hour:minute:second --> total hours rounded up</span>'''.encode('utf8'))
             self.wfile.write('''<table id='cs'>'''.encode('utf8'))
             if my_account.email in local.COMMUNITY_SERVICE and verified_result == 'verified':
