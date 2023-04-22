@@ -3323,30 +3323,27 @@ table#stats {
   left: 2%;
   box-sizing: border-box;
 }
-td#chart_td {
-  width: 65%;
+td#circle_td {
+  width: 60%;
 }
-canvas#chart {
+div#circle {
   position: absolute;
-  top: 15px;
-  left: 40px;
-  width: 40%;
+  left: 30%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border: 8px solid black;
+  border-radius: 50%;
 }
-div#chart_cover {
+div#circle p {
   position: absolute;
-  top: 15px;
-  left: 40px;
-  width: 40%;
-  height: 134px;
-}
-#chart_cover p {
-  position: absolute;
-  margin: 0;
   top: 50%;
   left: 50%;
-  margin-right: -50%;
+  text-align: center;
   transform: translate(-50%, -50%);
   font-size: 30px;
+  margin: 0;
 }
 p.stat {
   padding: 8px;
@@ -3474,11 +3471,12 @@ document.getElementById('{filter_for}').selected = 'selected';
 </table>
 <table id='stats'>
 <tr>
-<td id='chart_td'>
-<canvas id='chart'>
-</canvas>
-<div id='chart_cover' onclick='stepChart()'>
-<p></p>
+<td id='circle_td'>
+<div id='circle'>
+<p>
+20<br />
+<span style='font-size: 20px'>VOTERS</span>
+</p>
 </div>
 </td>
 <td>
@@ -3494,43 +3492,7 @@ Most similar opinion:
 </div>
 </div>
 </article>'''.encode('utf8'))
-        self.wfile.write('''<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-var data = {
-  labels: ['care', ''],
-  datasets: [
-    {
-      label: 'Dataset 1',
-      data: [100, 0],
-      backgroundColor: ['black', 'white']
-    }
-  ]
-};
-var config = {
-  type: 'doughnut',
-  data: data,
-  options: {
-    responsive: false,
-    cutout: 50,
-    plugins: {
-      legend: {
-        display: false
-      },
-      title: {
-        display: false,
-        text: 'Care',
-        color: 'black',
-        font: {
-          size: 18
-        }
-      }
-    }
-  },
-};
-var myChart = null;
-</script>'''.encode('utf8'))
         self.wfile.write(f'''<script>
-let stepIndex = 0;
 var view_opinion_id;
 var response;
 function openpop(element) {{
@@ -3556,28 +3518,13 @@ function openpop(element) {{
             document.getElementById('opinion_text').innerHTML = '<p>' + response[1] + '</p>';
             document.getElementById('created').innerHTML = 'created<br />' + response[2];
             document.getElementById('voted').innerHTML = 'voted<br />' + response[3];
-            document.getElementById('care_stat').innerHTML = response[4][0] + ' care';
-            document.getElementById('agree_stat').innerHTML = response[5][0] + ' agree';
-            document.getElementById('overall_stat').innerHTML = response[6][0] + ' overall';
+            document.getElementById('care_stat').innerHTML = response[4][0] + '% care';
+            document.getElementById('agree_stat').innerHTML = response[5][0] + '% agree';
+            document.getElementById('overall_stat').innerHTML = response[6][0] + '% overall';
             document.getElementById('similar_text').innerHTML = response[7][1];
             document.getElementById('view_popup').style.display = 'initial';
-            stepIndex = 0;
-            if (myChart == null) {{
-                myChart = new Chart(document.getElementById('chart'), config);
-            }}
-            myChart.data.datasets[0].data = [response[4 + stepIndex][0], 100 - response[4 + stepIndex][0]];
-            myChart.update();
-
-            document.getElementById('chart_cover').innerHTML = '<p>' + response[4 + stepIndex][1] + '</p>';
         }}
     }};
-}}
-function stepChart() {{
-    stepIndex++;
-    stepIndex = stepIndex % 3;
-    myChart.data.datasets[0].data = [response[4 + stepIndex][0], 100 - response[4 + stepIndex][0]];
-    myChart.update();
-    document.getElementById('chart_cover').innerHTML = '<p>' + response[4 + stepIndex][1] + '</p>';
 }}
 function closepop() {{
     document.getElementById('view_popup').style.display = 'none';
