@@ -3386,6 +3386,9 @@ div#similar_text {
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.send_help_box('h_question', 'Track opinions that you care about using the search, sort, and filter options. Clicking on an opinion will give you statistics about it. Find the most popular opinions in UpDown history!', point='bottom', bottom=50, width=300)
+        self.send_help_box('h_reserved', 'Committees reserve opinions to signify that they are working on a bill to resolve the opinion.', point='top', top=110, width=300)
+        self.send_help_box('h_timeline', 'The automated opinion selection process chooses opinions at random.', point='bottom', bottom=390, width=300)
+        self.send_help_box('h_stats', 'care = voted up or down (did not abstain)<br />agree = voted up given they care<br />overall = care * agree', point='top', top=480, width=300)
 
         keywords = url_arguments.get('words', [''])[0]
         sort_method = url_arguments.get('sort', ['overall'])[0]
@@ -3447,7 +3450,7 @@ document.getElementById('{filter_for}').selected = 'selected';
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<article id='view_popup'>
-<div id='reserved_header'>'''.encode('utf8'))
+<div id='reserved_header' onclick='manageHelp("h_reserved")'>'''.encode('utf8'))
         if isSenator:
             self.wfile.write('''reserved for <select id='reserved_for' onchange='reserve(this)'>
 <option id='unreserved' value='unreserved'>unreserved</option>'''.encode('utf8'))
@@ -3465,10 +3468,10 @@ document.getElementById('{filter_for}').selected = 'selected';
 <div id='close_popup' onclick='closepop()'>X</div>
 <div id='opinion_text'>
 </div>
-<table id='development'>
+<table id='development' onclick='manageHelp("h_timeline")'>
 <tr><td id='created'>created<br />_/_/_</td><td>--></td><td id='voted'>voted<br />_/_/_</td></tr>
 </table>
-<table id='stats'>
+<table id='stats' onclick='manageHelp("h_stats")'>
 <tr>
 <td id='circle_td'>
 <div id='circle'>
@@ -3777,7 +3780,6 @@ function editBill(mark_resolved) {{
         if 'opinion_ID' in url_arguments:
             opinion_ID = url_arguments['opinion_ID'][0]
             opinion = db.opinions_database[opinion_ID]
-            print('here 1')
             if opinion.is_after_voting():
                 response = [[]]
 
@@ -3802,9 +3804,7 @@ function editBill(mark_resolved) {{
                 # voting date
                 response.append(opinion.activity[2][0][0].strftime('%-m/%-d/%Y'))
                 # total # of voters
-                print('here 2')
                 response.append(sum(opinion.count_votes()))
-                print('here 3')
                 # care, agree, overall percentages and rankings
                 care_p, agree_p = opinion.care_agree_percent()
                 overall_p = care_p * agree_p / 100
