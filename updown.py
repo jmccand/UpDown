@@ -12,6 +12,13 @@ class User:
         self.votes = votes
         self.obselete = obselete
 
+    def has_visited(self, target_path):
+        for this_date, activity_list in self.activity.items():
+            for activity_unit in activity_list:
+                if activity_unit[0] == target_path:
+                    return True
+        return False
+
 class Opinion:
 
     def __init__(self, ID, text, activity, approved=None, scheduled=False, reserved_for=None, bill='', resolved=False):
