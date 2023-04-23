@@ -379,7 +379,7 @@ const end_tutorial = new Event('end_tutorial');
 let menu_is_open = false;
 let open_help = null;
 let just_switched = false;'''.encode('utf8'))
-        if False and my_account != None and my_account.has_visited(self.path_root):
+        if my_account != None and my_account.has_visited(self.path_root):
             self.wfile.write('let tutorial = false;'.encode('utf8'))
         else:
             self.wfile.write('let tutorial = true;'.encode('utf8'))
