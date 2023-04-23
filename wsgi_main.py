@@ -374,7 +374,7 @@ div.help_down {
         self.wfile.write('''<script>
 document.addEventListener('touchstart', () => {}, false);
 document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
-window.addEventListener('load', () => {if (tutorial) {manageHelp('h1')}}, false);
+window.addEventListener('load', () => {if (tutorial) {manageHelp('h1', true)}}, false);
 let open_help = null;
 let just_switched = false;'''.encode('utf8'))
         if False and my_account != None and my_account.has_visited(self.path_root):
@@ -387,23 +387,25 @@ let just_switched = false;'''.encode('utf8'))
 function close_menu() {
     document.getElementById('menu').style.width = '0';
 }
-function manageHelp(newId) {
-    if (open_help != null && open_help != newId) {
-        document.getElementById(open_help).style.display = 'none';
-    }
-    if (newId != null && !just_switched) {
-        document.getElementById(newId).style.display = 'initial';
-        if (!tutorial) {
-            just_switched = true;
+function manageHelp(newId, over_tutorial = false) {
+    if (over_tutorial) {
+        if (open_help != null && open_help != newId) {
+            document.getElementById(open_help).style.display = 'none';
         }
+        if (newId != null && !just_switched) {
+            document.getElementById(newId).style.display = 'initial';
+            if (!tutorial) {
+                just_switched = true;
+            }
+        }
+        open_help = newId;
     }
-    open_help = newId;
 }
 function clearHelp() {
     if (tutorial) {
         let next = 'h' + (parseInt(open_help.slice(1)) + 1);
         if (document.getElementById(next) != null) {
-            manageHelp(next);
+            manageHelp(next, true);
             return;
         }
         else {
