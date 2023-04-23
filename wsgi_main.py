@@ -375,6 +375,7 @@ div.help_down {
 document.addEventListener('touchstart', () => {}, false);
 document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
 window.addEventListener('load', () => {if (tutorial) {manageHelp('h1', true)}}, false);
+let menu_is_open = false;
 let open_help = null;
 let just_switched = false;'''.encode('utf8'))
         if False and my_account != None and my_account.has_visited(self.path_root):
@@ -382,13 +383,15 @@ let just_switched = false;'''.encode('utf8'))
         else:
             self.wfile.write('let tutorial = true;'.encode('utf8'))
         self.wfile.write('''function open_menu() {
+    menu_is_open = true;
     let menu = document.getElementById('menu').style.width = '250px';
 }
 function close_menu() {
+    menu_is_open = false;
     document.getElementById('menu').style.width = '0';
 }
 function manageHelp(newId, over_tutorial = false) {
-    if (over_tutorial) {
+    if (over_tutorial && !menu_is_open) {
         if (open_help != null && open_help != newId) {
             document.getElementById(open_help).style.display = 'none';
         }
@@ -399,6 +402,9 @@ function manageHelp(newId, over_tutorial = false) {
             }
         }
         open_help = newId;
+    }
+    else if (menu_is_open) {
+        document.getElementById(open_help).style.display = 'none';
     }
 }
 function clearHelp() {
