@@ -391,20 +391,24 @@ function close_menu() {
     document.getElementById('menu').style.width = '0';
 }
 function manageHelp(newId, over_tutorial = false) {
-    if (over_tutorial && !menu_is_open) {
-        if (open_help != null && open_help != newId) {
-            document.getElementById(open_help).style.display = 'none';
+    if ((tutorial && over_tutorial) || (!tutorial)) {
+        if (!menu_is_open) {
+            if (open_help != null && open_help != newId) {
+                document.getElementById(open_help).style.display = 'none';
+            }
+            if (newId != null && !just_switched) {
+                document.getElementById(newId).style.display = 'initial';
+                if (!tutorial) {
+                    just_switched = true;
+                }
+            }
+            open_help = newId;
         }
-        if (newId != null && !just_switched) {
-            document.getElementById(newId).style.display = 'initial';
-            if (!tutorial) {
-                just_switched = true;
+        else {
+            if (open_help != null) {
+                document.getElementById(open_help).style.display = 'none';
             }
         }
-        open_help = newId;
-    }
-    else if (menu_is_open) {
-        document.getElementById(open_help).style.display = 'none';
     }
 }
 function clearHelp() {
@@ -3408,9 +3412,9 @@ div#similar_text {
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         self.send_help_box('h1', 'Track opinions that you care about using the search, sort, and filter options. Clicking on an opinion will give you statistics about it. Find the most popular opinions in UpDown history!', point='bottom', bottom=50, width=300)
-        self.send_help_box('h2', 'Committees reserve opinions to signify that they are working on a bill to resolve the opinion.', point='top', top=110, width=300)
-        self.send_help_box('h3', 'The automated opinion selection process chooses opinions at random.', point='bottom', bottom=390, width=300)
-        self.send_help_box('h4', 'care = voted up or down (did not abstain)<br />agree = voted up given they care<br />overall = care * agree', point='top', top=480, width=300)
+        self.send_help_box('h3', 'Committees reserve opinions to signify that they are working on a bill to resolve the opinion.', point='top', top=110, width=300)
+        self.send_help_box('h4', 'The automated opinion selection process chooses opinions at random.', point='bottom', bottom=390, width=300)
+        self.send_help_box('h5', 'care = voted up or down (did not abstain)<br />agree = voted up given they care<br />overall = care * agree', point='top', top=480, width=300)
 
         keywords = url_arguments.get('words', [''])[0]
         sort_method = url_arguments.get('sort', ['overall'])[0]
@@ -3472,7 +3476,7 @@ document.getElementById('{filter_for}').selected = 'selected';
 </table>'''.encode('utf8'))
         self.wfile.write('</article></footer>'.encode('utf8'))
         self.wfile.write(f'''<article id='view_popup'>
-<div id='reserved_header' onclick='manageHelp("h2")'>'''.encode('utf8'))
+<div id='reserved_header' onclick='manageHelp("h3")'>'''.encode('utf8'))
         if isSenator:
             self.wfile.write('''reserved for <select id='reserved_for' onchange='reserve(this)'>
 <option id='unreserved' value='unreserved'>unreserved</option>'''.encode('utf8'))
@@ -3490,10 +3494,10 @@ document.getElementById('{filter_for}').selected = 'selected';
 <div id='close_popup' onclick='closepop()'>X</div>
 <div id='opinion_text'>
 </div>
-<table id='development' onclick='manageHelp("h3")'>
+<table id='development' onclick='manageHelp("h4")'>
 <tr><td id='created'>created<br />_/_/_</td><td>--></td><td id='voted'>voted<br />_/_/_</td></tr>
 </table>
-<table id='stats' onclick='manageHelp("h4")'>
+<table id='stats' onclick='manageHelp("h5")'>
 <tr>
 <td id='circle_td'>
 <div id='circle'>
@@ -3520,6 +3524,8 @@ Most similar opinion:
 var view_opinion_id;
 var response;
 function openpop(element) {{
+    tutorial = true;
+    open_help = 'h2';
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
     xhttp.send();
