@@ -1362,6 +1362,9 @@ Opinion #{index + 1}
                 self.send_help_box('h2', 'The ballot runs in 2 shifts: Sun-Tue and Thu-Sat', top=145, width=300)
 
             self.send_help_box('h3', 'These stamps keep track of your 8 available votes and how they are spent. Only possessing a max of 5 up or 5 down stamps, these stamps help you prioritize the opinions you care about.', top=180, width=300)
+            self.send_help_box('alert_up', 'You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.', top=180, width=300)
+            self.send_help_box('alert_down', 'You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.', top=180, width=300)
+            self.send_help_box('alert_max', 'You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.', top=180, width=300)
             self.send_help_box('h1', 'Swipe up/down to vote. Swipe left/right to switch between opinions. Double tap to abstain on an opinion.', bottom=50, width=300, point='bottom')
             
             self.wfile.write(f'''<script>
@@ -1522,16 +1525,16 @@ function checkVoteValidity(new_vote, old_vote) {{
     }}
     let valid = true;
     if (up_count == 5 && new_vote == 'up') {{
-        alert('You cannot vote up more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        manageHelp('alert_up');
         valid = false;
     }}
     else if (down_count == 5 && new_vote == 'down') {{
-        alert('You cannot vote down more than 5 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+        manageHelp('alert_down');
         valid = false;
     }}
     if (old_vote == 'abstain') {{
         if (up_count + down_count == 8 && new_vote != 'abstain') {{
-            alert('You cannot vote more than 8 times a day. Prioritize the opinions that you feel more strongly about and leave the others unvoted.');
+            manageHelp('alert_max');
             valid = false;
         }}
     }}
