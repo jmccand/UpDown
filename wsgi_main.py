@@ -1288,20 +1288,6 @@ p#opinion_p {
   transform: translate(-50%, -50%);
   text-align: center;
 }
-div#banner {
-  top: 70px;
-  position: absolute;
-  left: 2%;
-  font-size: 25px;
-  padding: 2%;
-  width: 96%;
-  border-radius: 3px;
-  border: 2px solid black;
-  background-color: lightBlue;
-  box-sizing: border-box;
-  z-index: 1;
-  display: none;
-}
 img.stamp {
   position: absolute;
   top: 50%;
@@ -1591,16 +1577,6 @@ function change(i) {{
 }}
 </script>
 '''.encode('utf8'))
-            self.wfile.write('''<div id='banner'></div>
-<script>
-function banner(text) {
-    document.getElementById('banner').innerHTML = text;
-    document.getElementById('banner').style.display = 'table-cell';
-    setTimeout(function close() {
-document.getElementById('banner').style.display = 'none';
-}, 3000);
-}
-</script>'''.encode('utf8'))
         self.wfile.write(f'''</footer>
 <script>
 if ('serviceWorker' in navigator) {{
