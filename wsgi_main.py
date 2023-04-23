@@ -375,6 +375,7 @@ div.help_down {
 document.addEventListener('touchstart', () => {}, false);
 document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
 window.addEventListener('load', () => {if (tutorial) {manageHelp('h1', true)}}, false);
+const end_tutorial = new Event('end_tutorial');
 let menu_is_open = false;
 let open_help = null;
 let just_switched = false;'''.encode('utf8'))
@@ -393,7 +394,7 @@ function close_menu() {
 function manageHelp(newId, over_tutorial = false) {
     if ((tutorial && over_tutorial) || (!tutorial)) {
         if (!menu_is_open) {
-            if (open_help != null && open_help != newId) {
+            if (open_help != null && open_help != newId && document.getElementById(open_help) != null) {
                 document.getElementById(open_help).style.display = 'none';
             }
             if (newId != null && !just_switched) {
@@ -420,6 +421,7 @@ function clearHelp() {
         }
         else {
             tutorial = false;
+            document.dispatchEvent(end_tutorial);
         }
     }
     if (open_help != null && !just_switched) {
@@ -3521,11 +3523,12 @@ Most similar opinion:
 </div>
 </article>'''.encode('utf8'))
         self.wfile.write(f'''<script>
+let og_tutorial = tutorial;
 var view_opinion_id;
 var response;
+let stats_opened = false;
+document.addEventListener('end_tutorial', function() {{if (stats_opened) {{og_tutorial = false;}}}}, false);
 function openpop(element) {{
-    tutorial = true;
-    open_help = 'h2';
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/leaderboard_lookup?opinion_ID=' + element.id);
     xhttp.send();
@@ -3554,10 +3557,21 @@ function openpop(element) {{
             document.getElementById('overall_stat').innerHTML = response[7][0] + '% overall (#' + response[7][1] + ')';
             document.getElementById('similar_text').innerHTML = response[8][1];
             document.getElementById('view_popup').style.display = 'initial';
+            stats_opened = true;
+            if (og_tutorial) {{
+                tutorial = true;
+                if (open_help == null) {{
+                    open_help = 'h3';
+                }}
+                manageHelp(open_help, true);
+            }}
         }}
     }};
 }}
 function closepop() {{
+    if (og_tutorial) {{
+        tutorial = false;
+    }}
     document.getElementById('view_popup').style.display = 'none';
 }}
 </script>'''.encode('utf8'))
