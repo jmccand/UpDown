@@ -374,6 +374,7 @@ div.help_down {
         self.wfile.write('''<script>
 document.addEventListener('touchstart', () => {}, false);
 document.addEventListener('touchend', () => {setTimeout(clearHelp, 50)}, false);
+window.addEventListener('load', () => {manageHelp('h1')}, false);
 let open_help = null;
 let just_switched = false;'''.encode('utf8'))
         if my_account != None and my_account.has_visited(self.path_root):
@@ -391,6 +392,7 @@ function manageHelp(newId) {
         document.getElementById(open_help).style.display = 'none';
     }
     if (newId != null && !just_switched) {
+        console.log(newId);
         document.getElementById(newId).style.display = 'initial';
         just_switched = true;
     }
@@ -402,9 +404,9 @@ function clearHelp() {
         open_help = null;
     }
     just_switched = false;
-    if (tutorial) {
-        
-    }
+    /*if (true) {
+        manageHelp('h' + parseInt(open_help));
+    }*/
 }
 </script>'''.encode('utf8'))
 
