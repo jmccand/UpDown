@@ -1828,6 +1828,7 @@ function handleTouchEnd() {
 </script>
 </body>
 </html>'''.encode('utf8'))
+        self.log_activity()
 
     def approve_opinions_page(self):
         my_account = self.identify_user()
