@@ -4121,7 +4121,7 @@ def auto_schedule():
                         while len(compiled_set) < 10:
                             new_random = random.choice(list(db.opinions_database.keys()))
                             copy_opinion = db.opinions_database[new_random]
-                            if new_random not in compiled_set and copy_opinion.approved == True:
+                            if not smart_opinion_in(compiled_set, new_random) and copy_opinion.approved == True:
                                 def update_opinions_database():
                                     new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
                                     db.opinions_database[str(new_opinion.ID)] = new_opinion
