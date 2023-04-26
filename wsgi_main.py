@@ -4125,7 +4125,7 @@ def auto_schedule():
                                     new_opinion = updown.Opinion(len(db.opinions_database), copy_opinion.text, [(-1, datetime.datetime.now()), [(-1, 'yes', datetime.datetime.now())], [(next_due_date, datetime.datetime.now())]], approved=copy_opinion.approved, scheduled=True)
                                     db.opinions_database[str(new_opinion.ID)] = new_opinion
                                     return new_opinion.ID
-                                new_opinion_id = run_and_sync(db.opinions_database, update_opinions_database, db.opinions_database_lock)
+                                new_opinion_id = run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
                                 compiled_set.add(str(new_opinion_id))
                     else:
                         for opinion_ID in list(db.opinions_database.keys()):
