@@ -620,8 +620,8 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
             server.close()
 
             print(f'Email sent! {msg.as_string()}')
-        except:
-            print('Something went wrong...')
+        except Exception as e:
+            print(f'Something went wrong... \n{e}')
 
     def check_email(self):
         url_arguments = urllib.parse.parse_qs(self.query_string)
