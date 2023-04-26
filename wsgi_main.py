@@ -4079,7 +4079,7 @@ def auto_schedule():
             see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
         else:
             see_day = today_date
-        if see_day.weekday() != 2:
+        if True and see_day.weekday() != 2:
             next_due_date = None
             if len(db.opinions_calendar.get(str(see_day), set())) < 10:
                 next_due_date = see_day
