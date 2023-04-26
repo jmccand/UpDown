@@ -367,7 +367,7 @@ div.help_down {
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('</div>'.encode('utf8'))
         if verified_result != 'verified' and my_account != None:
-            self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CLICK HERE!</div>'''.encode('utf8'))
+            self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CHECK EMAIL!</div>'''.encode('utf8'))
         self.wfile.write('</header>'.encode('utf8'))
         if my_account != None:
             self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h1")'/>'''.encode('utf8'))
