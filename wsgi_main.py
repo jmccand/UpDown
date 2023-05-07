@@ -869,15 +869,8 @@ Aggregate by IP</div>'''.encode('utf8'))
         else:
             self.start_response('200 OK', [])
         
-        see_day = None
-        today_date = datetime.date.today()
-        print(f'today weekday: {today_date.weekday()}')
-        if (today_date.weekday() + 1) % 7 < 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-        elif (today_date.weekday() + 1) % 7 > 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
-        else:
-            see_day = today_date
+        see_day = get_schedule_date()
+        
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -1014,18 +1007,12 @@ article#cover div {
             self.wfile.write('''</div></article><div id='opinion_holder'>'''.encode('utf8'))
 
             see_old_days = []
-            check_day = see_day
-            if check_day.weekday() not in (3, 6):
-                check_day = check_day - datetime.timedelta(days=3)
+            check_day = see_day - datetime.timedelta(days=7)
             while len(see_old_days) < 2 and check_day > local.LAUNCH_DATE:
-                # check_day.weekday is either 3 or 6
-                assert check_day.weekday() in (3, 6)
+                assert check_day.weekday() == 0
                 if db.opinions_calendar.get(str(check_day), set()) != set():
                     see_old_days.append(check_day)
-                if check_day.weekday() == 3:
-                    check_day = check_day - datetime.timedelta(days=4)
-                else:
-                    check_day = check_day - datetime.timedelta(days=3)
+                    check_day = check_day - datetime.timedelta(days=7)
             # reorder so most recent is last
             see_old_days = see_old_days[::-1]
             print(f'{see_old_days}')
@@ -1307,7 +1294,7 @@ img.stamp_icon {
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write(f'''<article id='ballot_label' onclick='manageHelp("h2")'>
-{see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=2)).strftime('%a %-m/%-d')}
+{see_day.strftime('%a %-m/%-d')} - {(see_day + datetime.timedelta(days=6)).strftime('%a %-m/%-d')}
 </article>'''.encode('utf8'))
             
             self.wfile.write('''<div id='opinion_holder'>'''.encode('utf8'))
@@ -2418,15 +2405,8 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                     my_account.votes[opinion_ID].append((my_vote, datetime.datetime.now()))
                 else:
                     my_account.votes[opinion_ID] = [(my_vote, datetime.datetime.now())]
-                see_day = None
-                today_date = datetime.date.today()
-                if (today_date.weekday() + 1) % 7 < 3:
-                    see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-                elif (today_date.weekday() + 1) % 7 > 3:
-                    see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
-                else:
-                    see_day = today_date
 
+                see_day = get_schedule_date()
                 #for other_opinion_ID in db.opinions_calendar[str(today_date - datetime.timedelta((today_date.weekday() + 1) % 7 % 4))]:
                 for other_opinion_ID in db.opinions_calendar[str(see_day)]:
                     if other_opinion_ID != opinion_ID and other_opinion_ID not in my_account.votes:
@@ -4072,24 +4052,14 @@ def auto_schedule():
     while True:
         # sleep time in seconds
         time.sleep(0.5)
-        see_day = None
-        today_date = datetime.date.today()
-        if (today_date.weekday() + 1) % 7 < 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-        elif (today_date.weekday() + 1) % 7 > 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
-        else:
-            see_day = today_date
-        if True or see_day.weekday() != 2:
+        see_day = get_schedule_date()
+        if True:
             next_due_date = None
             if len(db.opinions_calendar.get(str(see_day), set())) < 10:
                 next_due_date = see_day
             else:
-                if (see_day.weekday() + 1) % 7 < 3:
-                    next_due_date = see_day + datetime.timedelta(days=4)
-                else:
-                    next_due_date = see_day + datetime.timedelta(days=3)
-                # convert next due date to datetime
+                next_due_date = see_day + datetime.timedelta(days=7)
+            # convert next due date to datetime
             next_due_time = datetime.datetime.combine(next_due_date, datetime.datetime.min.time())
 
             def smart_opinion_in(collection, opinion_ID):
@@ -4308,6 +4278,11 @@ def valid_yogs():
 def email_is_valid(email):
     return re.match(email, local.EMAIL_MATCH_RE)
 
+def get_schedule_date():
+    today_date = datetime.date.today()
+    see_day = today_date - datetime.timedelta(days=today_date.weekday())
+    return see_day
+            
 def main():
     print('Student Change Web App... running...')
 
