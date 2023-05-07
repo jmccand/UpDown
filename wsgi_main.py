@@ -4030,6 +4030,7 @@ def stem(word):
         return word
     if word[-2] == 'e':
         if len(word) > 3 and word[-3] == 'i' and word[-4] not in ('a', 'e'):
+            print(f'THE WORD IS: {word}')
             word = word[:-3] + 'y' + word[-2:]
             return word[:-2]
         if word[-3] in ('i', 'a', 'o', 'e'):
