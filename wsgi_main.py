@@ -1549,7 +1549,7 @@ function change(i) {{
     else if (newIndex >= opinion_texts.length) {{
         newIndex = opinion_texts.length - 1;
     }}
-    let target = newIndex * -screen.width;
+    let target = newIndex * -window.innerWidth;
     let opinion_holder = document.getElementById('opinion_holder');
     opinion_holder.style.transition = '0.4s';
     opinion_holder.style.transform = 'translateX(' + target + 'px)';
