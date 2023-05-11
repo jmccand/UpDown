@@ -4283,6 +4283,52 @@ def get_schedule_date():
     today_date = datetime.date.today()
     see_day = today_date - datetime.timedelta(days=today_date.weekday())
     return see_day
+
+def count_all_votes():
+    votes_dict = {}
+    for this_user_id in verified_accounts:
+        user = db.user_ids[this_user_id]
+        for opinion_ID in user.votes:
+            if opinion_ID not in votes_dict:
+                votes_dict[opinion_ID] = [0, 0, 0]
+            this_vote = user_votes[str(self.ID)][-1][0]
+            if this_vote == 'up':
+                votes_dict[opinion_ID][0] += 1
+            elif this_vote == 'down':
+                votes_dict[opinion_ID][2] += 1
+            elif this_vote == 'abstain':
+                votes_dict[opinion_ID][1] += 1
+            else:
+                raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
+    return votes_dict
+
+def all_c_a():
+    c_a_dict = {}
+    for opinion_ID, counts in count_all_votes():
+        if sum(counts) > 0:
+            if counts[0] + counts[2] > 0:
+                c_a_dict[opinion_ID] = ((counts[0] + counts[1]) / sum(counts) * 100, counts[0] / (counts[0] + counts[2]))
+            else:
+                c_a_dict[opinion_ID] = ((counts[0] + counts[1]) / sum(counts) * 100, 0)
+        else:
+            c_a_dict[opinion_ID] = (0, 0)
+    return c_a_dict
+            
+
+def all_rankings(results, by='overall'):
+    c_a_dict = all_c_a()
+    c_a_list = []
+    for opinion_ID in results:
+        c_a_list.append((opinion_ID, c_a_dict[opinion_ID]))
+    if by == 'overall':
+        c_a_list.sort(key=lambda x: x[1][0] * x[1][1], reverse=True)
+    elif by == 'care':
+        c_a_list.sort(key=lambda x: x[1][0], reverse=True)
+    elif by == 'agree':
+        c_a_list.sort(key=lambda x: x[1][1], reverse=True)
+    else:
+        raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
+    return c_a_list
             
 def main():
     print('Student Change Web App... running...')
