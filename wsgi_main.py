@@ -3421,7 +3421,11 @@ document.getElementById('{filter_for}').selected = 'selected';
             elif filter_for == 'unresolved':
                 return not opinion.resolved
             elif filter_for == 'my_opinions':
-                return opinion.activity[0][0] == my_account.user_ID
+                if opinion.activity[0][0] != -1:
+                    secure = db.cookie_database[str(opinion.activity[0][0])]
+                    return secure[0] == my_account.user_ID and secure[1] == 'verified'
+                else:
+                    return False
             else:
                 return True
         for index, opinion in enumerate(results):
