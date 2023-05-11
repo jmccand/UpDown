@@ -136,7 +136,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 elif self.path == '/community_service':
                     self.path_root = '/community_service'
                     self.community_service()
-            except ValueError as error:
+            except Exception as error:
                 print(str(error))
                 traceback.print_exc()
                 self.start_response('500 SERVER ERROR', [])
@@ -3411,15 +3411,8 @@ document.getElementById('{sort_method}').selected = 'selected';
 document.getElementById('{filter_for}').selected = 'selected';
 </script>'''.encode('utf8'))
         self.wfile.write('''<article id='results'>'''.encode('utf8'))
-        results = list(db.opinions_database.keys())
-        results = [db.opinions_database[str(x)] for x in results]
-        results = list(filter(lambda x: x.is_after_voting(), results))
-        if sort_method == 'overall':
-            results.sort(key=lambda x: -1 * x.care_agree_percent()[0] * x.care_agree_percent()[1])
-        elif sort_method == 'care':
-            results.sort(key=lambda x: -1 * x.care_agree_percent()[0])
-        elif sort_method == 'agree':
-            results.sort(key=lambda x: -1 * x.care_agree_percent()[1])
+        ids_list = all_rankings(sort_method)
+        results = list(db.opinions_database[x] for x in ids_list)
         def filter_keep(opinion):
             if not is_matching(opinion.text, keywords):
                 return False
@@ -4286,12 +4279,16 @@ def get_schedule_date():
 
 def count_all_votes():
     votes_dict = {}
+    verified_accounts = set()
+    for this_cookie, this_secure in db.cookie_database.items():
+        if this_secure[1] == 'verified':
+            verified_accounts.add(this_secure[0])    
     for this_user_id in verified_accounts:
         user = db.user_ids[this_user_id]
         for opinion_ID in user.votes:
             if opinion_ID not in votes_dict:
                 votes_dict[opinion_ID] = [0, 0, 0]
-            this_vote = user_votes[str(self.ID)][-1][0]
+            this_vote = user.votes[str(opinion_ID)][-1][0]
             if this_vote == 'up':
                 votes_dict[opinion_ID][0] += 1
             elif this_vote == 'down':
@@ -4303,8 +4300,9 @@ def count_all_votes():
     return votes_dict
 
 def all_c_a():
+    votes_list = count_all_votes().items()
     c_a_dict = {}
-    for opinion_ID, counts in count_all_votes():
+    for opinion_ID, counts in votes_list:
         if sum(counts) > 0:
             if counts[0] + counts[2] > 0:
                 c_a_dict[opinion_ID] = ((counts[0] + counts[1]) / sum(counts) * 100, counts[0] / (counts[0] + counts[2]))
@@ -4316,10 +4314,7 @@ def all_c_a():
             
 
 def all_rankings(results, by='overall'):
-    c_a_dict = all_c_a()
-    c_a_list = []
-    for opinion_ID in results:
-        c_a_list.append((opinion_ID, c_a_dict[opinion_ID]))
+    c_a_list = list(all_c_a().items())
     if by == 'overall':
         c_a_list.sort(key=lambda x: x[1][0] * x[1][1], reverse=True)
     elif by == 'care':
@@ -4328,7 +4323,8 @@ def all_rankings(results, by='overall'):
         c_a_list.sort(key=lambda x: x[1][1], reverse=True)
     else:
         raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
-    return c_a_list
+    simplified_list = list(x[0] for x in c_a_list)
+    return simplified_list
             
 def main():
     print('Student Change Web App... running...')
