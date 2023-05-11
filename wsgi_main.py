@@ -1596,19 +1596,9 @@ if ('serviceWorker' in navigator) {{
             if opinion.approved == True and not opinion.scheduled:
                 unscheduled_approved += 1
         unscheduled_approved = unscheduled_approved // 10
-        next_date = datetime.date.today()
-        if (next_date.weekday() + 1) % 7 < 3:
-            next_date += datetime.timedelta(3 - (next_date.weekday() + 1) % 7)
-        elif (next_date.weekday() + 1) % 7 > 3:
-            next_date += datetime.timedelta(7 - (next_date.weekday() + 1) % 7)
-        else:
-            next_date += datetime.timedelta(1)
+        next_date = get_schedule_date() + datetime.timedelta(days=7)
         while unscheduled_approved > 0:
-            if next_date.weekday() == 6:
-                next_date += datetime.timedelta(4)
-            else:
-                assert next_date.weekday() == 3
-                next_date += datetime.timedelta(3)
+            next_date += datetime.timedelta(days=7)
             unscheduled_approved -= 10
                 
         self.start_response('200 OK', [])
