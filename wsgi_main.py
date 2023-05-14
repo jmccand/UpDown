@@ -379,7 +379,7 @@ const end_tutorial = new Event('end_tutorial');
 let menu_is_open = false;
 let open_help = null;
 let just_switched = false;'''.encode('utf8'))
-        if my_account != None and my_account.has_visited(self.path_root):
+        if my_account == None or my_account.has_visited(self.path_root):
             self.wfile.write('let tutorial = false;'.encode('utf8'))
         else:
             self.wfile.write('let tutorial = true;'.encode('utf8'))
@@ -498,42 +498,80 @@ function clearHelp() {
         self.send_links_head()
         self.wfile.write('''<style>
 form#email_form {
-  position: absolute;
-  top: 100px;
+  position: fixed;
+  top: 90px;
   width: 92%;
   left: 4%;
-  bottom: 55%;
-  border: 4px solid black;
+  height: 140px;
+  border: 1px solid black;
   border-radius: 12px;
   background-color: white;
   box-sizing: border-box;
-  padding: 5%;
-  font-size: 25px;
-  text-align: center;
+}
+#email_form span {
+  position: absolute;
+  top: 15px;
+  right: 12px;
+  font-size: 18px;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+}
+img#email_img {
+  position: absolute;
+  top: 40px;
+  left: 5px;
+  width: 130px;
 }
 input#email {
-  position: relative;
-  top: 20px;
-  width: 90%;
-  border: 2px solid black;
+  position: absolute;
+  top: 50px;
+  left: 140px;
+  right: 10px;
   font-size: 15px;
   padding: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
 }
 input#submit {
-  position: relative;
-  top: 40px;
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  right: 15px;
   font-size: 15px;
+  padding: 5px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+div#download {
+  position: fixed;
+  top: 370px;
+  height: 250px;
+  border-radius: 12px;
+  border: 1px solid black;
+}
+#download span {
+  positino: absolute;
+  left: 15px;
+  top: 10px;
+  font-size: 15px;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  background-color: #ffef90ff;
+}
+img#download_icon {
+  position: absolute;
+  right: 5px;
+  top: 15px;
+  bottom: 15px;
 }
 div#tos {
-  position: absolute;
-  top: 47%;
+  position: fixed;
+  top: 57%;
   width: 100%;
   font-size: 30px;
   text-align: center;
 }
 article {
-  position: absolute;
-  top: 53%;
+  position: fixed;
+  top: 63%;
   width: 92%;
   left: 4%;
   padding: 3%;
@@ -545,12 +583,31 @@ article {
   border: 1px solid black;
   border-radius: 6px;
 }
+div#add_to_homepage {
+  position: fixed;
+  top: 42%;
+  width: 92%;
+  left: 4%;
+  padding: 3%;
+  padding-left: 5%;
+  padding-right: 5%;
+  bottom: 45%;
+  border: 3px dashed black;
+  font-family: Verdana, Helvetica, 'Trebuchet MS', sans-serif, Arial;
+  font-size: 16px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background-color: lightGray;
+  text-align: center;
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         YOGS = valid_yogs()
+        self.wfile.write(f'''<div id='add_to_homepage'>Download UpDown by clicking on the 3 dots or share icon and selecting 'Add to Homepage'.</div>'''.encode('utf8'))
         self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
-Enter your email to join:<br />
+<span>Enter your email to join:</span>
+<img id='email_img'/>
 <input id='email' type='email' name='email' /><br />
 <input id='submit' type='submit' value='I AGREE TO THE TERMS OF SERVICE' disabled='true'/>
 </form>
@@ -568,6 +625,7 @@ That said, everything on UpDown is moderated to ensure that opinions don't get o
 </article>
 
 <script>
+
 const exceptionEmails = {list(local.EXCEPTION_EMAILS)};
 const YOGS = {YOGS};
 const re = /{local.EMAIL_MATCH_RE}/;
@@ -3937,6 +3995,8 @@ td {
             self.wfile.write(f'''<div id='{element_id}' class='help_box' style='top: {top}px; width: {width}px; display: none'><div class='help_text' style='top: {arrow_height}px'>{text}</div><div class='help_up'></div></div>'''.encode('utf8'))
         elif point == 'bottom':
             self.wfile.write(f'''<div id='{element_id}' class='help_box' style='bottom: {bottom}px; width: {width}px; display: none'><div class='help_text' style='bottom: {arrow_height}px'>{text}</div><div class='help_down'></div></div>'''.encode('utf8'))
+        elif point == 'bottom_right':
+            self.wfile.write(f'''<div id='{element_id}' class='help_box' style='bottom: {bottom}px; width: {width}px; display: none'><div class='help_text' style='bottom: {arrow_height}px'>{text}</div><div class='help_down' style='left: 90%'></div></div>'''.encode('utf8'))
 
                     
 class invalidCookie(ValueError):
