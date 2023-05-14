@@ -501,7 +501,7 @@ function clearHelp() {
         self.wfile.write('''<style>
 form#email_form {
   position: fixed;
-  top: 90px;
+  top: 80px;
   width: 92%;
   left: 4%;
   height: 140px;
@@ -512,21 +512,21 @@ form#email_form {
 }
 #email_form span {
   position: absolute;
-  top: 15px;
+  top: 18px;
   right: 12px;
-  font-size: 18px;
+  font-size: 19px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
 }
 img#email_img {
   position: absolute;
-  top: 40px;
-  left: 5px;
-  width: 130px;
+  top: 0px;
+  left: 15px;
+  width: 100px;
 }
 input#email {
   position: absolute;
   top: 50px;
-  left: 140px;
+  left: 130px;
   right: 10px;
   font-size: 15px;
   padding: 5px;
@@ -545,24 +545,26 @@ input#submit {
 }
 div#download {
   position: fixed;
-  top: 370px;
-  height: 250px;
+  top: 230px;
+  height: 130px;
+  width: 92%;
+  left: 4%;
   border-radius: 12px;
   border: 1px solid black;
+  background-color: #ffef90ff;
 }
 #download span {
-  positino: absolute;
-  left: 15px;
-  top: 10px;
-  font-size: 15px;
+  position: absolute;
+  left: 25px;
+  top: 20px;
+  font-size: 20px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
-  background-color: #ffef90ff;
 }
 img#download_icon {
   position: absolute;
   right: 5px;
   top: 15px;
-  bottom: 15px;
+  height: 100px;
 }
 div#tos {
   position: fixed;
@@ -585,28 +587,10 @@ article {
   border: 1px solid black;
   border-radius: 6px;
 }
-div#add_to_homepage {
-  position: fixed;
-  top: 42%;
-  width: 92%;
-  left: 4%;
-  padding: 3%;
-  padding-left: 5%;
-  padding-right: 5%;
-  bottom: 45%;
-  border: 3px dashed black;
-  font-family: Verdana, Helvetica, 'Trebuchet MS', sans-serif, Arial;
-  font-size: 16px;
-  box-sizing: border-box;
-  border-radius: 6px;
-  background-color: lightGray;
-  text-align: center;
-}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
         YOGS = valid_yogs()
-        self.wfile.write(f'''<div id='add_to_homepage'>Download UpDown by clicking on the 3 dots or share icon and selecting 'Add to Homepage'.</div>'''.encode('utf8'))
         self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
 <span>Enter your email to join:</span>
 <img id='email_img' src='mail_icon.png'/>
@@ -615,6 +599,7 @@ div#add_to_homepage {
 </form>
 <div id='download'>
 <img id='download_icon' src='download_icon.png'/>
+<span>Download UpDown</span>
 </div>
 <div id='tos'>
 TERMS OF SERVICE:
