@@ -1457,6 +1457,7 @@ let already_changed = false;
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchend', handleTouchEnd, false);
 document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('touchcancel', handleTouchCancel, false);
 document.addEventListener('dblclick', handleDoubleClick, false);
 document.addEventListener('keydown', handleKeyDown, false);
 
@@ -1547,6 +1548,12 @@ function handleTouchMove(evt) {{
         return;
     }}
 
+}}
+function handleTouchCancel(evt) {{
+    xStart = null;
+    yStart = null;
+    xEnd = null;
+    yEnd = null;
 }}
 function handleDoubleClick(evt) {{
     vote('abstain');
@@ -2026,6 +2033,7 @@ setInterval(updateSearch, 1000);
 
 document.addEventListener('touchstart', handleTouchStart, false);
 document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('touchcancel', handleTouchCancel, false);
 document.addEventListener('keydown', handleKeyDown, false);
 
 var xStart = null;
@@ -2075,6 +2083,12 @@ function handleTouchMove(evt) {{
     xStart = null;
     yStart = null;
     unlocked = false;
+}}
+function handleTouchCancel(evt) {{
+    xStart = null;
+    yStart = null;
+    xEnd = null;
+    yEnd = null;
 }}
 function handleKeyDown(evt) {{
     let key_pressed = event.key;
