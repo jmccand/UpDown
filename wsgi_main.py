@@ -557,7 +557,7 @@ div#download {
   position: absolute;
   left: 25px;
   top: 20px;
-  font-size: 20px;
+  font-size: 22px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
 }
 img#download_icon {
@@ -568,8 +568,8 @@ img#download_icon {
 }
 div#dots {
   position: absolute;
-  left: 25px;
-  top: 55px;
+  left: 15px;
+  top: 60px;
   width: 35px;
   height: 50px;
   border: 2px solid black;
@@ -582,6 +582,17 @@ div#dots {
   left: 0;
   top: 50%;
   transform: translate(0, -50%) rotate(90deg);
+}
+div#add {
+  position: absolute;
+  top: 65px;
+  left: 60px;
+  padding: 8px;
+  border: 2px solid black;
+  font-size: 18px;
+  background-color: white;
+  font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
+  border-radius: 8px;
 }
 div#tos {
   position: fixed;
@@ -619,6 +630,9 @@ article {
 <span>Download UpDown</span>
 <div id='dots'>
 <img src='3_dots_icon.png'/>
+</div>
+<div id='add'>
+Add to Homepage
 </div>
 </div>
 <div id='tos'>
