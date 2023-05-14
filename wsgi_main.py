@@ -597,23 +597,33 @@ div#add {
 div#tos {
   position: fixed;
   top: 57%;
-  width: 100%;
+  width: 92%;
+  left: 4%;
+  bottom: 10px;
   font-size: 30px;
   text-align: center;
+  background-color: lightGray;
+  border: 1px solid black;
+  border-radius: 15px;
+  padding: 15px;
+  box-sizing: border-box;
 }
-article {
-  position: fixed;
-  top: 63%;
+#tos article {
+  position: absolute;
+  top: 60px;
   width: 92%;
   left: 4%;
   padding: 3%;
-  bottom: 5%;
+  bottom: 3%;
   z-index: 1;
   overflow: scroll;
+  font-size: 18px;
+  text-align: left;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
   box-sizing: border-box;
   border: 1px solid black;
   border-radius: 6px;
+  background-color: white;
 }
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
@@ -637,16 +647,16 @@ Add to Homepage
 </div>
 <div id='tos'>
 TERMS OF SERVICE:
-</div>
 <article>
 UpDown uses your email to ensure that each student only votes once.<br /><br />
 <!--This app was created to channel the focus of the student body. As LHS has over 2000 students, it can be hard to unify our beliefs. By uniting our preferences, we can work with the administration to bring real change to LHS.<br /><br />
 Using UpDown, students submit and vote on opinions. In this way, the student body can raise issues that we care about.<br /><br />
 The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />-->
 On UpDown, everything you do is kept anonymous. All that UpDown needs from you is your honest opinions about our school. Your name will not be tied to your votes, nor the opinions that you submit.<br /><br />
-That said, everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy is contingent on your following LHS's Code of Conduct which outlaws bullying, cyberbullying, and hate speech. Not-safe-for-work content is also not allowed. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher or how much you hate school.<br /><br />
+That said, everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy is contingent on your following LHS's Code of Conduct which outlaws bullying, cyberbullying, and hate speech. Not-safe-for-work content is also not allowed. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher or how much you hate school.
 </form>
 </article>
+</div>
 
 <script>
 
