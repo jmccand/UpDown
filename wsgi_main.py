@@ -59,7 +59,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         
     
     def do_GET(self):
-        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png')
+        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png', '/3_dots_icon.png')
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
@@ -566,6 +566,23 @@ img#download_icon {
   top: 15px;
   height: 100px;
 }
+div#dots {
+  position: absolute;
+  left: 25px;
+  top: 55px;
+  width: 35px;
+  height: 50px;
+  border: 2px solid black;
+  border-radius: 8px;
+  background-color: white;
+}
+#dots img {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 50%;
+  transform: translate(0, -50%) rotate(90deg);
+}
 div#tos {
   position: fixed;
   top: 57%;
@@ -600,6 +617,9 @@ article {
 <div id='download'>
 <img id='download_icon' src='download_icon.png'/>
 <span>Download UpDown</span>
+<div id='dots'>
+<img src='3_dots_icon.png'/>
+</div>
 </div>
 <div id='tos'>
 TERMS OF SERVICE:
