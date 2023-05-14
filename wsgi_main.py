@@ -59,6 +59,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         
     
     def do_GET(self):
+        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png')
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
@@ -67,7 +68,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
-        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png'):
+        if invalid_cookie and not self.path.startswith('/check_email') and not self.path.startswith('/email_taken') and not self.path.startswith('/verification') and self.path not in image_paths and not self.path == '/manifest.json':
             self.path_root = '/get_email'
             self.get_email()
         else:
@@ -75,7 +76,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 #self.path_root = '/'
                 if self.path == '/':
                     self.opinions_page()
-                elif self.path in ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/help.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png'):
+                elif self.path in image_paths:
                     return self.load_image()
                 elif self.path == '/manifest.json':
                     self.path_root = '/manifest.json'
@@ -607,10 +608,13 @@ div#add_to_homepage {
         self.wfile.write(f'''<div id='add_to_homepage'>Download UpDown by clicking on the 3 dots or share icon and selecting 'Add to Homepage'.</div>'''.encode('utf8'))
         self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
 <span>Enter your email to join:</span>
-<img id='email_img'/>
+<img id='email_img' src='mail_icon.png'/>
 <input id='email' type='email' name='email' /><br />
 <input id='submit' type='submit' value='I AGREE TO THE TERMS OF SERVICE' disabled='true'/>
 </form>
+<div id='download'>
+<img id='download_icon' src='download_icon.png'/>
+</div>
 <div id='tos'>
 TERMS OF SERVICE:
 </div>
