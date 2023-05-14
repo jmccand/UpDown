@@ -59,7 +59,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         
     
     def do_GET(self):
-        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/manifest.json', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png')
+        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png')
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
@@ -463,6 +463,7 @@ function clearHelp() {
             self.wfile.write(file_data)
 
     def handle_manifest(self):
+        print('handle manifest!')
         manifest = '''{
     "short_name": "UpDown",
     "name": "UpDown",
