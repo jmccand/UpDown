@@ -59,7 +59,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         
     
     def do_GET(self):
-        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png', '/3_dots_icon.png')
+        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png', '/3_dots_icon.png', '/help.png')
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
@@ -276,6 +276,7 @@ header {
   padding: 5px;
   box-sizing: border-box;
   text-align: center;
+  font-size: 15px;
   background-color: red;
   z-index: 1;
   border-bottom: 2px solid black;
@@ -368,7 +369,7 @@ div.help_down {
                 self.wfile.write('''<a href='/community_service'>Cmty. Service</a>'''.encode('utf8'))
         self.wfile.write('</div>'.encode('utf8'))
         if verified_result != 'verified' and my_account != None:
-            self.wfile.write('''<div id='unverified_warning'>WARNING: UNVERIFIED ACCOUNT. CHECK EMAIL!</div>'''.encode('utf8'))
+            self.wfile.write('''<div id='unverified_warning'>UNVERIFIED ACCOUNT. CHECK EMAIL!</div>'''.encode('utf8'))
         self.wfile.write('</header>'.encode('utf8'))
         if my_account != None:
             self.wfile.write('''<img id='help' src='help.png' onclick='manageHelp("h1")'/>'''.encode('utf8'))
@@ -1304,7 +1305,7 @@ article#ballot_label {
             if verified_result == 'verified':
                 self.wfile.write('  top: 70px;'.encode('utf8'))
             else:
-                self.wfile.write('  top: 105px;'.encode('utf8'))
+                self.wfile.write('  top: 100px;'.encode('utf8'))
             self.wfile.write('''  font-size: 25px;
   padding: 10px;
   width: 96%;
