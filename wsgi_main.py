@@ -743,7 +743,7 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
                 self.log_activity()
             else:
                 self.start_response('302 MOVED', [('Location', f'/?root_email={user_email}')])
-                raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
+                print(ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}"))
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
