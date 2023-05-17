@@ -495,6 +495,8 @@ function clearHelp() {
 
     def get_email(self):
         self.start_response('200 OK', [])
+        url_arguments = urllib.parse.parse_qs(self.query_string)
+        root_email = url_arguments.get('root_email', [''])[0]
         self.wfile.write('<html><head>'.encode('utf8'))
         self.wfile.write('''<link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
@@ -633,7 +635,7 @@ div#tos {
         self.wfile.write(f'''<form id='email_form' method='GET' action='/check_email'>
 <span>Enter your email to join:</span>
 <img id='email_img' src='mail_icon.png'/>
-<input id='email' type='email' name='email' /><br />
+<input id='email' type='email' name='email' value='{root_email}'/><br />
 <input id='submit' type='submit' value='I AGREE TO THE TERMS OF SERVICE' disabled='true'/>
 </form>
 <div id='download'>
@@ -740,6 +742,7 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
                 #redirect to homepage so they can vote
                 self.log_activity()
             else:
+                self.start_response('302 MOVED', [('Location', f'/?root_email={user_email}')])
                 raise ValueError(f"ip {self.client_address[0]} -- check email function got email {user_email}")
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
