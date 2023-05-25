@@ -4,9 +4,16 @@ import time
 import datetime
 
 while True:
-    run_command = f'rsync -rv --exclude --remove-source-files "*.new" {local.PULL_BACKUP_FROM} {local.PULL_BACKUP_TO}'
-    print(f'\nNow running rsync at time {datetime.datetime.now()}\nCOMMAND: {run_command}')
-    p = subprocess.run(run_command, shell=True, capture_output=True)
-    print(f'{p.stderr.decode("utf-8")}\n{p.stdout.decode("utf-8")}')
-    print('rsync done!')
-    time.sleep(local.DB_SLEEP_DELAY)
+  # this deletes the files that were backed up, but not the empty directories!
+  run_command = 'rsync -rva --exclude "*.new" --remove-source-files %s %s' % (local.PULL_BACKUP_FROM, local.PULL_BACKUP_TO)
+  print('\nNow running rsync at time %s\nCOMMAND: %s' % (datetime.datetime.now(), run_command))
+  p = subprocess.run(run_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  print('%s\n%s' % (p.stderr.decode("utf-8"), p.stdout.decode("utf-8")))
+  print('rsync done!')
+
+  run_command = 'find %s -type d -empty -delete' % local.PULL_BACKUP_FROM
+  print('\nNow running empty directory cleanup at time %s\nCOMMAND: %s' % (datetime.datetime.now(), run_command))
+  p = subprocess.run(run_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  print('%s\n%s' % (p.stderr.decode("utf-8"), p.stdout.decode("utf-8")))
+  print('empty directory cleanup done!; now sleep for %s seconds' % local.DB_SLEEP_DELAY)
+  time.sleep(local.DB_SLEEP_DELAY)
