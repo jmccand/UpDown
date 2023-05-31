@@ -624,12 +624,11 @@ div#add_popup {
   font-size: 28px;
   text-align: center;
   background-color: white;
-  border: 2px solid black;
+  border: 0 solid black;
   border-radius: 0 0 15px 15px;
   box-sizing: border-box;
   height: 0;
   overflow-y: hidden;
-  display: none;
   transition: height 0.5s;
 }
 img.small {
@@ -675,6 +674,7 @@ That said, everything on UpDown is moderated to ensure that opinions don't get o
 </div>
 <script>
 document.addEventListener('touchend', handleTouchEnd, false);
+let opened_di = false;
 const exceptionEmails = {list(local.EXCEPTION_EMAILS)};
 const YOGS = {YOGS};
 const re = /{local.EMAIL_MATCH_RE}/;
@@ -694,14 +694,20 @@ function checkEmail() {{
 }}
 function open_di() {{
     let add_popup = document.getElementById('add_popup');
-    add_popup.style.display = 'initial';
+    add_popup.style.borderWidth = '2px';
     add_popup.style.height = '230px';
     add_popup.style.padding = '15px';
+    opened_di = true;
 }}
 function handleTouchEnd() {{
     let add_popup = document.getElementById('add_popup');
     add_popup.style.height = '0';
-    add_popup.style.display = 'none';
+    opened_di = false;
+    setTimeout(() => {{if (!opened_di) {{
+    add_popup.style.padding = '0';
+    add_popup.style.borderWidth = '0';
+}}
+}}, 400);
 }}
 </script>
 </body>
