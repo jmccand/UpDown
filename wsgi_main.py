@@ -59,7 +59,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
         
     
     def do_GET(self):
-        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png', '/3_dots_icon.png', '/help.png')
+        image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png', '/3_dots_icon.png', '/help.png', '/share_icon.png', '/apple_icon.png', '/android_icon.png', '/chrome_icon.png', '/safari_icon.png')
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
@@ -387,7 +387,7 @@ let just_switched = false;'''.encode('utf8'))
             self.wfile.write('let tutorial = true;'.encode('utf8'))
         self.wfile.write('''function open_menu() {
     menu_is_open = true;
-    let menu = document.getElementById('menu').style.width = '250px';
+    document.getElementById('menu').style.width = '250px';
 }
 function close_menu() {
     menu_is_open = false;
@@ -555,12 +555,13 @@ div#download {
   border-radius: 12px;
   border: 1px solid black;
   background-color: #ffef90ff;
+  box-sizing: border-box;
 }
 #download span {
   position: absolute;
   left: 25px;
   top: 20px;
-  font-size: 22px;
+  font-size: 24px;
   font-family: Helvetica, Verdana, 'Trebuchet MS', sans-serif, Arial;
 }
 img#download_icon {
@@ -569,27 +570,14 @@ img#download_icon {
   top: 15px;
   height: 100px;
 }
-div#dots {
+div#position_add {
   position: absolute;
-  left: 15px;
-  top: 60px;
-  width: 35px;
-  height: 50px;
-  border: 2px solid black;
-  border-radius: 8px;
-  background-color: white;
+  top: 70px;
+  left: 25px;
 }
-#dots img {
-  position: absolute;
-  width: 100%;
-  left: 0;
-  top: 50%;
-  transform: translate(0, -50%) rotate(90deg);
-}
-div#add {
-  position: absolute;
-  top: 65px;
-  left: 60px;
+div.add {
+  display: inline;
+  width: fit-content;
   padding: 8px;
   border: 2px solid black;
   font-size: 18px;
@@ -628,6 +616,29 @@ div#tos {
   border-radius: 6px;
   background-color: white;
 }
+div#add_popup {
+  position: fixed;
+  top: 350px;
+  width: 92%;
+  left: 4%;
+  font-size: 28px;
+  text-align: center;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 0 0 15px 15px;
+  box-sizing: border-box;
+  height: 0;
+  overflow-y: hidden;
+  display: none;
+  transition: height 0.5s;
+}
+img.small {
+  display: inline;
+  height: 30px;
+}
+img#dots {
+  transform: rotate(90deg);
+}
 </style>'''.encode('utf8'))
         self.wfile.write('</head><body>'.encode('utf8'))
         self.send_links_body()
@@ -638,14 +649,13 @@ div#tos {
 <input id='email' type='email' name='email' value='{root_email}'/><br />
 <input id='submit' type='submit' value='I AGREE TO THE TERMS OF SERVICE' disabled='true'/>
 </form>
-<div id='download'>
+<div id='download' onclick='open_di()'>
 <img id='download_icon' src='download_icon.png'/>
 <span>Download UpDown</span>
-<div id='dots'>
-<img src='3_dots_icon.png'/>
+<div id='position_add'>
+<div class='add'>
+Add to Home Screen
 </div>
-<div id='add'>
-Add to Homepage
 </div>
 </div>
 <div id='tos'>
@@ -657,12 +667,14 @@ Using UpDown, students submit and vote on opinions. In this way, the student bod
 The most popular opinions are submitted to the LHS Student-Faculty Senate, a club that negotiates with the administration to bring about change. With the student body backing the LHS Senate, we will be more unified than ever.<br /><br />-->
 On UpDown, everything you do is kept anonymous. All that UpDown needs from you is your honest opinions about our school. Your name will not be tied to your votes, nor the opinions that you submit.<br /><br />
 That said, everything on UpDown is moderated to ensure that opinions don't get out of hand. The privacy policy is contingent on your following LHS's Code of Conduct which outlaws bullying, cyberbullying, and hate speech. Not-safe-for-work content is also not allowed. Anything that directly violates school rules will be reported. UpDown was created for you to share constructive feedback about the school, not to complain about a particular teacher or how much you hate school.
-</form>
 </article>
 </div>
-
+<div id='add_popup'>
+<img src='apple_icon.png' class='small'/> <span style='font-weight: bold'>Apple:</span> <img src='safari_icon.png' class='small'/> Safari,<br /><img src='share_icon.png' class='small'/> Share, <div class='add'>Add to Home Screen</div><br /><br />
+<img src='android_icon.png' class='small'/> <span style='font-weight: bold'>Android:</span> <img src='chrome_icon.png' class='small'/> Chrome,<br /><img src='3_dots_icon.png' class='small' id='dots'/> 3 dots, <div class='add'>Add to Home Screen</div>
+</div>
 <script>
-
+document.addEventListener('touchend', handleTouchEnd, false);
 const exceptionEmails = {list(local.EXCEPTION_EMAILS)};
 const YOGS = {YOGS};
 const re = /{local.EMAIL_MATCH_RE}/;
@@ -679,6 +691,17 @@ function checkEmail() {{
         document.getElementById('submit').disabled = true;
     }}
     setTimeout(checkEmail, 1000);
+}}
+function open_di() {{
+    let add_popup = document.getElementById('add_popup');
+    add_popup.style.display = 'initial';
+    add_popup.style.height = '230px';
+    add_popup.style.padding = '15px';
+}}
+function handleTouchEnd() {{
+    let add_popup = document.getElementById('add_popup');
+    add_popup.style.height = '0';
+    add_popup.style.display = 'none';
 }}
 </script>
 </body>
