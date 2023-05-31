@@ -160,9 +160,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             my_code = self.my_cookies['code'].value
             if my_code in db.cookie_database:
                 parsed_ua = user_agents.parse(self.http_user_agent)
-                def update_device_info():
+                def update_db_device_info():
                     db.device_info[my_code] = [self.client_address, parsed_ua]
-                run_and_sync(db.device_info_lock, update_device_info, db.device_info, False)
+                run_and_sync(db.device_info_lock, update_db_device_info, db.device_info, False)
 
     def send_links_head(self):
         self.wfile.write('''<meta charset="utf-8">
@@ -768,6 +768,8 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
                 self.start_response('302 MOVED', [('Location', '/'), ('Set-Cookie', f'code={new_cookie}; path=/; expires={expiration.strftime("%a, %d %b %Y %H:%M:%S GMT")}')])
                 self.my_cookies['code'] = new_cookie
 
+                self.update_device_info()
+                
                 #redirect to homepage so they can vote
                 self.log_activity()
             else:
