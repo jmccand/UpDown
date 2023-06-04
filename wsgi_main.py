@@ -875,21 +875,24 @@ input#aggregate_checkbox {
 <body>'''.encode('utf8'))
             self.send_links_body()
             self.wfile.write(f'''<form id='form' method='GET' action='/verification'><input type='hidden' name='verification_id' value='{verification_ID}' />'''.encode('utf8'))
+
+            def last_active(cookie):
+                cookie_account = db.user_ids[db.cookie_database[cookie][0]]
+                sorted_dates = list(cookie_account.activity.keys())
+                # sort descending
+                sorted_dates.sort(reverse=True)
+                for active_date in sorted_dates:
+                    user_activity = cookie_account.activity[active_date]
+                    for activity_unit in user_activity:
+                        if activity_unit[1] == cookie and activity_unit[2] not in ('verified', 'blocked'):
+                            return activity_unit[-1]
+                return datetime.datetime.combine(local.LAUNCH_DATE, datetime.datetime.min.time())
             my_email = db.verification_links[verification_ID]
             id_list = []
             for ID, user in db.user_ids.items():
                 if user.email == my_email:
                     id_list.append(ID)
             cookie_list = []
-            def last_active(cookie):
-                latest = datetime.datetime.combine(local.LAUNCH_DATE, datetime.datetime.min.time())
-                cookie_account = db.user_ids[db.cookie_database[cookie][0]]
-                for active_date, user_activity in cookie_account.activity.items():
-                    for activity_unit in user_activity:
-                        if activity_unit[1] == cookie and activity_unit[2] not in ('verified', 'blocked'):
-                            if latest == None or activity_unit[-1] > latest:
-                                latest = activity_unit[-1]
-                return latest
             for cookie, secure in db.cookie_database.items():
                 ID = secure[0]
                 if ID in id_list:
