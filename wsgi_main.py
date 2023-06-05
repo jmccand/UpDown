@@ -3936,12 +3936,13 @@ function editBill(mark_resolved) {{
                 response.append(opinion.activity[0][1].strftime('%-m/%-d/%Y'))
                 # voting date
                 response.append(opinion.activity[2][0][0].strftime('%-m/%-d/%Y'))
-                # total # of voters
-                response.append(sum(opinion.count_votes()))
                 # care, agree, overall percentages and rankings
-                care_p, agree_p = opinion.care_agree_percent()
+                counts, percentages, ranks = opinion.rankings(return_all=True)
+                care_p, agree_p = percentages
                 overall_p = care_p * agree_p / 100
-                care_r, agree_r, overall_r = opinion.rankings()
+                care_r, agree_r, overall_r = ranks
+                # total # of voters
+                response.append(sum(counts))
                 response.extend([[care_p, care_r], [agree_p, agree_r], [overall_p, overall_r]])
                 # similar opinion
                 similar_opinions = list(filter(lambda x: x != opinion.ID, search(opinion.text)))
