@@ -57,7 +57,7 @@ class Opinion:
                     raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
         return up_votes, down_votes, abstains
     
-    def care_agree_percent(self):
+    def care_agree_percent(self, return_all=False):
         up, down, abstain = self.count_votes()
         care = 0
         agree = 0
@@ -65,7 +65,10 @@ class Opinion:
             care = (up + down) / (up + down + abstain) * 100
             if up + down > 0:
                 agree = up / (up + down) * 100
-        return care, agree
+        if return_all:
+            return (up, down, abstain), (care, agree)
+        else:
+            return care, agree
 
     def is_after_voting(self):
         see_day = None
@@ -79,8 +82,12 @@ class Opinion:
 
         return self.scheduled and self.activity[2][0][0] < today_date and str(self.ID) not in db.opinions_calendar.get(str(see_day), set())
 
-    def rankings(self):
-        my_care, my_agree = self.care_agree_percent()
+    def rankings(self, return_all=False):
+        if return_all:
+            counts, percentages = self.care_agree_percent(return_all=True)
+            my_care, my_agree = percentages
+        else:
+            my_care, my_agree = self.care_agree_percent()
         my_overall = my_care * my_agree
         care_rank = 1
         agree_rank = 1
@@ -94,5 +101,8 @@ class Opinion:
                 agree_rank += 1
             if this_overall > my_overall:
                 overall_rank += 1
-        return care_rank, agree_rank, overall_rank
+        if return_all:
+            return counts, (my_care, my_agree), (care_rank, agree_rank, overall_rank)
+        else:
+            return care_rank, agree_rank, overall_rank
  
