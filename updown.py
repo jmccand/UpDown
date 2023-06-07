@@ -71,15 +71,8 @@ class Opinion:
             return care, agree
 
     def is_after_voting(self):
-        see_day = None
         today_date = datetime.date.today()
-        if (today_date.weekday() + 1) % 7 < 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7)
-        elif (today_date.weekday() + 1) % 7 > 3:
-            see_day = today_date - datetime.timedelta((today_date.weekday() + 1) % 7 - 4)
-        else:
-            see_day = today_date
-
+        see_day = today_date - datetime.timedelta(days=today_date.weekday())
         return self.scheduled and self.activity[2][0][0] < today_date and str(self.ID) not in db.opinions_calendar.get(str(see_day), set())
 
     def rankings(self, return_all=False):
