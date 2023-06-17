@@ -4188,7 +4188,13 @@ def auto_schedule():
         # sleep time in seconds
         time.sleep(0.5)
         see_day = get_schedule_date()
-        if True:
+        is_break = False
+        today_date = datetime.date.today()
+        for start, end in local.BREAKS:
+            if today_date < end and today_date > start:
+                is_break = True
+                break
+        if not is_break:
             next_due_date = None
             if len(db.opinions_calendar.get(str(see_day), set())) < 10:
                 next_due_date = see_day
