@@ -3881,9 +3881,8 @@ def auto_schedule():
         time.sleep(0.5)
         see_day = get_schedule_date()
         is_break = False
-        today_date = datetime.date.today()
         for start, end in local.BREAKS:
-            if today_date < end and today_date > start:
+            if see_day < end and see_day > start:
                 is_break = True
                 break
         if not is_break:
