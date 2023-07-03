@@ -31,20 +31,26 @@ import math
 import requests
 from waitress import serve
 
+# standard wsgi handling application function, each request goes here first
 def application(environ, start_response):
     for key, item in environ.items():
         print(f'{key}       {item}')
+    # pass the environ for request data and start response for somewhere to send the response
     handler_object = MyWSGIHandler(environ, start_response)
+    # call the central handler function from MyWSGIHandler
     handler_object.do_GET()
     if 'AUTH_TYPE' in environ:
         print(f'{environ["AUTH_TYPE"]}')
-        
+
+    # pass all of the bytes that were written to the wfile
     return [handler_object.wfile.getvalue()]
     
 class MyWSGIHandler(SimpleHTTPRequestHandler):
 
+    # static variable that declares the level of prints which you want. 0 is maximum prints (used for bug catching).
     DEBUG = 3
 
+    # define all of the "self." object-specific variables
     def __init__(self, environ, start_response):
         self.headers = {}
         self.path = environ['PATH_INFO']
@@ -57,14 +63,18 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
 
         self.start_response = start_response
         
-    
+    # central handling function, leftover from pre-wsgi conversion
     def do_GET(self):
+        '''
+        This tuple defines the paths that are acceptable because they are used to get images. You could just handle all paths that start with '/' instead of manually defining every path but because these image paths are used for accessing files, it is safer to manually define every path used so that the file-getting image function never is used maliciously to access files that should be private.
+        '''
         image_paths = ('/favicon.ico', '/favicon.png', '/hamburger.png', '/timeline.png', '/down_stamp.png', '/up_stamp.png', '/green_icon.png', '/red_icon.png', '/gray_icon.png', '/submit_arrow.png', '/submit_button.png', '/clock.png', '/sign.png', '/mail_icon.png', '/download_icon.png', '/3_dots_icon.png', '/help.png', '/share_icon.png', '/apple_icon.png', '/android_icon.png', '/chrome_icon.png', '/safari_icon.png')
         print('\n')
         if MyWSGIHandler.DEBUG == 0:
             print('\npath: ' + self.path)
             print(f'{self.my_cookies}')
 
+        # for unidentified users, automatically get their email
         invalid_cookie = self.identify_user(nocookie=True) == None and self.path != 'favicon.ico'
 
         self.path_root = '/'
@@ -143,10 +153,12 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                 self.start_response('500 SERVER ERROR', [])
                 
 
+    # identifies a user based on their cookie
     def identify_user(self, nocookie=False):
         #print('identify user function called!')
         if 'code' in self.my_cookies:
             my_code = self.my_cookies['code'].value
+            # check if the cookie is valid
             if my_code in db.cookie_database and db.cookie_database[my_code][1] != 'blocked':
                 self.update_device_info()
                 return db.user_ids[db.cookie_database[my_code][0]]
@@ -155,6 +167,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
             else:
                 raise ValueError(f'ip {self.client_address[0]} -- identify user function got no code in cookies')
 
+    # updates the device info database, which records the IP and user agent data for each device (primarily used for providing information about devices on the verification page
     def update_device_info(self):
         if 'code' in self.my_cookies:
             my_code = self.my_cookies['code'].value
@@ -164,6 +177,7 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
                     db.device_info[my_code] = [self.client_address, parsed_ua]
                 run_and_sync(db.device_info_lock, update_db_device_info, db.device_info, False)
 
+    # sends the standardized head of DOM to be sent with every request (includes styling for the header, menu, etc.
     def send_links_head(self):
         self.wfile.write('''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -319,7 +333,8 @@ div.help_down {
   transform: translate(-50%, 0);
 }
 </style>'''.encode('utf8'))
-        
+
+    # sends the standardized body of DOM to be sent with every request. Sends the body for the header, menu, etc.
     def send_links_body(self):
         my_account = self.identify_user(nocookie=True)
         verified_result = 'blocked'
@@ -434,6 +449,7 @@ function clearHelp() {
 }
 </script>'''.encode('utf8'))
 
+    # stores all information about the request data in the user's activity, as well as logs it (for backup). Should be called at the end of every request to store as much information as possible.
     def log_activity(self, what=[]):
         my_account = self.identify_user()
         activity_unit = [self.path_root, (self.my_cookies['code'].value, self.client_address, user_agents.parse(self.http_user_agent))] + what + [datetime.datetime.now()]
@@ -449,7 +465,8 @@ function clearHelp() {
                           update_user_activity,
                           db.user_ids)
         logging.info(f'''ip: {self.client_address[0]}; email: {my_account.email}; cookie: {self.my_cookies['code'].value}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
-        
+
+    # for loading images. Be careful with what it is loading.
     def load_image(self):
         image_type = os.path.splitext(self.path)[1][1:]
         if image_type in ('ico', 'png'):
@@ -457,12 +474,14 @@ function clearHelp() {
             self.start_response('200 OK', [('content-type', f'image/{image_type}'), ('content-length', str(len(image_data))), ('cache-control', 'max-age=126100000')])
             self.wfile.write(image_data)
 
+    # for loading files. Be careful with what it is loading.
     def load_file(self):
         if self.path == '/service-worker.js':
             file_data = open(self.path[1:], 'rb').read()
             self.start_response('200 OK', [('content-type', f'text/javascript'), ('content-length', str(len(file_data)))])
             self.wfile.write(file_data)
 
+    # for responding with the manifest, which defines how a Progressive Web App (PWA) is to be displayed standalone from the homescreen
     def handle_manifest(self):
         print('handle manifest!')
         manifest = '''{
@@ -493,6 +512,7 @@ function clearHelp() {
         self.start_response('200 OK', [('content-type', f'application/json'), ('content-length', str(len(manifest)))])
         self.wfile.write(manifest.encode('utf8'))
 
+    # for getting the email of an unidentified user
     def get_email(self):
         self.start_response('200 OK', [])
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -712,7 +732,8 @@ function handleTouchEnd() {{
 </script>
 </body>
 </html>'''.encode('utf8'))
-        
+
+    # for sending a verification link to a new user
     def send_email(self, to_email, v_uuid):
         msg = MIMEMultipart('alternative')
         msg['Subject'] = "Add your votes to the count?"
@@ -747,6 +768,7 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
         except Exception as e:
             print(f'Something went wrong... \n{e}')
 
+    # users are redirected here after get_email to confirm that the email they submitted is valid. If it is, this function redirects them to the homepage.
     def check_email(self):
         url_arguments = urllib.parse.parse_qs(self.query_string)
         if 'email' in url_arguments:
@@ -778,6 +800,7 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
         else:
             raise ValueError(f'ip {self.client_address[0]} -- check email function got url arguments {url_arguments}')
 
+    # the page that opens upon loading the verification link
     def verification_page(self):
         my_account = self.identify_user(True)
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -876,6 +899,7 @@ input#aggregate_checkbox {
             self.send_links_body()
             self.wfile.write(f'''<form id='form' method='GET' action='/verification'><input type='hidden' name='verification_id' value='{verification_ID}' />'''.encode('utf8'))
 
+            # get the date at which a browser (identified by its cookie) was last active for user reference
             def last_active(cookie):
                 cookie_account = db.user_ids[db.cookie_database[cookie][0]]
                 sorted_dates = list(cookie_account.activity.keys())
@@ -983,7 +1007,8 @@ document.getElementById("{cookie_list}_{compiled_verification}").selected = 'tru
 Aggregate by IP</div>'''.encode('utf8'))
             self.wfile.write('''</form></body></html>'''.encode('utf8'))
             self.log_activity()
-                
+
+    # this page shows the ballot
     def opinions_page(self):
         reset_cookie = False
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -1414,7 +1439,8 @@ if ('serviceWorker' in navigator) {{
 </script>'''.encode('utf8'))
         self.wfile.write('</body></html>'.encode('utf8'))
         self.log_activity()
-        
+
+    # responds with the page to submit opinions, as well as handles if someone has submitted an opinion by parsing url arguments
     def submit_opinions_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -1636,6 +1662,7 @@ function handleTouchEnd() {
 </html>'''.encode('utf8'))
         self.log_activity()
 
+    # responds with the page for the moderator of UpDown to approve opinions or reject them according to their viability
     def approve_opinions_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -1884,6 +1911,7 @@ function updateSearch() {{
             self.wfile.write('</body></html>'.encode('utf8'))
             self.log_activity()
 
+    # responds with the information about the Senate
     def senate_page(self):
         my_account = self.identify_user()
         self.start_response('200 OK', [])
@@ -2202,7 +2230,8 @@ What are Senate Committees?<br />
 Each senator is assigned to a Committee at the beginning of the year. There are 6 committees: Executive, Community Service, Oversight, Climate, Policy, and Communications. Each committee meets once a week outside of the Senate meeting.'''.encode('utf8'))
         self.wfile.write('</article></body></html>'.encode('utf8'))
         self.log_activity()
-        
+
+    # handles the back end of recording a new opinion. It is called by the submit_opinion_page function after that function parses the url arguments.
     def submit_opinion(self, start_response=True):
         url_arguments = urllib.parse.parse_qs(self.query_string)
         my_account = self.identify_user()
@@ -2220,6 +2249,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         else:
             raise ValueError(f'ip {self.client_address[0]} -- submit opinion function got url arguments {url_arguments}')
 
+    # handles recording votes into the database
     def vote(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -2252,6 +2282,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         else:
             raise ValueError(f'ip {self.client_address[0]} -- vote function got url arguments {url_arguments}')
 
+    # handles recording approval status of opinions into the database
     def approve(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -2291,6 +2322,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         else:
             raise ValueError(f'ip {self.client_address[0]} -- approval function got user {user.email}, who is not a moderator.')
 
+    # old page that is no longer used. Was previously used to enable admin to schedule the opinions that run on the ballot, but was replaced by auto_schedule, which is random and unbiased with respect to opinion content.
     def schedule_opinions_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -2534,6 +2566,7 @@ function close_pop() {
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule_opinions function got user {user.email}, who is not an admin.')
 
+    # old was used in pair with the schedule_opinions_page
     def schedule_date_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -2662,6 +2695,7 @@ function update_unselected(element) {{
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
 
+    # old was used to handle requests to schedule opinions for the ballot
     def schedule(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -2710,6 +2744,7 @@ function update_unselected(element) {{
         else:
             raise ValueError(f'ip {self.client_address[0]} -- schedule date function got user {user.email}, who is not an admin.')
 
+    # old was used to unschedule opinions on the ballot
     def unschedule(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -2755,7 +2790,8 @@ function update_unselected(element) {{
                 raise ValueError(f'ip {self.client_address[0]} -- unschedule function got url arguments {url_arguments}')
         else:
             raise ValueError(f'ip {self.client_address[0]} -- unschedule date function got user {user.email}, who is not an admin.')
-        
+
+    # old was used to track opinions before the leaderboard page. We decided to use the leaderboard page instead because it is more organized and the competitive aspect will drive users to create successful opinions.
     def track_opinions_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -2963,7 +2999,8 @@ function updateStats(element) {{
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
-        
+
+    # responds with the leaderboard page, which is used to track how successful opinions are. The page intends to use the competitive drive of users to encourage them to submit opinions.
     def leaderboard_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -3369,7 +3406,8 @@ function reserve(element) {
         self.wfile.write('''</body></html>'''.encode('utf8'))
 
         self.log_activity()
-        
+
+    # responds with the private committee page, where Senators see bills they are working on
     def view_committee_page(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -3554,7 +3592,8 @@ function editBill(mark_resolved) {{
                 self.wfile.write('''</body></html>'''.encode('utf8'))
                 self.log_activity()
 
-                
+
+    # used to respond to the XML requests that update the "closest relative" in the submit_opinion_page
     def submit_opinion_search(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -3565,7 +3604,8 @@ function editBill(mark_resolved) {{
                 opinions_text = db.opinions_database[str(opinions[0])].text
             self.start_response('200 OK', [])
             self.wfile.write(json.dumps(opinions_text).encode('utf8'))
-            
+
+    # used to respond to the XML requests that update the "closest relatives" in the approve_opinion_page
     def approve_opinion_search(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -3578,6 +3618,7 @@ function editBill(mark_resolved) {{
             self.start_response('200 OK', [])
             self.wfile.write(json.dumps(opinions_simplified[:4]).encode('utf8'))
 
+    # old function used to respond to the XML requests for the opinions that are already scheduled on a given date
     def already_scheduled(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -3598,6 +3639,7 @@ function editBill(mark_resolved) {{
                 self.start_response('200 OK', [])
                 self.wfile.write(json.dumps(response).encode('utf8'))
 
+    # used to respond to the XML requests that animate the leaderboard page's popup that displays all of the data on the opinion
     def handle_leaderboard_lookup(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -3651,7 +3693,8 @@ function editBill(mark_resolved) {{
                 self.start_response('400 BAD REQUEST', [])
         else:
             self.start_response('400 BAD REQUEST', [])
-            
+
+    # used to update the database when a Senator reserves an opinion for their committee
     def reserve(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
@@ -3677,6 +3720,7 @@ function editBill(mark_resolved) {{
                     
                     self.start_response('200 OK', [])
 
+    # used to update the database when a Senator updates the bill for an opinion
     def edit_bill(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -3705,7 +3749,7 @@ function editBill(mark_resolved) {{
                 self.log_activity()
 
                 self.start_response('200 OK', [])
-
+    # used for the beta testing when it responded with a page that displayed a user's community service
     def community_service(self):
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
@@ -3768,6 +3812,7 @@ td {
         else:
             self.start_response('400 BAD REQUEST', [])
 
+    # generalizes sending the HTML for a help box
     def send_help_box(self, element_id, text, top=0, width=100, bottom=0, point='top'):
         arrow_height = 15
         if point == 'top':
@@ -3782,6 +3827,7 @@ class invalidCookie(ValueError):
     def __init__(self, message):
         super().__init__(message)
 
+# is used to update the database. It acquires the necessary lock, applies the change, syncs the database, then releases the lock. The locking ensures that the database doesn't get corrupted by simultaneous syncing which could be caused by threads.
 def run_and_sync(lock_needed, change, database, check_corrupt=True):
     lock_needed.acquire()
     try:
@@ -3791,7 +3837,8 @@ def run_and_sync(lock_needed, change, database, check_corrupt=True):
         return returns
     finally:
         lock_needed.release()
-            
+
+# function used to format opinion words to the same style and return a list for addition into the search index
 def simplify_text(text):
     split_text = re.split('''\W+''', text)
     if split_text[-1] == '':
@@ -3801,6 +3848,7 @@ def simplify_text(text):
         split_text[index] = stem(split_text[index])
     return split_text
 
+# function called once at the start of running the server which builds the search index from scratch, storing information about every opinion in memory
 def build_search_index():
     search_index_lock.acquire()
     for opinion_ID in range(len(db.opinions_database)):
@@ -3811,6 +3859,7 @@ def build_search_index():
 
     search_index_lock.release()
 
+# function used to add a new opinion to the pre-existing search index
 def search_index_add_opinion(opinion):
     search_index_lock.acquire()
     split_text = simplify_text(opinion.text)
@@ -3824,6 +3873,7 @@ def search_index_add_opinion(opinion):
             SEARCH_INDEX[word] = [opinion.ID]
     search_index_lock.release()
 
+# function used to search for opinions given the input text that a user typed in
 def search(input_text):
     split_text = simplify_text(input_text)
     results = {}
@@ -3842,11 +3892,12 @@ def search(input_text):
     
     return ordered_results
 
+# function used to check if two texts have any matching words (used to filter results in the leaderboard search results
 def is_matching(text1, text2):
     # print(f'{(set(simplify_text(text1)) & set(simplify_text(text2))) != set()}')
     return text1 == '' or text2 == '' or (set(simplify_text(text1)) & set(simplify_text(text2))) != set()
 
-# poached from Lucene’s EnglishMinimalStemmer, Apache Software License v2
+# function used to simplify words (called stemming) which attempts to get the root of the word so that if someone searches for the word or one of its different forms. This stemmer is poached from Lucene’s EnglishMinimalStemmer, Apache Software License v2
 def stem(word):
     if word.endswith("'s"):
         word = word[:-2]
@@ -3863,6 +3914,7 @@ def stem(word):
             return word
     return word[:-1]
 
+# runs on the thread that is in charge of periodically backing up the database. Backups are taken in case the database becomes corrupted and we must revert to a previous version
 def thread_backup():
     while True:
         time.sleep(local.DB_SLEEP_DELAY)
@@ -3875,6 +3927,7 @@ def thread_backup():
                             shutil.copytree(local.DIRECTORY_PATH, f'{local.BACKUP_DIRECTORY}/{dirname}')
         os.rename(f'{local.BACKUP_DIRECTORY}/{dirname}',f'{local.BACKUP_DIRECTORY}/{dirname[:-4]}')
 
+# runs on the thread that is in charge of scheduling opinions. It selects opinions randomly to run on the ballot
 def auto_schedule():
     while True:
         # sleep time in seconds
@@ -3967,6 +4020,7 @@ def auto_schedule():
                             db.opinions_database[opinion_ID] = opinion
                             db.opinions_database.sync()
 
+# gets the number of opinions reserved by a committee. Committees can only reserve a maximum of 2 opinions at a time to ensure that each one gets sufficient attention.
 def reserve_count(committee):
     cur_count = 0
     for opinion_ID, opinion in db.opinions_database.items():
@@ -3974,6 +4028,7 @@ def reserve_count(committee):
             cur_count += 1
     return cur_count
 
+# is used to verify a cookie
 def verify_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
     verified_cookie = None
@@ -4042,6 +4097,7 @@ def verify_device(cookie_code):
     if MyWSGIHandler.DEBUG < 2:
         print(f'{cookie_code} just verified their email!')
 
+# is used to block a cookie
 def block_device(cookie_code):
     my_account = db.user_ids[db.cookie_database[cookie_code][0]]
     # block my cookie
@@ -4064,7 +4120,8 @@ def block_device(cookie_code):
                       update_user_activity,
                       db.user_ids)
     logging.info(f'''email: {my_account.email}; cookie: {cookie_code}; user ID: {my_account.user_ID}; activity: {activity_unit}''')    
-        
+
+# is used to create an account for an email which a user submitted
 def create_account(user_email):
     def update_user_ids():
         new_id = str(len(db.user_ids))
@@ -4097,24 +4154,29 @@ def create_account(user_email):
         return new_cookie, new_id, send_v_link
     return run_and_sync(db.user_ids_lock, update_user_ids, db.user_ids, check_corrupt=False)
 
+# is used to calculate the expiration date for a cookie that is being set for a user with a given year-of-graduation
 def calc_expiration(yog):
     century = (datetime.date.today().year // 100) * 100
     return datetime.date(year=century + yog, month=8, day=1)
 
+# returns the valid years of graduations for new users
 def valid_yogs():
     if datetime.date.today().month >= 8:
         return [str(x)[-2:] for x in range(int(datetime.date.today().year + 1), int(datetime.date.today().year + 5))]
     else:
         return [str(x)[-2:] for x in range(int(datetime.date.today().year), int(datetime.date.today().year + 4))]
 
+# used to determine if an email is valid (it must be a school email)
 def email_is_valid(email):
     return re.match(email, local.EMAIL_MATCH_RE)
 
+# used to get the date which this week's ballot is stored under in the opinions calendar database
 def get_schedule_date():
     today_date = datetime.date.today()
     see_day = today_date - datetime.timedelta(days=today_date.weekday())
     return see_day
 
+# used to count all votes of every opinion in the database. This en-masse calculation is much more efficient than individual calls for each opinion, because the leaderboard page needs to know the voting data for all opinions.
 def count_all_votes():
     votes_dict = {}
     verified_accounts = set()
@@ -4137,6 +4199,7 @@ def count_all_votes():
                 raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
     return votes_dict
 
+# gets the care and agree percentages for all opinions
 def all_c_a():
     votes_list = count_all_votes().items()
     c_a_dict = {}
@@ -4150,7 +4213,7 @@ def all_c_a():
             c_a_dict[opinion_ID] = (0, 0)
     return c_a_dict
             
-
+# gets the rankings for all opinions
 def all_rankings(results, by='overall'):
     c_a_list = list(all_c_a().items())
     if by == 'overall':
@@ -4163,7 +4226,8 @@ def all_rankings(results, by='overall'):
         raise ValueError(f'Found a vote other than up, down, or abstain: {this_vote}')
     simplified_list = list(x[0] for x in c_a_list)
     return simplified_list
-            
+
+# main is called upon running the app locally but not upon running on wsgi server
 def main():
     print('Student Change Web App... running...')
 
@@ -4201,6 +4265,8 @@ def main():
     # httpd.serve_forever()
     serve(application, host='10.17.4.226', port=8888)
 
+# global scope code which is called upon starting the server locally or on the cloud. Starts necessary threads and builds search index.
+    
 logging.basicConfig(filename='UpDown.log', level=logging.DEBUG)
 
 SEARCH_INDEX = {}
