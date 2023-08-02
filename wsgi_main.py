@@ -455,7 +455,6 @@ function clearHelp() {
     # stores all information about the request data in the user's activity, as well as logs it (for backup). Should be called at the end of every request to store as much information as possible.
     def log_activity(self, what=[]):
         if not MyWSGIHandler.PAUSE:
-            print('unpaused!')
             my_account = self.identify_user()
             activity_unit = [self.path_root, (self.my_cookies['code'].value, self.client_address, user_agents.parse(self.http_user_agent))] + what + [datetime.datetime.now()]
             if datetime.date.today() in my_account.activity:
@@ -519,7 +518,7 @@ function clearHelp() {
 
     # for getting the email of an unidentified user
     def get_email(self):
-        self.start_response('200 OK', [])
+        self.start_response('200 OK', [('content-type', 'text/html'),])
         url_arguments = urllib.parse.parse_qs(self.query_string)
         root_email = url_arguments.get('root_email', [''])[0]
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
