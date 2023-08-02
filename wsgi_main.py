@@ -826,7 +826,7 @@ Use <a href='{local.DOMAIN_PROTOCAL}{local.DOMAIN_NAME}/verification?verificatio
                 self.my_cookies['code'] = new_cookie
                 self.update_device_info()
             else:
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', 'text/html'),])
             # verify the device
             verify_device(self.my_cookies['code'].value)
             # handle form submission
@@ -1026,7 +1026,7 @@ Aggregate by IP</div>'''.encode('utf8'))
         if reset_cookie:
             self.start_response('200 OK', [('Set-Cookie', f'code={url_arguments["cookie_code"][0]}; path=/')])
         else:
-            self.start_response('200 OK', [])
+            self.start_response('200 OK', [('content-type', 'text/html'),])
         
         see_day = get_schedule_date()
         
@@ -1467,7 +1467,7 @@ if ('serviceWorker' in navigator) {{
             next_date += datetime.timedelta(days=7)
             unscheduled_approved -= 10
                 
-        self.start_response('200 OK', [])
+        self.start_response('200 OK', [('content-type', 'text/html'),])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
@@ -1678,7 +1678,7 @@ function handleTouchEnd() {
         my_account = self.identify_user()
         verified_result = db.cookie_database[self.my_cookies['code'].value][1]
         if my_account.email in local.ADMINS and verified_result == 'verified':
-            self.start_response('200 OK', [])
+            self.start_response('200 OK', [('content-type', 'text/html'),])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
@@ -1925,7 +1925,7 @@ function updateSearch() {{
     # responds with the information about the Senate
     def senate_page(self):
         my_account = self.identify_user()
-        self.start_response('200 OK', [])
+        self.start_response('200 OK', [('content-type', 'text/html'),])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
@@ -2255,7 +2255,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
             run_and_sync(db.opinions_database_lock, update_opinions_database, db.opinions_database)
             search_index_add_opinion(db.opinions_database[str(opinion_ID)])
             if start_response:
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', 'text/html'),])
             self.log_activity([opinion_ID])
         else:
             raise ValueError(f'ip {self.client_address[0]} -- submit opinion function got url arguments {url_arguments}')
@@ -2283,7 +2283,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                     db.user_ids[my_account.user_ID] = my_account
                 run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
 
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', 'text/html'),])
                 if MyWSGIHandler.DEBUG < 2:
                     print(f'{my_account.email} has voted {my_vote}')
 
@@ -2322,7 +2322,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
                         db.user_ids[my_account.user_ID] = my_account
                     run_and_sync(db.user_ids_lock, update_user_cookies, db.user_ids)
 
-                    self.start_response('200 OK', [])
+                    self.start_response('200 OK', [('content-type', 'text/html'),])
                     
                     self.log_activity([my_vote, opinion_ID])
                     
@@ -2340,7 +2340,7 @@ Each senator is assigned to a Committee at the beginning of the year. There are 
         url_arguments = urllib.parse.parse_qs(self.query_string)
         see_month_str = url_arguments.get('month', [datetime.date.today().strftime('%Y-%m')])[0]
         if my_account.email in local.ADMINS and verified_result == 'verified':
-            self.start_response('200 OK', [])
+            self.start_response('200 OK', [('content-type', 'text/html'),])
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''
@@ -2589,7 +2589,7 @@ function close_pop() {
                     datetime.datetime.strptime(this_date, '%Y-%m-%d')
                 except ValueError:
                     raise ValueError(e + f'ip {self.client_address[0]} -- schedule date function got date {url_arguments["date"][0]}')
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', 'text/html'),])
                 self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
                 self.wfile.write('''
@@ -2744,7 +2744,7 @@ function update_unselected(element) {{
                         db.opinions_calendar[this_date] = selected
                     run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
                     
-                    self.start_response('200 OK', [])
+                    self.start_response('200 OK', [('content-type', 'text/html'),])
 
                     self.log_activity([this_date, opinion_ID])
                     
@@ -2791,7 +2791,7 @@ function update_unselected(element) {{
                         db.opinions_calendar[this_date] = selected
                     run_and_sync(db.opinions_calendar_lock, update_opinions_calendar, db.opinions_calendar)
 
-                    self.start_response('200 OK', [])
+                    self.start_response('200 OK', [('content-type', 'text/html'),])
 
                     self.log_activity([this_date, opinion_ID])
                     
@@ -2806,7 +2806,7 @@ function update_unselected(element) {{
     def track_opinions_page(self):
         my_account = self.identify_user()
         url_arguments = urllib.parse.parse_qs(self.query_string)
-        self.start_response('200 OK', [])
+        self.start_response('200 OK', [('content-type', 'text/html'),])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
@@ -3021,7 +3021,7 @@ function updateStats(element) {{
                 if my_account.email in members:
                     isSenator = True
         url_arguments = urllib.parse.parse_qs(self.query_string)
-        self.start_response('200 OK', [])
+        self.start_response('200 OK', [('content-type', 'text/html'),])
         self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.send_links_head()
         self.wfile.write('''<style>
@@ -3426,7 +3426,7 @@ function reserve(element) {
         committee = url_arguments['committee'][0]
         if committee in local.COMMITTEE_MEMBERS.keys():
             if my_account.email in local.COMMITTEE_MEMBERS[committee] and verified_result == 'verified':
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', 'text/html'),])
                 self.wfile.write(f'<!DOCTYPE HTML><html><head>'.encode('utf8'))
                 self.send_links_head()
                 self.wfile.write('''<style>
@@ -3613,7 +3613,7 @@ function editBill(mark_resolved) {{
             opinions_text = ''
             if len(opinions) > 0:
                 opinions_text = db.opinions_database[str(opinions[0])].text
-            self.start_response('200 OK', [])
+            self.start_response('200 OK', [('content-type', f'application/json'),])
             self.wfile.write(json.dumps(opinions_text).encode('utf8'))
 
     # used to respond to the XML requests that update the "closest relatives" in the approve_opinion_page
@@ -3626,7 +3626,7 @@ function editBill(mark_resolved) {{
             opinions_simplified = [db.opinions_database[str(opinion_ID)] for opinion_ID in opinions]
             opinions_simplified = filter(lambda x: str(x.ID) != target_ID, opinions_simplified)
             opinions_simplified = [x.text for x in opinions_simplified]
-            self.start_response('200 OK', [])
+            self.start_response('200 OK', [('content-type', f'application/json'),])
             self.wfile.write(json.dumps(opinions_simplified[:4]).encode('utf8'))
 
     # old function used to respond to the XML requests for the opinions that are already scheduled on a given date
@@ -3647,7 +3647,7 @@ function editBill(mark_resolved) {{
                 selected = list(selected)
                 unselected = [list(x) for x in unselected]
                 response = [selected, unselected[:20]]
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', f'application/json'),])
                 self.wfile.write(json.dumps(response).encode('utf8'))
 
     # used to respond to the XML requests that animate the leaderboard page's popup that displays all of the data on the opinion
@@ -3698,7 +3698,7 @@ function editBill(mark_resolved) {{
                 else:
                     response.append([opinion_ID, ''])
                 print(response)
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', f'application/json'),])
                 self.wfile.write(json.dumps(response).encode('utf8'))
             else:
                 self.start_response('400 BAD REQUEST', [])
@@ -3729,7 +3729,7 @@ function editBill(mark_resolved) {{
 
                     self.log_activity([committee, opinion_ID])
                     
-                    self.start_response('200 OK', [])
+                    self.start_response('200 OK', [('content-type', 'text/html'),])
 
     # used to update the database when a Senator updates the bill for an opinion
     def edit_bill(self):
@@ -3759,7 +3759,7 @@ function editBill(mark_resolved) {{
                 
                 self.log_activity()
 
-                self.start_response('200 OK', [])
+                self.start_response('200 OK', [('content-type', 'text/html'),])
     # used for the beta testing when it responded with a page that displayed a user's community service
     def community_service(self):
         my_account = self.identify_user()
@@ -3778,7 +3778,7 @@ function editBill(mark_resolved) {{
                                 hour_counts[user_account.email] += datetime.timedelta(minutes=3)
                             else:
                                 hour_counts[user_account.email] += activity_list[index+1][-1] - activity_unit[-1]
-            self.start_response('200 OK', [])
+            self.start_response('200 OK', [('content-type', 'text/html'),])
             self.wfile.write('''<html><head>'''.encode('utf8'))
             self.send_links_head()
             self.wfile.write('''<style>
