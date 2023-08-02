@@ -50,6 +50,9 @@ class MyWSGIHandler(SimpleHTTPRequestHandler):
     # static variable that declares the level of prints which you want. 0 is maximum prints (used for bug catching).
     DEBUG = 3
 
+    # for pausing logging of activity, typically to save disk space. WARNING: DATA WILL NOT BE SAVED IF PAUSE IS TRUE
+    PAUSE = True
+
     # define all of the "self." object-specific variables
     def __init__(self, environ, start_response):
         self.headers = {}
@@ -451,20 +454,22 @@ function clearHelp() {
 
     # stores all information about the request data in the user's activity, as well as logs it (for backup). Should be called at the end of every request to store as much information as possible.
     def log_activity(self, what=[]):
-        my_account = self.identify_user()
-        activity_unit = [self.path_root, (self.my_cookies['code'].value, self.client_address, user_agents.parse(self.http_user_agent))] + what + [datetime.datetime.now()]
-        if datetime.date.today() in my_account.activity:
-            my_account.activity[datetime.date.today()].append(tuple(activity_unit))
-        else:
-            my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
+        if not MyWSGIHandler.PAUSE:
+            print('unpaused!')
+            my_account = self.identify_user()
+            activity_unit = [self.path_root, (self.my_cookies['code'].value, self.client_address, user_agents.parse(self.http_user_agent))] + what + [datetime.datetime.now()]
+            if datetime.date.today() in my_account.activity:
+                my_account.activity[datetime.date.today()].append(tuple(activity_unit))
+            else:
+                my_account.activity[datetime.date.today()] = [tuple(activity_unit)]
 
-        def update_user_activity():
-            db.user_ids[my_account.user_ID] = my_account
-        
-        run_and_sync(db.user_ids_lock,
-                          update_user_activity,
-                          db.user_ids)
-        logging.info(f'''ip: {self.client_address[0]}; email: {my_account.email}; cookie: {self.my_cookies['code'].value}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
+            def update_user_activity():
+                db.user_ids[my_account.user_ID] = my_account
+
+            run_and_sync(db.user_ids_lock,
+                              update_user_activity,
+                              db.user_ids)
+            logging.info(f'''ip: {self.client_address[0]}; email: {my_account.email}; cookie: {self.my_cookies['code'].value}; user ID: {my_account.user_ID}; activity: {activity_unit}''')
 
     # for loading images. Be careful with what it is loading.
     def load_image(self):
