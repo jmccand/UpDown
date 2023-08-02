@@ -522,7 +522,7 @@ function clearHelp() {
         self.start_response('200 OK', [])
         url_arguments = urllib.parse.parse_qs(self.query_string)
         root_email = url_arguments.get('root_email', [''])[0]
-        self.wfile.write('<html><head>'.encode('utf8'))
+        self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
         self.wfile.write('''<link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
         self.send_links_head()
