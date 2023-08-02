@@ -1028,6 +1028,13 @@ Aggregate by IP</div>'''.encode('utf8'))
         
         print(f'day of the week that opinions page is viewing: {see_day}')
         if str(see_day) not in db.opinions_calendar or db.opinions_calendar[str(see_day)] == set():
+            break_msg = None
+            for start, end, msg in local.BREAKS:
+                if see_day < end and see_day > start:
+                    break_msg = msg
+                    break
+            assert not break_msg is None
+
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
             self.wfile.write('''<link rel="manifest" href="/manifest.json" crossorigin='use-credentials'>
 <link rel="apple-touch-icon" href="/favicon.png">'''.encode('utf8'))
@@ -1046,7 +1053,7 @@ article#congrats {
             self.wfile.write('<body>'.encode('utf8'))
             self.send_links_body()
             self.send_help_box('h1', 'UpDown wishes you a very happy break. You deserve it!', bottom=50, width=300, point='bottom')
-            self.wfile.write('''<article id='congrats'>HAPPY BREAK!</article></body></html>'''.encode('utf8'))
+            self.wfile.write(f'''<article id='congrats'>{break_msg}</article></body></html>'''.encode('utf8'))
             self.log_activity()
         else:
             self.wfile.write('<!DOCTYPE HTML><html><head>'.encode('utf8'))
@@ -3933,12 +3940,12 @@ def auto_schedule():
         # sleep time in seconds
         time.sleep(0.5)
         see_day = get_schedule_date()
-        is_break = False
-        for start, end in local.BREAKS:
+        break_msg = None
+        for start, end, msg in local.BREAKS:
             if see_day < end and see_day > start:
-                is_break = True
+                break_msg = msg
                 break
-        if not is_break:
+        if break_msg is None:
             next_due_date = None
             if len(db.opinions_calendar.get(str(see_day), set())) < 10:
                 next_due_date = see_day
